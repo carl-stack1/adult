@@ -3757,17 +3757,29 @@
       // 1. Check Mock Session
       let u = getCurrentUser();
 
-      // 2. Check Supabase Session (for Google Login)
+      // 2. Check Supabase Session (for Google Login or persistence)
       if (!u) {
         const { data: { session } } = await db.auth.getSession();
         if (session && session.user) {
           const user = session.user;
+          const meta = user.user_metadata || {};
+
+          // Primary data from Auth
           u = {
-            name: user.user_metadata.full_name || user.user_metadata.name || user.email.split('@')[0],
+            name: meta.full_name || meta.name || user.email.split('@')[0],
             email: user.email,
-            phone: user.phone || '',
-            location: user.user_metadata.address || user.user_metadata.location || ''
+            phone: meta.phone_number || '',
+            location: meta.location || ''
           };
+
+          // ENHANCEMENT: Fetch the very latest from the 'customers' table (Source of Truth)
+          const { data: custData } = await db.from('customers').select('*').eq('email', user.email).single();
+          if (custData) {
+            u.phone = custData.phone || u.phone;
+            u.location = custData.location || u.location;
+            u.name = custData.name || u.name;
+          }
+
           sessionStorage.setItem('atk_user', JSON.stringify(u));
         }
       }
