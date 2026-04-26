@@ -948,7 +948,8 @@
                                 </thead>
                                 <tbody id="dashboardOrdersTable">
                                     <tr>
-                                        <td colspan="7" style="text-align:center;color:var(--text-muted);padding:2rem">No
+                                        <td colspan="7" style="text-align:center;color:var(--text-muted);padding:2rem">
+                                            No
                                             orders yet. Orders from the store will appear here.</td>
                                     </tr>
                                 </tbody>
@@ -991,7 +992,8 @@
                                 </thead>
                                 <tbody id="allOrdersTable">
                                     <tr>
-                                        <td colspan="8" style="text-align:center;color:var(--text-muted);padding:2rem">No
+                                        <td colspan="8" style="text-align:center;color:var(--text-muted);padding:2rem">
+                                            No
                                             orders yet.</td>
                                     </tr>
                                 </tbody>
@@ -1137,7 +1139,8 @@
                                 </thead>
                                 <tbody id="customersTable">
                                     <tr>
-                                        <td colspan="4" style="text-align:center;color:var(--text-muted);padding:2rem">No
+                                        <td colspan="4" style="text-align:center;color:var(--text-muted);padding:2rem">
+                                            No
                                             registered customers yet.</td>
                                     </tr>
                                 </tbody>
@@ -1155,6 +1158,16 @@
                         <button class="btn-primary" onclick="savePromos()">Save Changes</button>
                     </div>
                     <div class="panel-body">
+                        <div
+                            style="background:var(--off-black);padding:1.5rem;border-radius:12px;border:1px solid var(--border);margin-bottom:2rem">
+                            <h3 style="margin-bottom:1rem;color:var(--gold)">Top Scrolling Marquee</h3>
+                            <div class="form-group">
+                                <label>Marquee Message (Thin bar at the top of the site)</label>
+                                <input type="text" id="m_marquee"
+                                    placeholder="FREE DELIVERY OVER KES 5,000 ✨ 100% DISCREET PACKAGING">
+                            </div>
+                        </div>
+
                         <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(300px, 1fr));gap:2rem;">
                             <!-- Promo 1 -->
                             <div class="marketing-card"
@@ -1671,6 +1684,8 @@
                 document.getElementById('m2_desc').value = p2.description || '';
                 document.getElementById('m2_btn').value = p2.button_text || '';
             }
+            const marq = DB_PROMOS.find(p => p.type === 'marquee');
+            if (marq) document.getElementById('m_marquee').value = marq.title || '';
         }
 
         async function savePromos() {
@@ -1686,12 +1701,23 @@
                 description: document.getElementById('m2_desc').value,
                 button_text: document.getElementById('m2_btn').value
             };
+            const pMarq = { title: document.getElementById('m_marquee').value };
 
-            await db.from('promo_banners').update(p1).eq('type', 'promo1');
-            await db.from('promo_banners').update(p2).eq('type', 'promo2');
+            try {
+                const res1 = await db.from('promo_banners').update(p1).eq('type', 'promo1');
+                const res2 = await db.from('promo_banners').update(p2).eq('type', 'promo2');
+                const res3 = await db.from('promo_banners').update(pMarq).eq('type', 'marquee');
 
-            showAdminToast('📣 Marketing banners updated!');
-            await fetchAllData();
+                if (res1.error || res2.error || res3.error) {
+                    throw new Error('Database Error');
+                }
+
+                showAdminToast('📣 Marketing banners updated successfully!');
+                await fetchAllData();
+            } catch (err) {
+                console.error(err);
+                showAdminToast('❌ Failed to update banners. check console.');
+            }
         }
 
         // ===================== REVIEWS =====================

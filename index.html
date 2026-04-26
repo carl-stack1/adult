@@ -3886,6 +3886,7 @@
       // Update metadata in Supabase
       const { data: { session } } = await db.auth.getSession();
       if (session) {
+        // 1. Update Auth Metadata
         await db.auth.updateUser({
           data: {
             full_name: newU.name,
@@ -3893,6 +3894,13 @@
             location: newU.location
           }
         });
+
+        // 2. Sync with Customers table
+        await db.from('customers').update({
+          name: newU.name,
+          phone: newU.phone,
+          location: newU.location
+        }).eq('email', newU.email);
       }
 
       restoreAuthState();
