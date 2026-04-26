@@ -1646,15 +1646,18 @@
     .success-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.85);
+      background: rgba(0, 0, 0, 0.9);
       z-index: 4000;
       display: flex;
-      align-items: center;
+      align-items: flex-start;
+      /* Start from top to allow scrolling */
       justify-content: center;
       opacity: 0;
       visibility: hidden;
       transition: all 0.35s;
-      padding: 2rem
+      padding: 4rem 1.5rem;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
     }
 
     .auth-overlay.open,
@@ -1670,6 +1673,8 @@
       max-width: 440px;
       padding: 2.5rem;
       position: relative;
+      margin: auto;
+      /* Centers modal even with overflow */
       transform: translateY(30px);
       transition: transform 0.35s cubic-bezier(0.23, 1, 0.32, 1)
     }
