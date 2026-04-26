@@ -183,16 +183,26 @@
         }
 
         .topbar {
-            padding: 1.5rem 2.5rem;
+            padding: 1rem 1.5rem;
             border-bottom: 1px solid var(--border);
-            background: rgba(10, 10, 10, 0.8);
-            backdrop-filter: blur(10px);
+            background: rgba(10, 10, 10, 0.88);
+            backdrop-filter: blur(14px);
             display: flex;
             align-items: center;
             justify-content: space-between;
             position: sticky;
             top: 0;
             z-index: 50;
+        }
+
+        .mobile-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--white);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
         }
 
         .page-title {
@@ -741,17 +751,80 @@
         }
 
         /* RESPONSIVE */
-        @media(max-width:900px) {
-            .stats-grid {
-                grid-template-columns: 1fr 1fr;
+        @media(max-width:1024px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             }
 
-            .sidebar {
-                display: none;
+            .sidebar.open {
+                transform: translateX(0);
             }
 
             .main {
                 margin-left: 0;
+            }
+
+            .mobile-toggle {
+                display: block;
+            }
+        }
+
+        @media(max-width:768px) {
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 1rem;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-group.full {
+                grid-column: span 1;
+            }
+
+            .content {
+                padding: 1.5rem;
+            }
+
+            .topbar {
+                padding: 1rem;
+            }
+
+            .page-title {
+                font-size: 1.25rem;
+            }
+
+            /* Responsive Tables */
+            .table-container {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            table {
+                min-width: 600px;
+            }
+        }
+
+        @media(max-width:480px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .login-box {
+                width: 90%;
+                padding: 2rem 1.5rem;
+            }
+
+            .btn-primary,
+            .btn-ghost {
+                padding: 0.6rem 1rem;
+                font-size: 0.65rem;
+            }
+
+            .topbar-actions {
+                gap: 0.5rem;
             }
         }
     </style>
@@ -812,7 +885,10 @@
     <!-- Main Content -->
     <div class="main">
         <div class="topbar">
-            <div class="page-title" id="pageTitle">Dashboard</div>
+            <div style="display:flex; align-items:center; gap:1rem">
+                <button class="mobile-toggle" onclick="toggleSidebar()">☰</button>
+                <div class="page-title" id="pageTitle">Dashboard</div>
+            </div>
             <div class="topbar-actions">
                 <a href="index.html" target="_blank">
                     <button class="btn-ghost">🌐 View Store</button>
@@ -857,25 +933,27 @@
                             onclick="showPage('orders', document.querySelector('[onclick*=orders]'))">View All</button>
                     </div>
                     <div class="panel-body" style="padding:0">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Order ID</th>
-                                    <th>Customer</th>
-                                    <th>Items</th>
-                                    <th>Total</th>
-                                    <th>Status</th>
-                                    <th>Date</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="dashboardOrdersTable">
-                                <tr>
-                                    <td colspan="7" style="text-align:center;color:var(--text-muted);padding:2rem">No
-                                        orders yet. Orders from the store will appear here.</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Order ID</th>
+                                        <th>Customer</th>
+                                        <th>Items</th>
+                                        <th>Total</th>
+                                        <th>Status</th>
+                                        <th>Date</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="dashboardOrdersTable">
+                                    <tr>
+                                        <td colspan="7" style="text-align:center;color:var(--text-muted);padding:2rem">No
+                                            orders yet. Orders from the store will appear here.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -897,26 +975,28 @@
                         </div>
                     </div>
                     <div class="panel-body" style="padding:0">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Order ID</th>
-                                    <th>Customer</th>
-                                    <th>Email</th>
-                                    <th>Items</th>
-                                    <th>Total</th>
-                                    <th>Status</th>
-                                    <th>Date</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="allOrdersTable">
-                                <tr>
-                                    <td colspan="8" style="text-align:center;color:var(--text-muted);padding:2rem">No
-                                        orders yet.</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Order ID</th>
+                                        <th>Customer</th>
+                                        <th>Email</th>
+                                        <th>Items</th>
+                                        <th>Total</th>
+                                        <th>Status</th>
+                                        <th>Date</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="allOrdersTable">
+                                    <tr>
+                                        <td colspan="8" style="text-align:center;color:var(--text-muted);padding:2rem">No
+                                            orders yet.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -931,21 +1011,23 @@
                             Product</button>
                     </div>
                     <div class="panel-body" style="padding:0">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Product</th>
-                                    <th>Image</th>
-                                    <th>Category</th>
-                                    <th>Price</th>
-                                    <th>Old Price</th>
-                                    <th>Badge</th>
-                                    <th>Stock</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="productsTable"></tbody>
-                        </table>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Image</th>
+                                        <th>Category</th>
+                                        <th>Price</th>
+                                        <th>Old Price</th>
+                                        <th>Badge</th>
+                                        <th>Stock</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="productsTable"></tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1043,22 +1125,24 @@
                         <div class="panel-title">Registered Customers</div>
                     </div>
                     <div class="panel-body" style="padding:0">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Email</th>
-                                    <th>Orders</th>
-                                    <th>Date Joined</th>
-                                </tr>
-                            </thead>
-                            <tbody id="customersTable">
-                                <tr>
-                                    <td colspan="4" style="text-align:center;color:var(--text-muted);padding:2rem">No
-                                        registered customers yet.</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Orders</th>
+                                        <th>Date Joined</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="customersTable">
+                                    <tr>
+                                        <td colspan="4" style="text-align:center;color:var(--text-muted);padding:2rem">No
+                                            registered customers yet.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1071,7 +1155,7 @@
                         <button class="btn-primary" onclick="savePromos()">Save Changes</button>
                     </div>
                     <div class="panel-body">
-                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;">
+                        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(300px, 1fr));gap:2rem;">
                             <!-- Promo 1 -->
                             <div class="marketing-card"
                                 style="background:var(--off-black);padding:1.5rem;border-radius:12px;border:1px solid var(--border)">
@@ -1146,18 +1230,20 @@
                         <div class="panel-title">Customer Reviews Moderation</div>
                     </div>
                     <div class="panel-body" style="padding:0">
-                        <table style="width:100%">
-                            <thead>
-                                <tr>
-                                    <th>Customer</th>
-                                    <th>Email</th>
-                                    <th>Rating</th>
-                                    <th style="max-width:300px">Review</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="allReviewsTable"></tbody>
-                        </table>
+                        <div class="table-container">
+                            <table style="width:100%">
+                                <thead>
+                                    <tr>
+                                        <th>Customer</th>
+                                        <th>Email</th>
+                                        <th>Rating</th>
+                                        <th style="max-width:300px">Review</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="allReviewsTable"></tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1543,12 +1629,20 @@
             document.getElementById('page-' + id).classList.add('active');
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
             if (btn) btn.classList.add('active');
-            const titles = { dashboard: 'Dashboard', orders: 'Orders', products: 'Products', addProduct: 'Add Product', customers: 'Customers', catalogue: 'Catalogue' };
+            const titles = { dashboard: 'Dashboard', orders: 'Orders', products: 'Products', addProduct: 'Add Product', customers: 'Customers', catalogue: 'Catalogue', marketing: 'Marketing', reviews: 'Reviews' };
             document.getElementById('pageTitle').textContent = titles[id] || id;
             if (id === 'products') renderProductsTable();
             if (id === 'orders') renderOrdersTable();
             if (id === 'customers') renderCustomersTable();
             if (id === 'catalogue') renderCatalogue();
+            if (window.innerWidth <= 1024) toggleSidebar(false);
+        }
+
+        function toggleSidebar(force) {
+            const side = document.querySelector('.sidebar');
+            if (force === false) side.classList.remove('open');
+            else if (force === true) side.classList.add('open');
+            else side.classList.toggle('open');
         }
 
         // ===================== TOAST =====================
