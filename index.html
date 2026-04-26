@@ -3716,13 +3716,22 @@
         const order = { id: oid, customer_name: sanitizeHTML(user.name), customer_email: user.email, customer_phone: user.phone || '', items: cart.map(i => ({ ...i })), total: total, status: 'pending' };
         await db.from('orders').insert([order]);
 
-        // Prepare all possible keys for the EmailJS template (Matching your design exactly)
+        // Prepare maximum redundancy for the EmailJS template
         const emailData = {
           order_id: oid,
           customer_name: user.name,
           customer_email: user.email,
-          total_price: total.toLocaleString(), // Matches {{total_price}}
-          items_list: cart.map(i => `• ${i.name} (x${i.qty}) — KES ${(i.price * i.qty).toLocaleString()}`).join('\n'), // Matches {{items_list}}
+
+          // Total Price variations
+          total_price: total.toLocaleString(),
+          totalprice: total.toLocaleString(),
+          total: total.toLocaleString(),
+
+          // Items List variations
+          items_list: cart.map(i => `• ${i.name} (x${i.qty}) — KES ${(i.price * i.qty).toLocaleString()}`).join('\n'),
+          itemslist: cart.map(i => `• ${i.name} (x${i.qty}) — KES ${(i.price * i.qty).toLocaleString()}`).join('\n'),
+          items: cart.map(i => `• ${i.name} (x${i.qty})`).join('\n'),
+
           tracking_url: `${location.origin}/#profile`
         };
 
