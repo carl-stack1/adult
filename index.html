@@ -3154,29 +3154,92 @@
       <div class="auth-sub" style="margin-bottom:1.5rem">Manage Your Privacy & Details</div>
 
       <div class="auth-form" id="profileForm">
-        <label style="font-size:0.7rem; color:var(--text-muted); margin-bottom:-0.5rem">Full Name</label>
-        <input class="auth-input" type="text" id="prName">
+        <!-- Profile Info Display Mode -->
+        <div id="profileDisplayMode">
+          <div style="display:flex; justify-content:flex-end; margin-bottom: 1rem">
+            <button onclick="toggleProfileEdit(true)" class="btn-ghost"
+              style="padding:0.4rem 0.8rem; font-size:0.7rem; color:var(--rose); border:1px solid var(--rose)">Edit
+              Profile</button>
+          </div>
 
-        <label style="font-size:0.7rem; color:var(--text-muted); margin-bottom:-0.5rem">Email Address</label>
-        <input class="auth-input" type="email" id="prEmail" readonly style="opacity:0.6">
+          <div style="margin-bottom:1.2rem">
+            <div style="font-size:0.75rem; color:var(--text-muted); margin-bottom:0.2rem">Full Name</div>
+            <div id="dispName" style="font-family:'Cormorant Garamond',serif; font-size:1.1rem; color:var(--white)">—
+            </div>
+          </div>
 
-        <label style="font-size:0.7rem; color:var(--text-muted); margin-bottom:-0.5rem">Phone Number</label>
-        <input class="auth-input" type="tel" id="prPhone" placeholder="07xx xxx xxx">
+          <div style="margin-bottom:1.2rem">
+            <div style="font-size:0.75rem; color:var(--text-muted); margin-bottom:0.2rem">Email Address</div>
+            <div id="dispEmail" style="font-size:0.95rem; color:var(--white); opacity:0.7">—</div>
+          </div>
 
-        <label style="font-size:0.7rem; color:var(--text-muted); margin-bottom:-0.5rem">Delivery Location</label>
-        <input class="auth-input" type="text" id="prLoc" placeholder="Estate, Building, Town">
+          <div style="margin-bottom:1.2rem">
+            <div style="font-size:0.75rem; color:var(--text-muted); margin-bottom:0.2rem">Phone Number</div>
+            <div id="dispPhone" style="font-size:0.95rem; color:var(--white)">—</div>
+          </div>
 
-        <label style="font-size:0.7rem; color:var(--text-muted); margin-bottom:-0.5rem">Change Password (leave blank to
-          keep current)</label>
-        <input class="auth-input" type="password" id="prPass">
+          <div style="margin-bottom:1.2rem">
+            <div style="font-size:0.75rem; color:var(--text-muted); margin-bottom:0.2rem">Delivery Location</div>
+            <div id="dispLoc" style="font-size:0.95rem; color:var(--white)">—</div>
+          </div>
 
-        <button class="auth-btn" onclick="saveProfile()" id="savePrBtn">Save Changes</button>
+          <!-- Order Tracking Section -->
+          <div style="margin-top:2rem; border-top:1px solid var(--border); padding-top:1.5rem">
+            <div
+              style="font-family:'Cormorant Garamond',serif; font-size:1.1rem; margin-bottom:1rem; color:var(--gold)">📦
+              Track Your Orders</div>
+            <div id="orderTrackingList" style="max-height:200px; overflow-y:auto">
+              <p style="font-size:0.75rem; color:var(--text-muted)">Loading your orders...</p>
+            </div>
+          </div>
 
-        <button onclick="viewOrderHistory()"
-          style="width:100%;margin-top:0.75rem;padding:0.75rem;background:rgba(255,255,255,0.04);border:1px solid var(--border);color:var(--white);font-family:'DM Sans',sans-serif;font-size:0.78rem;letter-spacing:0.15em;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:all 0.2s"
-          onmouseover="this.style.borderColor='var(--rose)'" onmouseout="this.style.borderColor='var(--border)'">
-          📦 My Order History
-        </button>
+          <button onclick="viewOrderHistory()"
+            style="width:100%;margin-top:1.5rem;padding:0.75rem;background:rgba(255,255,255,0.04);border:1px solid var(--border);color:var(--white);font-family:'DM Sans',sans-serif;font-size:0.78rem;letter-spacing:0.15em;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:all 0.2s">
+            View All Order History
+          </button>
+        </div>
+
+        <!-- Profile Info Edit Mode -->
+        <div id="profileEditMode" style="display:none">
+          <label style="font-size:0.7rem; color:var(--text-muted); margin-bottom:0.2rem; display:block">Full
+            Name</label>
+          <input class="auth-input" type="text" id="prName">
+
+          <label style="font-size:0.7rem; color:var(--text-muted); margin-bottom:0.2rem; display:block">Phone
+            Number</label>
+          <input class="auth-input" type="tel" id="prPhone" placeholder="07xx xxx xxx">
+
+          <label style="font-size:0.7rem; color:var(--text-muted); margin-bottom:0.2rem; display:block">Delivery
+            Location</label>
+          <input class="auth-input" type="text" id="prLoc" placeholder="Estate, Building, Town">
+
+          <div
+            style="background:rgba(255,100,100,0.05); padding:1rem; border-radius:8px; margin: 1.5rem 0; border:1px solid rgba(196,88,122,0.2)">
+            <label
+              style="font-size:0.7rem; color:var(--rose); font-weight:bold; margin-bottom:0.8rem; display:block; text-transform:uppercase">Security:
+              Change Password</label>
+
+            <label style="font-size:0.65rem; color:var(--text-muted); display:block; margin-bottom:0.3rem">Current
+              Password</label>
+            <input class="auth-input" type="password" id="prOldPass" style="margin-bottom:0.8rem"
+              placeholder="••••••••">
+
+            <label style="font-size:0.65rem; color:var(--text-muted); display:block; margin-bottom:0.3rem">New
+              Password</label>
+            <input class="auth-input" type="password" id="prNewPass" style="margin-bottom:0.8rem"
+              placeholder="New Password">
+
+            <label style="font-size:0.65rem; color:var(--text-muted); display:block; margin-bottom:0.3rem">Confirm New
+              Password</label>
+            <input class="auth-input" type="password" id="prConfirmPass" placeholder="Confirm Password">
+          </div>
+
+          <div style="display:flex; gap:0.5rem">
+            <button class="auth-btn" onclick="saveProfile()" id="savePrBtn" style="flex:2">Save All Changes</button>
+            <button class="btn-ghost" onclick="toggleProfileEdit(false)"
+              style="flex:1; border:1px solid var(--border); color:var(--white); border-radius:4px">Cancel</button>
+          </div>
+        </div>
 
         <hr style="border:none; border-top:1px solid var(--border); margin:1.5rem 0">
 
@@ -3511,12 +3574,24 @@
       }
       const feats = (p.features || '').split('\n').filter(f => f.trim());
       document.getElementById('pdFeatures').innerHTML = feats.map(f => `<li>${f.trim()}</li>`).join('');
-      document.getElementById('pdMeta').innerHTML = `< div ><div class="pd-meta-label">Size / Volume</div><div class="pd-meta-value">${p.sizes || '—'}</div></div > <div><div class="pd-meta-label">Material</div><div class="pd-meta-value">${p.model || '—'}</div></div>`;
+      document.getElementById('pdMeta').innerHTML = `<div><div class="pd-meta-label">Size / Volume</div><div class="pd-meta-value">${p.sizes || '—'}</div></div> <div><div class="pd-meta-label">Material</div><div class="pd-meta-value">${p.model || '—'}</div></div>`;
       const revs = p.reviews || [];
       document.getElementById('pdReviewsList').innerHTML = revs.length ? revs.map(r => `<div class="pd-review-item"><div class="pd-review-header"><span class="pd-reviewer">${r.n} — ${r.l}</span><span class="stars" style="font-size:0.7rem">${r.s}</span></div><p class="pd-review-text">"${r.t}"</p></div>`).join('') : '<p style="font-size:0.78rem;color:var(--text-muted)">No reviews yet.</p>';
       document.getElementById('pdAddBtn').textContent = `Add to Cart  •  KES ${p.price.toLocaleString()} `;
       document.getElementById('pdOverlay').classList.add('open');
       document.body.style.overflow = 'hidden';
+      updateReviewVisibility();
+    }
+
+    function updateReviewVisibility() {
+      const u = getCurrentUser();
+      if (u) {
+        if (document.getElementById('pdReviewForm')) document.getElementById('pdReviewForm').style.display = 'block';
+        if (document.getElementById('revLoginNotice')) document.getElementById('revLoginNotice').style.display = 'none';
+      } else {
+        if (document.getElementById('pdReviewForm')) document.getElementById('pdReviewForm').style.display = 'none';
+        if (document.getElementById('revLoginNotice')) document.getElementById('revLoginNotice').style.display = 'block';
+      }
     }
     function closePd() { document.getElementById('pdOverlay').classList.remove('open'); document.body.style.overflow = ''; }
     function changePdQty(d) {
@@ -3707,18 +3782,76 @@
       }
     }
 
-    function openProfile() {
+    function toggleProfileEdit(isEdit) {
+      document.getElementById('profileDisplayMode').style.display = isEdit ? 'none' : 'block';
+      document.getElementById('profileEditMode').style.display = isEdit ? 'block' : 'none';
+    }
+
+    async function openProfile() {
       document.getElementById('profileOverlay').classList.add('open');
       document.body.style.overflow = 'hidden';
       const u = getCurrentUser();
       if (u) {
-        if (document.getElementById('prName')) document.getElementById('prName').value = u.name || '';
-        if (document.getElementById('prEmail')) document.getElementById('prEmail').value = u.email || '';
-        if (document.getElementById('prPhone')) document.getElementById('prPhone').value = u.phone || '';
-        if (document.getElementById('prLoc')) document.getElementById('prLoc').value = u.location || '';
+        // Display Mode
+        document.getElementById('dispName').textContent = u.name || '—';
+        document.getElementById('dispEmail').textContent = u.email || '—';
+        document.getElementById('dispPhone').textContent = u.phone || 'Not set';
+        document.getElementById('dispLoc').textContent = u.location || 'Not set';
+
+        // Edit Mode
+        document.getElementById('prName').value = u.name || '';
+        document.getElementById('prPhone').value = u.phone || '';
+        document.getElementById('prLoc').value = u.location || '';
+
+        toggleProfileEdit(false);
+        renderOrderTracking();
       }
     }
+
+    async function renderOrderTracking() {
+      const u = getCurrentUser();
+      const listEl = document.getElementById('orderTrackingList');
+      if (!u || !listEl) return;
+
+      try {
+        const { data, error } = await db.from('orders').select('*').eq('customer_email', u.email).order('created_at', { ascending: false }).limit(3);
+        if (error) throw error;
+
+        if (!data || data.length === 0) {
+          listEl.innerHTML = '<p style="font-size:0.75rem; color:var(--text-muted)">No active orders to track.</p>';
+          return;
+        }
+
+        listEl.innerHTML = data.map(ord => {
+          const status = (ord.status || 'pending').toLowerCase();
+          const steps = ['pending', 'confirmed', 'processed', 'shipped', 'delivered'];
+          const currentIdx = steps.indexOf(status);
+
+          return `
+            <div style="background:rgba(255,255,255,0.03); padding:0.8rem; border-radius:8px; margin-bottom:0.8rem; border:1px solid var(--border)">
+              <div style="display:flex; justify-content:space-between; margin-bottom:0.6rem">
+                <span style="font-size:0.7rem; color:var(--gold)">Order #${ord.id.slice(0, 8)}</span>
+                <span style="font-size:0.65rem; color:var(--rose); text-transform:uppercase">${status}</span>
+              </div>
+              <div style="display:flex; gap:4px">
+                ${steps.map((s, i) => `
+                  <div style="height:4px; flex:1; background:${i <= currentIdx ? 'var(--rose)' : 'rgba(255,255,255,0.1)'}; border-radius:2px" title="${s}"></div>
+                `).join('')}
+              </div>
+              <div style="display:flex; justify-content:space-between; margin-top:0.4rem; font-size:0.6rem; color:var(--text-muted)">
+                <span>Placed</span>
+                <span>${status === 'delivered' ? 'Delivered' : 'In Progress'}</span>
+              </div>
+            </div>
+          `;
+        }).join('');
+      } catch (err) {
+        listEl.innerHTML = '<p style="font-size:0.7rem; color:var(--text-muted)">Unable to load tracking.</p>';
+      }
+    }
+
     function closeProfile() { document.getElementById('profileOverlay').classList.remove('open'); document.body.style.overflow = ''; }
+
     async function saveProfile() {
       const u = getCurrentUser();
       if (!u) return;
@@ -3730,9 +3863,22 @@
         location: document.getElementById('prLoc').value.trim()
       };
 
+      // Handle Password Change
+      const oldPass = document.getElementById('prOldPass').value;
+      const newPass = document.getElementById('prNewPass').value;
+      const confirmPass = document.getElementById('prConfirmPass').value;
+
+      if (newPass) {
+        if (newPass !== confirmPass) { showToast('New passwords do not match!'); return; }
+        if (newPass.length < 6) { showToast('Password must be at least 6 characters.'); return; }
+        // Note: Supabase updatePassword doesn't strictly need old pass if session is active but it's good practice
+        const { error } = await db.auth.updateUser({ password: newPass });
+        if (error) { showToast('Error updating password: ' + error.message); return; }
+      }
+
       sessionStorage.setItem('atk_user', JSON.stringify(newU));
 
-      // Update metadata in Supabase if exists
+      // Update metadata in Supabase
       const { data: { session } } = await db.auth.getSession();
       if (session) {
         await db.auth.updateUser({
@@ -3746,8 +3892,9 @@
 
       restoreAuthState();
       showToast('Profile updated successfully! ✨');
-      closeProfile();
+      openProfile(); // Refresh display mode
     }
+
     async function deleteAccount() { if (confirm('Delete your account permanently?')) { sessionStorage.removeItem('atk_user'); location.reload(); } }
     function doLogout() { sessionStorage.removeItem('atk_user'); location.reload(); }
     function loginWithGoogle() { db.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.origin + location.pathname } }); }
