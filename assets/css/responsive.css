@@ -1,0 +1,164 @@
+/* ==========================================================================
+   RESPONSIVE OVERRIDES - ADULTTOYSKE
+   ========================================================================== */
+
+@media (max-width: 1024px) {
+    nav {
+        padding: 1.2rem 2rem;
+    }
+
+    nav.scrolled {
+        padding: 0.8rem 2rem;
+    }
+
+    section {
+        padding: 5rem 2rem;
+    }
+
+    .hero {
+        padding: 0 2rem 5rem;
+    }
+
+    .hero-stats {
+        right: 2rem;
+        bottom: 5rem;
+    }
+
+    .products-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .categories-grid {
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: auto;
+    }
+
+    .cat-card:first-child {
+        grid-row: span 1;
+    }
+
+    .trust-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .promo-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .footer-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 2.5rem;
+    }
+
+    .reviews-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .faq-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .cart-drawer {
+        width: 340px;
+    }
+
+    .trust-strip {
+        padding: 2.5rem 2rem;
+    }
+
+    .promo-section {
+        padding: 3rem 2rem;
+    }
+
+    .newsletter {
+        padding: 4rem 2rem;
+    }
+}
+
+@media (max-width: 640px) {
+    nav {
+        padding: 1rem 1.5rem;
+    }
+
+    nav.scrolled {
+        padding: 0.8rem 1.5rem;
+    }
+
+    .nav-links {
+        display: none;
+    }
+
+    section {
+        padding: 4rem 1.5rem;
+    }
+
+    .hero {
+        padding: 0 1.5rem 4rem;
+    }
+
+    .hero-stats {
+        display: none;
+    }
+
+    .products-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    .categories-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .trust-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .reviews-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .footer-grid {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+
+    .products-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1.5rem;
+    }
+
+    .hero-actions {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .cart-drawer {
+        width: 100%;
+    }
+
+    .trust-strip {
+        padding: 2rem 1.5rem;
+    }
+
+    .promo-section {
+        padding: 3rem 1.5rem;
+    }
+
+    .newsletter {
+        padding: 3rem 1.5rem;
+    }
+
+    .newsletter-form {
+        flex-direction: column;
+    }
+
+    .newsletter-input {
+        border-right: 1px solid rgba(255, 255, 255, 0.2);
+        border-bottom: none;
+    }
+
+    .footer-bottom {
+        flex-direction: column;
+    }
+}

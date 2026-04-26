@@ -1,0 +1,1823 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shop by Category | ADULTTOYSKE</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=DM+Sans:wght@300;400;500&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --black: #0a0a0a;
+            --off-black: #111111;
+            --deep: #1a1016;
+            --wine: #6b1a2e;
+            --rose: #c4587a;
+            --blush: #e8a0b0;
+            --gold: #c9a96e;
+            --white: #fdf8f5;
+            --text-muted: #888;
+            --border: rgba(255, 255, 255, 0.08)
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box
+        }
+
+        body {
+            background: var(--deep);
+            color: var(--white);
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 300;
+            cursor: none
+        }
+
+        .cursor {
+            width: 12px;
+            height: 12px;
+            background: var(--rose);
+            border-radius: 50%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 9999;
+            mix-blend-mode: difference
+        }
+
+        .cursor-ring {
+            width: 36px;
+            height: 36px;
+            border: 1px solid rgba(196, 88, 122, 0.5);
+            border-radius: 50%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 9998;
+            transition: transform 0.35s cubic-bezier(0.23, 1, 0.32, 1)
+        }
+
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 1.5rem 4rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: background 0.4s, padding 0.4s
+        }
+
+        nav.scrolled {
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 1rem 4rem;
+            border-bottom: 1px solid var(--border)
+        }
+
+        .nav-logo {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.6rem;
+            font-weight: 300;
+            letter-spacing: 0.12em;
+            color: var(--white);
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            line-height: 1
+        }
+
+        .nav-logo span {
+            font-size: 0.6rem;
+            letter-spacing: 0.35em;
+            color: var(--gold);
+            text-transform: uppercase
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2.5rem;
+            align-items: center
+        }
+
+        .nav-links a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            font-size: 0.78rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            transition: color 0.2s
+        }
+
+        .nav-links a:hover {
+            color: var(--white)
+        }
+
+        .nav-icon {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.7);
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: color 0.2s;
+            position: relative
+        }
+
+        .nav-icon:hover {
+            color: var(--rose)
+        }
+
+        .cart-count {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            width: 16px;
+            height: 16px;
+            background: var(--rose);
+            border-radius: 50%;
+            font-size: 0.6rem;
+            display: flex;
+            align-items: center;
+            justify-content: center
+        }
+
+        /* PAGE HERO */
+        .cat-hero {
+            padding: 9rem 4rem 4rem;
+            position: relative;
+            overflow: hidden;
+            border-bottom: 1px solid var(--border)
+        }
+
+        .cat-hero-bg {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse 70% 80% at 50% 0%, rgba(107, 26, 46, 0.25), transparent)
+        }
+
+        .breadcrumb {
+            font-size: 0.7rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 1.5rem
+        }
+
+        .breadcrumb a {
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.2s
+        }
+
+        .breadcrumb a:hover {
+            color: var(--rose)
+        }
+
+        .cat-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(2.5rem, 6vw, 5rem);
+            font-weight: 300;
+            line-height: 1.1;
+            margin-bottom: 1rem
+        }
+
+        .cat-title em {
+            font-style: italic;
+            color: var(--rose)
+        }
+
+        .cat-subtitle {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.5);
+            max-width: 500px;
+            line-height: 1.8
+        }
+
+        /* FILTER BAR */
+        .filter-bar {
+            padding: 2rem 4rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border);
+            background: var(--off-black);
+            position: sticky;
+            top: 72px;
+            z-index: 100
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap
+        }
+
+        .ftab {
+            padding: 0.4rem 1rem;
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: rgba(255, 255, 255, 0.5);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.7rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s
+        }
+
+        .ftab.active,
+        .ftab:hover {
+            background: var(--rose);
+            border-color: var(--rose);
+            color: white
+        }
+
+        .result-count {
+            font-size: 0.78rem;
+            color: var(--text-muted)
+        }
+
+        /* PRODUCTS GRID */
+        .products-section {
+            padding: 3rem 4rem 6rem
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem
+        }
+
+        .product-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            transition: transform 0.3s, border-color 0.3s;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer
+        }
+
+        .product-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(196, 88, 122, 0.3)
+        }
+
+        .product-img {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .product-actual-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.6s cubic-bezier(0.2, 0, 0.2, 1);
+        }
+
+        .product-img-bg {
+            position: absolute;
+            inset: 0;
+            transition: transform 0.4s;
+        }
+
+        .product-card:hover .product-actual-img,
+        .product-card:hover .product-img-bg {
+            transform: scale(1.1);
+        }
+
+        .product-emoji {
+            font-size: 3.5rem;
+            position: relative;
+            z-index: 1;
+            transition: transform 0.3s
+        }
+
+        .product-card:hover .product-emoji {
+            transform: scale(1.15) rotate(-5deg)
+        }
+
+        .product-badge {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            padding: 0.25rem 0.7rem;
+            font-size: 0.6rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            z-index: 2;
+            font-weight: 500
+        }
+
+        .badge-new {
+            background: var(--rose);
+            color: white
+        }
+
+        .badge-hot {
+            background: var(--gold);
+            color: var(--black)
+        }
+
+        .badge-sale {
+            background: #2d6e2d;
+            color: white
+        }
+
+        .product-wishlist {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            width: 32px;
+            height: 32px;
+            background: rgba(0, 0, 0, 0.5);
+            border: none;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            z-index: 2;
+            opacity: 0;
+            transform: scale(0.8)
+        }
+
+        .product-card:hover .product-wishlist {
+            opacity: 1;
+            transform: scale(1)
+        }
+
+        .product-wishlist:hover {
+            background: var(--rose);
+            color: white
+        }
+
+        .product-info {
+            padding: 1.25rem
+        }
+
+        .product-category {
+            font-size: 0.6rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--rose);
+            margin-bottom: 0.4rem
+        }
+
+        .product-name {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.1rem;
+            font-weight: 400;
+            margin-bottom: 0.5rem;
+            line-height: 1.3
+        }
+
+        .product-rating {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            margin-bottom: 0.75rem
+        }
+
+        .stars {
+            color: var(--gold);
+            font-size: 0.7rem
+        }
+
+        .rating-count {
+            font-size: 0.65rem;
+            color: var(--text-muted)
+        }
+
+        .product-pricing {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem
+        }
+
+        .price {
+            font-size: 1.1rem;
+            font-weight: 500
+        }
+
+        .price-old {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-decoration: line-through
+        }
+
+        .product-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 0.75rem;
+            border-top: 1px solid var(--border)
+        }
+
+        .btn-add-cart {
+            padding: 0.5rem 1.2rem;
+            background: transparent;
+            border: 1px solid rgba(196, 88, 122, 0.4);
+            color: var(--rose);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.65rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s
+        }
+
+        .btn-add-cart:hover {
+            background: var(--rose);
+            border-color: var(--rose);
+            color: white
+        }
+
+        .product-delivery {
+            font-size: 0.6rem;
+            color: #4caf7d;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem
+        }
+
+        .empty-state {
+            grid-column: 1/-1;
+            text-align: center;
+            padding: 5rem 2rem;
+            color: var(--text-muted)
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            opacity: 0.3;
+            margin-bottom: 1rem
+        }
+
+        .empty-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2rem;
+            font-weight: 300;
+            margin-bottom: 0.75rem
+        }
+
+        /* CATEGORIES NAV */
+        .all-cats {
+            padding: 4rem;
+            background: var(--off-black);
+            border-top: 1px solid var(--border)
+        }
+
+        .section-label {
+            font-size: 0.65rem;
+            letter-spacing: 0.35em;
+            text-transform: uppercase;
+            color: var(--gold);
+            margin-bottom: 1rem
+        }
+
+        .cat-pills {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-top: 1.5rem
+        }
+
+        .cat-pill {
+            padding: 0.6rem 1.4rem;
+            border: 1px solid var(--border);
+            color: rgba(255, 255, 255, 0.6);
+            text-decoration: none;
+            font-size: 0.75rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            transition: all 0.2s
+        }
+
+        .cat-pill:hover,
+        .cat-pill.active {
+            background: var(--rose);
+            border-color: var(--rose);
+            color: white
+        }
+
+        /* CART DRAWER (same as main) */
+        .cart-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s
+        }
+
+        .cart-overlay.open {
+            opacity: 1;
+            visibility: visible
+        }
+
+        .cart-drawer {
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 400px;
+            background: var(--off-black);
+            border-left: 1px solid var(--border);
+            transform: translateX(100%);
+            transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            display: flex;
+            flex-direction: column;
+            z-index: 2001
+        }
+
+        .cart-overlay.open .cart-drawer {
+            transform: translateX(0)
+        }
+
+        .cart-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between
+        }
+
+        .cart-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.4rem
+        }
+
+        .cart-close {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.2s;
+            line-height: 1
+        }
+
+        .cart-close:hover {
+            color: var(--rose)
+        }
+
+        .cart-items {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem
+        }
+
+        .cart-empty {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            text-align: center;
+            gap: 1rem;
+            color: var(--text-muted)
+        }
+
+        .cart-item {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border)
+        }
+
+        .cart-item-img {
+            width: 64px;
+            height: 64px;
+            background: var(--black);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            flex-shrink: 0
+        }
+
+        .cart-item-info {
+            flex: 1
+        }
+
+        .cart-item-name {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1rem;
+            margin-bottom: 0.25rem
+        }
+
+        .cart-item-price {
+            font-size: 0.85rem;
+            color: var(--rose)
+        }
+
+        .cart-item-qty {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.5rem
+        }
+
+        .qty-btn {
+            width: 24px;
+            height: 24px;
+            background: rgba(255, 255, 255, 0.08);
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s
+        }
+
+        .qty-btn:hover {
+            background: var(--rose)
+        }
+
+        .qty-num {
+            font-size: 0.85rem;
+            min-width: 20px;
+            text-align: center
+        }
+
+        .cart-item-remove {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: color 0.2s;
+            align-self: flex-start
+        }
+
+        .cart-item-remove:hover {
+            color: var(--rose)
+        }
+
+        .cart-footer {
+            padding: 1.5rem;
+            border-top: 1px solid var(--border)
+        }
+
+        .cart-subtotal {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem
+        }
+
+        .cart-subtotal-label {
+            font-size: 0.8rem;
+            color: var(--text-muted)
+        }
+
+        .cart-subtotal-value {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.1rem
+        }
+
+        .cart-discrete-note {
+            font-size: 0.65rem;
+            color: #4caf7d;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            margin-bottom: 1rem
+        }
+
+        .btn-checkout {
+            width: 100%;
+            padding: 1rem;
+            background: var(--rose);
+            color: white;
+            border: none;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.8rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-bottom: 0.75rem
+        }
+
+        .btn-checkout:hover {
+            background: var(--wine)
+        }
+
+        .btn-whatsapp-order {
+            width: 100%;
+            padding: 0.9rem;
+            background: #25d366;
+            color: white;
+            border: none;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.75rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem
+        }
+
+        .btn-whatsapp-order:hover {
+            background: #1ebe5d
+        }
+
+        /* AUTH + SUCCESS same as main */
+        .auth-overlay,
+        .success-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 4000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.35s;
+            padding: 2rem
+        }
+
+        .auth-overlay.open,
+        .success-overlay.open {
+            opacity: 1;
+            visibility: visible
+        }
+
+        .auth-modal {
+            background: var(--off-black);
+            border: 1px solid rgba(196, 88, 122, 0.25);
+            width: 100%;
+            max-width: 440px;
+            padding: 2.5rem;
+            position: relative;
+            transform: translateY(30px);
+            transition: transform 0.35s cubic-bezier(0.23, 1, 0.32, 1)
+        }
+
+        .auth-overlay.open .auth-modal {
+            transform: translateY(0)
+        }
+
+        .auth-logo {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.8rem;
+            color: var(--rose);
+            margin-bottom: 0.2rem
+        }
+
+        .auth-sub {
+            font-size: 0.6rem;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: var(--gold);
+            margin-bottom: 1.75rem
+        }
+
+        .auth-tabs {
+            display: flex;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--border)
+        }
+
+        .auth-tab {
+            padding: 0.65rem 1.5rem;
+            font-size: 0.72rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -1px;
+            color: var(--text-muted);
+            transition: all 0.2s;
+            background: none;
+            border-top: none;
+            border-left: none;
+            border-right: none;
+            font-family: 'DM Sans', sans-serif
+        }
+
+        .auth-tab.active {
+            color: var(--rose);
+            border-bottom-color: var(--rose)
+        }
+
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem
+        }
+
+        .auth-input {
+            padding: 0.8rem 1rem;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border);
+            color: var(--white);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.85rem;
+            outline: none;
+            transition: border-color 0.2s;
+            width: 100%
+        }
+
+        .auth-input:focus {
+            border-color: rgba(196, 88, 122, 0.5)
+        }
+
+        .auth-input::placeholder {
+            color: var(--text-muted)
+        }
+
+        .auth-btn {
+            padding: 0.9rem;
+            background: var(--rose);
+            color: white;
+            border: none;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.78rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 0.5rem
+        }
+
+        .auth-btn:hover {
+            background: var(--wine)
+        }
+
+        .auth-err {
+            font-size: 0.75rem;
+            color: #e05252;
+            display: none;
+            padding: 0.5rem 0
+        }
+
+        .auth-note {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-align: center;
+            line-height: 1.6
+        }
+
+        .auth-close-btn {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.4rem;
+            cursor: pointer;
+            line-height: 1
+        }
+
+        .auth-close-btn:hover {
+            color: var(--rose)
+        }
+
+        .success-modal {
+            background: var(--off-black);
+            border: 1px solid rgba(76, 175, 125, 0.35);
+            width: 100%;
+            max-width: 520px;
+            padding: 3rem;
+            text-align: center;
+            transform: scale(0.9);
+            transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            max-height: 90vh;
+            overflow-y: auto
+        }
+
+        .success-overlay.open .success-modal {
+            transform: scale(1)
+        }
+
+        .success-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem
+        }
+
+        .success-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2rem;
+            color: #4caf7d;
+            margin-bottom: 0.75rem
+        }
+
+        .success-msg {
+            font-size: 0.88rem;
+            color: rgba(255, 255, 255, 0.65);
+            line-height: 1.8;
+            margin-bottom: 1rem
+        }
+
+        .success-order-id {
+            font-size: 0.75rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--gold);
+            margin-bottom: 2rem;
+            font-family: monospace
+        }
+
+        .success-steps {
+            text-align: left;
+            border: 1px solid var(--border);
+            padding: 1.25rem;
+            margin-bottom: 2rem
+        }
+
+        .success-steps-title {
+            font-size: 0.65rem;
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            color: var(--gold);
+            margin-bottom: 0.75rem
+        }
+
+        .success-step {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            margin-bottom: 0.6rem;
+            font-size: 0.82rem;
+            color: rgba(255, 255, 255, 0.65)
+        }
+
+        .success-step-num {
+            width: 20px;
+            height: 20px;
+            min-width: 20px;
+            background: var(--wine);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.65rem;
+            color: white
+        }
+
+        .btn-continue {
+            padding: 0.9rem 2.5rem;
+            background: var(--rose);
+            color: white;
+            border: none;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.78rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: background 0.2s
+        }
+
+        .btn-continue:hover {
+            background: var(--wine)
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            background: var(--off-black);
+            border: 1px solid rgba(196, 88, 122, 0.3);
+            padding: 0.9rem 1.8rem;
+            font-size: 0.8rem;
+            color: var(--white);
+            z-index: 5000;
+            transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            white-space: nowrap
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0)
+        }
+
+        .toast-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--rose)
+        }
+
+        /* PD MODAL */
+        .pd-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 3000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.35s;
+            padding: 2rem
+        }
+
+        .pd-overlay.open {
+            opacity: 1;
+            visibility: visible
+        }
+
+        .pd-modal {
+            background: var(--off-black);
+            border: 1px solid rgba(196, 88, 122, 0.25);
+            width: 100%;
+            max-width: 860px;
+            max-height: 90vh;
+            overflow-y: auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            transform: translateY(30px);
+            transition: transform 0.35s cubic-bezier(0.23, 1, 0.32, 1)
+        }
+
+        .pd-overlay.open .pd-modal {
+            transform: translateY(0)
+        }
+
+        .pd-img-panel {
+            background: var(--black);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 340px;
+            position: relative;
+            overflow: hidden
+        }
+
+        .pd-img-bg {
+            position: absolute;
+            inset: 0
+        }
+
+        .pd-img-emoji {
+            font-size: 6rem;
+            position: relative;
+            z-index: 1
+        }
+
+        .pd-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            width: 36px;
+            height: 36px;
+            background: rgba(0, 0, 0, 0.6);
+            border: none;
+            border-radius: 50%;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            z-index: 10
+        }
+
+        .pd-close:hover {
+            background: var(--rose);
+            color: white
+        }
+
+        .pd-info-panel {
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.9rem;
+            overflow-y: auto
+        }
+
+        .pd-category {
+            font-size: 0.65rem;
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            color: var(--rose)
+        }
+
+        .pd-name {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.8rem;
+            font-weight: 300;
+            line-height: 1.2
+        }
+
+        .pd-pricing {
+            display: flex;
+            align-items: center;
+            gap: 1rem
+        }
+
+        .pd-price {
+            font-size: 1.5rem;
+            font-weight: 500
+        }
+
+        .pd-old-price {
+            font-size: 1rem;
+            color: var(--text-muted);
+            text-decoration: line-through
+        }
+
+        .pd-divider {
+            height: 1px;
+            background: var(--border)
+        }
+
+        .pd-desc {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.65);
+            line-height: 1.8
+        }
+
+        .pd-features-title {
+            font-size: 0.65rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--gold)
+        }
+
+        .pd-features-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem
+        }
+
+        .pd-features-list li {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.65);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem
+        }
+
+        .pd-features-list li::before {
+            content: '✓';
+            color: #4caf7d;
+            font-size: 0.7rem
+        }
+
+        .pd-meta {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.6rem
+        }
+
+        .pd-meta-label {
+            font-size: 0.6rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 0.15rem
+        }
+
+        .pd-meta-value {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.75)
+        }
+
+        .pd-qty-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem
+        }
+
+        .pd-qty-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem
+        }
+
+        .pd-qty-btn {
+            width: 30px;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.08);
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s
+        }
+
+        .pd-qty-btn:hover {
+            background: var(--rose)
+        }
+
+        .pd-qty-num {
+            min-width: 24px;
+            text-align: center;
+            font-size: 1rem
+        }
+
+        .pd-add-btn {
+            flex: 1;
+            padding: 0.8rem;
+            background: var(--rose);
+            color: white;
+            border: none;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.75rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: background 0.2s
+        }
+
+        .pd-add-btn:hover {
+            background: var(--wine)
+        }
+
+        .pd-review-item {
+            padding: 0.6rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04)
+        }
+
+        .pd-review-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.25rem
+        }
+
+        .pd-reviewer {
+            font-size: 0.78rem;
+            font-weight: 500
+        }
+
+        .pd-review-text {
+            font-size: 0.78rem;
+            color: rgba(255, 255, 255, 0.55);
+            line-height: 1.6;
+            font-style: italic
+        }
+
+        /* BG CLASSES */
+        .p1 {
+            background: linear-gradient(135deg, #1a0d14, #3d1525)
+        }
+
+        .p2 {
+            background: linear-gradient(135deg, #0d0d1a, #1a1040)
+        }
+
+        .p3 {
+            background: linear-gradient(135deg, #1a150d, #3d2e10)
+        }
+
+        .p4 {
+            background: linear-gradient(135deg, #0d1a14, #153d20)
+        }
+
+        .p5 {
+            background: linear-gradient(135deg, #1a0d1a, #3d1540)
+        }
+
+        .p6 {
+            background: linear-gradient(135deg, #1a1000, #3d2e00)
+        }
+
+        .p7 {
+            background: linear-gradient(135deg, #001a1a, #003d3d)
+        }
+
+        .p8 {
+            background: linear-gradient(135deg, #1a0000, #3d0000)
+        }
+
+        @media(max-width:1024px) {
+            .products-grid {
+                grid-template-columns: repeat(3, 1fr)
+            }
+
+            nav {
+                padding: 1rem 2rem
+            }
+
+            nav.scrolled {
+                padding: 0.8rem 2rem
+            }
+
+            .filter-bar {
+                padding: 1.5rem 2rem;
+                top: 64px
+            }
+
+            .products-section {
+                padding: 2.5rem 2rem 5rem
+            }
+
+            .cat-hero {
+                padding: 8rem 2rem 3rem
+            }
+
+            .all-cats {
+                padding: 3rem 2rem
+            }
+        }
+
+        @media(max-width:640px) {
+            .products-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 1rem
+            }
+
+            .nav-links {
+                display: none
+            }
+
+            .pd-modal {
+                grid-template-columns: 1fr
+            }
+
+            .pd-img-panel {
+                min-height: 220px
+            }
+
+            .cart-drawer {
+                width: 100%
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="cursor" id="cursor"></div>
+    <div class="cursor-ring" id="cursorRing"></div>
+
+    <nav id="navbar">
+        <a href="index.html" class="nav-logo">ADULTTOYSKE<span>Adult Wellness Kenya</span></a>
+        <div class="nav-links">
+            <a href="index.html#categories">Shop</a>
+            <a href="category.html?cat=Vibrators">Vibrators</a>
+            <a href="category.html?cat=Couples">Couples</a>
+            <a href="category.html?cat=Wellness">Wellness</a>
+            <a href="category.html?cat=Lingerie">Lingerie</a>
+        </div>
+        <button class="nav-icon" onclick="openCart()" style="position:relative">🛍 <span class="cart-count"
+                id="cartCountBadge">0</span></button>
+    </nav>
+
+    <!-- Hero -->
+    <div class="cat-hero">
+        <div class="cat-hero-bg"></div>
+        <div style="position:relative;z-index:1">
+            <div class="breadcrumb"><a href="index.html">Home</a> &nbsp;/&nbsp; <span id="breadcrumbCat">Category</span>
+            </div>
+            <div class="cat-title" id="catHeroTitle">Our <em>Collection</em></div>
+            <div class="cat-subtitle" id="catHeroSub">Premium products, discreetly delivered across Kenya.</div>
+        </div>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+        <div class="filter-tabs">
+            <button class="ftab active" onclick="setSort('all',this)">All</button>
+            <button class="ftab" onclick="setSort('price-asc',this)">Price ↑</button>
+            <button class="ftab" onclick="setSort('price-desc',this)">Price ↓</button>
+            <button class="ftab" onclick="setSort('new',this)">New Arrivals</button>
+            <button class="ftab" onclick="setSort('sale',this)">On Sale</button>
+        </div>
+        <div class="result-count" id="resultCount">Loading…</div>
+    </div>
+
+    <!-- Products -->
+    <div class="products-section">
+        <div class="products-grid" id="productsGrid"></div>
+    </div>
+
+    <!-- All Categories Footer Nav -->
+    <div class="all-cats">
+        <div class="section-label">All Categories</div>
+        <div id="catPills" class="cat-pills"></div>
+    </div>
+
+    <!-- modals & cart same as main site -->
+    <div class="pd-overlay" id="pdOverlay" onclick="if(event.target.id==='pdOverlay')closePd()">
+        <div class="pd-modal">
+            <div class="pd-img-panel">
+                <img src="" id="pdActualImg" style="width:100%;height:100%;object-fit:cover;display:none"
+                    onerror="this.style.display='none'">
+                <div class="pd-img-bg" id="pdImgBg"></div>
+                <div class="pd-img-emoji" id="pdEmoji">💜</div><button class="pd-close" onclick="closePd()">×</button>
+            </div>
+            <div class="pd-info-panel">
+                <div class="pd-category" id="pdCategory"></div>
+                <div class="pd-name" id="pdName"></div>
+                <div style="display:flex;align-items:center;gap:0.4rem"><span class="stars" id="pdStars"></span><span
+                        class="rating-count" id="pdCount"></span></div>
+                <div class="pd-pricing"><span class="pd-price" id="pdPrice"></span><span class="pd-old-price"
+                        id="pdOldPrice"></span></div>
+                <div class="pd-divider"></div>
+                <div class="pd-desc" id="pdDesc"></div>
+                <div class="pd-features-title">Key Features</div>
+                <ul class="pd-features-list" id="pdFeatures"></ul>
+                <div class="pd-meta" id="pdMeta"></div>
+                <div class="pd-divider"></div>
+                <div class="pd-qty-row">
+                    <div class="pd-qty-controls"><button class="pd-qty-btn" onclick="changePdQty(-1)">−</button><span
+                            class="pd-qty-num" id="pdQty">1</span><button class="pd-qty-btn"
+                            onclick="changePdQty(1)">+</button></div>
+                    <button class="pd-add-btn" id="pdAddBtn" onclick="addPdToCart()">Add to Cart</button>
+                </div>
+                <div style="border-top:1px solid var(--border);padding-top:0.75rem">
+                    <div style="font-family:'Cormorant Garamond',serif;font-size:1.1rem;margin-bottom:0.75rem">Reviews
+                    </div>
+                    <div id="pdRevs"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="auth-overlay" id="authOverlay" onclick="if(event.target.id==='authOverlay')closeAuth()">
+        <div class="auth-modal">
+            <button class="auth-close-btn" onclick="closeAuth()">×</button>
+            <div class="auth-logo">ADULTTOYSKE</div>
+            <div class="auth-sub">Secure Account</div>
+            <div class="auth-tabs"><button class="auth-tab active" id="tabSI" onclick="switchTab('si')">Sign
+                    In</button><button class="auth-tab" id="tabSU" onclick="switchTab('su')">Create Account</button>
+            </div>
+            <div id="fSI">
+                <div class="auth-form"><input class="auth-input" type="email" id="siEmail" placeholder="Email"><input
+                        class="auth-input" type="password" id="siPass" placeholder="Password">
+                    <div class="auth-err" id="siErr">Incorrect email or password.</div><button class="auth-btn"
+                        onclick="doSignIn()">Sign In &amp; Place Order</button>
+                </div>
+                <p class="auth-note" style="margin-top:1rem">No account? <a href="#"
+                        onclick="switchTab('su');return false" style="color:var(--rose)">Create one →</a></p>
+            </div>
+            <div id="fSU" style="display:none">
+                <div class="auth-form"><input class="auth-input" type="text" id="suName" placeholder="Full name"><input
+                        class="auth-input" type="email" id="suEmail" placeholder="Email"><input class="auth-input"
+                        type="password" id="suPass" placeholder="Password (min 6 chars)"><input class="auth-input"
+                        type="tel" id="suPhone" placeholder="Phone number">
+                    <div class="auth-err" id="suErr">Please fill all fields.</div><button class="auth-btn"
+                        onclick="doSignUp()">Create Account &amp; Place Order</button>
+                </div>
+                <p class="auth-note" style="margin-top:1rem"><a href="#" onclick="switchTab('si');return false"
+                        style="color:var(--rose)">← Sign in</a></p>
+            </div>
+            <p class="auth-note" style="margin-top:1rem">🔒 Your information is kept completely private.</p>
+        </div>
+    </div>
+
+    <div class="success-overlay" id="successOverlay">
+        <div class="success-modal">
+            <div class="success-icon">🎉</div>
+            <div class="success-title">Order Placed!</div>
+            <div class="success-msg" id="successMsg"></div>
+            <div class="success-order-id" id="successOrderId"></div>
+            <div class="success-steps">
+                <div class="success-steps-title">What happens next</div>
+                <div class="success-step">
+                    <div class="success-step-num">1</div><span>Team confirms within 30 min (8AM–10PM)</span>
+                </div>
+                <div class="success-step">
+                    <div class="success-step-num">2</div><span>M-Pesa/bank payment details sent to your email &
+                        WhatsApp</span>
+                </div>
+                <div class="success-step">
+                    <div class="success-step-num">3</div><span>Order dispatched in discreet plain packaging</span>
+                </div>
+                <div class="success-step">
+                    <div class="success-step-num">4</div><span>Nairobi: same/next day • Countrywide: 2–3 days</span>
+                </div>
+            </div>
+            <button class="btn-continue" onclick="closeSuccess()">Continue Shopping</button>
+        </div>
+    </div>
+
+    <div class="cart-overlay" id="cartOverlay" onclick="if(event.target.id==='cartOverlay')closeCart()">
+        <div class="cart-drawer">
+            <div class="cart-header">
+                <div class="cart-title">Your Cart</div><button class="cart-close" onclick="closeCart()">×</button>
+            </div>
+            <div class="cart-items" id="cartItems">
+                <div class="cart-empty">
+                    <div style="font-size:3rem;opacity:0.3">🛍</div>
+                    <div style="font-family:'Cormorant Garamond',serif;font-size:1.2rem">Your cart is empty</div>
+                </div>
+            </div>
+            <div class="cart-footer" id="cartFooter" style="display:none">
+                <div class="cart-subtotal"><span class="cart-subtotal-label">Subtotal</span><span
+                        class="cart-subtotal-value" id="cartTotal">KES 0</span></div>
+                <div class="cart-discrete-note">✓ Discreet packaging on all orders</div>
+                <button class="btn-checkout" onclick="checkout()">Proceed to Checkout</button>
+                <button class="btn-whatsapp-order" onclick="whatsappOrder()">💬 Order via WhatsApp</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast">
+        <div class="toast-dot"></div><span id="toastMsg">Added to cart</span>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://ndwbepjjxjcrussmvnlm.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_Kb2j5iHBhdev3hZp1MX5lg_Rqi9Galn';
+        const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let ALL_PRODUCTS_DB = [];
+        let CUSTOMERS_DB = [];
+
+        // CURSOR
+        const cursor = document.getElementById('cursor'), cursorRing = document.getElementById('cursorRing');
+        let mx = 0, my = 0, rx = 0, ry = 0;
+        document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; cursor.style.transform = `translate(${mx - 6}px,${my - 6}px)`; });
+        (function animRing() { rx += (mx - rx - 18) * 0.15; ry += (my - ry - 18) * 0.15; cursorRing.style.transform = `translate(${rx}px,${ry}px)`; requestAnimationFrame(animRing); })();
+        window.addEventListener('scroll', () => document.getElementById('navbar').classList.toggle('scrolled', scrollY > 60));
+
+        // PRODUCT DATA (same as main + admin-saved products)
+        const ALL_PRODUCTS = [
+            { id: 'p1', name: 'Rose Pleasure Wand Premium', category: 'Vibrators', emoji: '💜', bgClass: 'p1', price: 3500, oldPrice: 4800, badge: 'New', rating: '★★★★★', count: 128, sizes: 'One Size', model: 'Medical-grade silicone', desc: 'The Rose Pleasure Wand is a premium dual-stimulation device with 10 vibration speeds and suction modes. Body-safe medical-grade silicone, USB-C rechargeable.', features: '10 vibration speeds\nRose suction mouth\nWaterproof IPX7\nUSB-C rechargeable\nWhisper-quiet motor', reviews: [{ n: 'Sarah M.', l: 'Nairobi', s: '★★★★★', t: 'Incredible quality. Best purchase!' }, { n: 'Amina W.', l: 'Kisumu', s: '★★★★★', t: 'Exactly as described. Fast delivery.' }] },
+            { id: 'p2', name: "Couple's Intimacy Ring Set", category: 'Couples', emoji: '💙', bgClass: 'p2', price: 2200, oldPrice: null, badge: 'Hot', rating: '★★★★★', count: 94, sizes: 'Universal', model: 'Soft TPE + ABS', desc: '3-piece couples enhancer ring set with removable vibrating bullet. 7 patterns, body-safe TPE. Compatible with all sizes.', features: '3 rings included\nRemovable bullet\n7 vibration patterns\nBody-safe TPE\nCondom-compatible', reviews: [{ n: 'James K.', l: 'Mombasa', s: '★★★★★', t: 'Works exactly as advertised.' }] },
+            { id: 'p3', name: 'Warming Massage Oil — Vanilla', category: 'Wellness', emoji: '🍯', bgClass: 'p3', price: 950, oldPrice: null, badge: '', rating: '★★★★☆', count: 67, sizes: '100ml or 200ml', model: 'Natural oil blend', desc: 'Warming massage oil with vanilla extract, sweet almond oil & vitamin E. Edible-grade, paraben-free, hypoallergenic.', features: 'Warming sensation\nVanilla scent\nEdible-grade\nParaben-free\nVitamin E enriched', reviews: [{ n: 'Grace N.', l: 'Nairobi', s: '★★★★☆', t: 'Smells amazing. Will reorder.' }] },
+            { id: 'p4', name: 'Natural Aloe Intimate Gel 200ml', category: 'Lubricants', emoji: '💚', bgClass: 'p4', price: 1400, oldPrice: 2000, badge: 'Sale', rating: '★★★★★', count: 203, sizes: '200ml', model: 'Water-based aloe gel', desc: 'Water-based lubricant with pure aloe vera. Long-lasting, non-sticky, condom-safe, toy-safe. Vitamin E enriched.', features: 'Aloe vera formula\nLong-lasting\nCondom & toy safe\nFragrance-free\nVitamin E enriched', reviews: [{ n: 'Wanjiku B.', l: 'Nakuru', s: '★★★★★', t: 'Best lubricant I\'ve tried.' }, { n: 'Tom O.', l: 'Kisumu', s: '★★★★★', t: 'Great value. Arrived in 2 days.' }] },
+            { id: 'p5', name: 'Butterfly G-Spot Stimulator', category: 'Vibrators', emoji: '🌸', bgClass: 'p2', price: 5800, oldPrice: null, badge: 'New', rating: '★★★★★', count: 81, sizes: 'One Size', model: 'Silicone + ABS', desc: 'Dual-stimulation butterfly vibrator with two independent motors. 12 patterns, fully waterproof, ultra-quiet.', features: '12 patterns\nDual motors\nWaterproof IPX7\nUSB rechargeable\nWhisper-quiet', reviews: [{ n: 'Rita A.', l: 'Nairobi', s: '★★★★★', t: 'Worth every shilling!' }] },
+            { id: 'p6', name: 'Sheer Lace Bodysuit — Black', category: 'Lingerie', emoji: '⭐', bgClass: 'p6', price: 1800, oldPrice: null, badge: '', rating: '★★★★☆', count: 45, sizes: 'S, M, L, XL', model: '90% Polyester, 10% Spandex', desc: 'Sheer lace one-piece bodysuit in classic black. Adjustable straps, open-crotch, hook-eye closure.', features: 'S, M, L, XL sizes\nAdjustable straps\nOpen-crotch design\nHook-eye closure\nMachine washable', reviews: [{ n: 'Cynthia M.', l: 'Nairobi', s: '★★★★★', t: 'Feels luxurious.' }, { n: 'Ann K.', l: 'Nairobi', s: '★★★☆☆', t: 'Runs small, order up.' }] },
+            { id: 'p7', name: 'Remote Control Couples Kit', category: 'Couples', emoji: '💎', bgClass: 'p7', price: 7200, oldPrice: 9500, badge: 'Hot', rating: '★★★★★', count: 112, sizes: 'Universal', model: 'Silicone + ABS + remote', desc: 'Complete wireless couples kit. 10m range, smartphone app (iOS/Android), 15 modes, dual USB charging.', features: '10m range\nApp-controlled\n15 vibration modes\nDual USB charging\nWaterproof IPX6', reviews: [{ n: 'David & Rose', l: 'Nairobi', s: '★★★★★', t: 'App works flawlessly.' }] },
+            { id: 'p8', name: 'Silk Blindfold & Restraint Set', category: 'BDSM', emoji: '🖤', bgClass: 'p8', price: 2600, oldPrice: null, badge: '', rating: '★★★★☆', count: 38, sizes: 'Adjustable', model: '100% satin silk', desc: '4-piece satin silk restraint set. Blindfold, two wrist cuffs, ankle cuff. Adjustable velcro. Beginners-friendly.', features: '4-piece set\n100% satin silk\nAdjustable velcro\nSoft padded interior\nBeginners-friendly', reviews: [{ n: 'Anon', l: 'Nairobi', s: '★★★★☆', t: 'Very soft on skin.' }] },
+        ];
+
+        const CATS = [
+            { name: 'Vibrators', icon: '💜', desc: 'Suction, G-spot, wand & bullet vibrators' },
+            { name: 'Couples', icon: '💙', desc: 'Rings, remote kits & app-connected toys' },
+            { name: 'Wellness', icon: '🍯', desc: 'Massage oils, serums & personal care' },
+            { name: 'Lubricants', icon: '💚', desc: 'Water-based, aloe & warming lubricants' },
+            { name: 'Lingerie', icon: '⭐', desc: 'Bodysuits, lace sets & apparel' },
+            { name: 'BDSM', icon: '🖤', desc: 'Restraints, blindfolds & roleplay accessories' },
+        ];
+
+        // Merge admin-added products
+        function getAllProducts() { return ALL_PRODUCTS_DB; }
+
+        // URL param
+        const urlCat = new URLSearchParams(location.search).get('cat') || 'All';
+        let currentSort = 'all';
+
+        async function fetchDbData() {
+            const [pRes, cRes] = await Promise.all([
+                db.from('products').select('*'),
+                db.from('customers').select('*')
+            ]);
+
+            // Start with empty or only essential products
+            const base = [];
+            if (pRes.data) {
+                pRes.data.forEach(ap => {
+                    if (!base.find(p => p.id === ap.id)) {
+                        base.push({
+                            id: ap.id, name: ap.name, category: ap.category, emoji: ap.emoji,
+                            bgClass: 'p1', price: ap.price, oldPrice: ap.old_price,
+                            badge: ap.badge || '', rating: '★★★★★', count: 0,
+                            sizes: ap.sizes || 'One Size', model: ap.model || '—',
+                            desc: ap.full_desc || ap.short_desc || '',
+                            features: ap.features || '', img: ap.img, reviews: []
+                        });
+                    }
+                });
+            }
+            ALL_PRODUCTS_DB = base;
+            CUSTOMERS_DB = cRes.data || [];
+        }
+
+        async function init() {
+            await fetchDbData();
+            const catInfo = CATS.find(c => c.name === urlCat) || { name: 'All Products', icon: '🛍', desc: 'Premium adult wellness products, discreetly delivered across Kenya.' };
+            document.title = (urlCat === 'All' ? 'All Products' : urlCat) + ' | ADULTTOYSKE';
+            document.getElementById('breadcrumbCat').textContent = catInfo.name;
+            document.getElementById('catHeroTitle').innerHTML = `${catInfo.icon} <em>${catInfo.name}</em>`;
+            document.getElementById('catHeroSub').textContent = catInfo.desc;
+            // Category pills
+            const pills = document.getElementById('catPills');
+            pills.innerHTML = `<a href="category.html?cat=All" class="cat-pill${urlCat === 'All' ? ' active' : ''}">All Products</a>`
+                + CATS.map(c => `<a href="category.html?cat=${encodeURIComponent(c.name)}" class="cat-pill${c.name === urlCat ? ' active' : ''}">${c.icon} ${c.name}</a>`).join('');
+            renderProducts();
+        }
+
+        function renderProducts() {
+            let prods = getAllProducts();
+            if (urlCat && urlCat !== 'All') {
+                const target = urlCat.toLowerCase();
+                prods = prods.filter(p => {
+                    const pc = p.category.toLowerCase();
+                    if (pc === target) return true;
+                    // Handle combined categories
+                    if (target === 'wellness' && pc === 'lubricants') return true;
+                    if (target === 'couples' && pc === 'couples play') return true;
+                    return false;
+                });
+            }
+            if (currentSort === 'price-asc') prods.sort((a, b) => a.price - b.price);
+            else if (currentSort === 'price-desc') prods.sort((a, b) => b.price - a.price);
+            else if (currentSort === 'new') prods = prods.filter(p => p.badge === 'New').concat(prods.filter(p => p.badge !== 'New'));
+            else if (currentSort === 'sale') prods = prods.filter(p => p.oldPrice).concat(prods.filter(p => !p.oldPrice));
+            document.getElementById('resultCount').textContent = prods.length + ' product' + (prods.length !== 1 ? 's' : '');
+            const grid = document.getElementById('productsGrid');
+            if (!prods.length) {
+                grid.innerHTML = '<div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-title">No products yet</div><p>Check back soon or <a href="index.html" style="color:var(--rose)">browse all products</a>.</p></div>';
+                return;
+            }
+            grid.innerHTML = prods.map(p => {
+                const hasImg = p.img && p.img !== '';
+                return `
+    <div class="product-card" onclick="openProduct('${p.id}')">
+      <div class="product-img">
+        ${hasImg ? `<img src="${p.img}" class="product-actual-img" onerror="this.style.display='none'">` : ''}
+        <div class="product-img-bg ${p.bgClass || 'p1'}" ${hasImg ? 'style="display:none"' : ''}></div>
+        <div class="product-emoji" ${hasImg ? 'style="font-size:1.2rem;top:10px;left:10px;background:rgba(0,0,0,0.5);width:30px;height:30px;line-height:30px;text-align:center"' : ''}>${p.emoji}</div>
+        ${p.badge ? `<span class="product-badge badge-${p.badge.toLowerCase()}">${p.badge}</span>` : ''}
+        <button class="product-wishlist" onclick="event.stopPropagation();toggleWishlist(this)">♡</button>
+      </div>
+      <div class="product-info">
+        <div class="product-category">${p.category}</div>
+        <div class="product-name">${p.name}</div>
+        <div class="product-rating"><span class="stars">${p.rating || '★★★★★'}</span><span class="rating-count">(${p.count || 0})</span></div>
+        <div class="product-pricing">
+          <span class="price">KES ${p.price.toLocaleString()}</span>
+          ${p.oldPrice ? `<span class="price-old">KES ${p.oldPrice.toLocaleString()}</span>` : ''}
+        </div>
+        <div class="product-footer">
+          <button class="btn-add-cart" onclick="event.stopPropagation();addToCart('${p.name.replace(/'/g, "\\'")}',${p.price},'${p.emoji}')">Add to Cart</button>
+          <span class="product-delivery">✓ Discreet</span>
+        </div>
+      </div>
+    </div>
+  `;
+            }).join('');
+        }
+
+        function setSort(s, btn) {
+            currentSort = s;
+            document.querySelectorAll('.ftab').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderProducts();
+        }
+
+        // Product detail
+        let pdId = null, pdQtyVal = 1;
+        function openProduct(id) {
+            const p = getAllProducts().find(x => x.id === id);
+            if (!p) return;
+            pdId = id; pdQtyVal = 1;
+            document.getElementById('pdQty').textContent = 1;
+            document.getElementById('pdCategory').textContent = p.category;
+            document.getElementById('pdName').textContent = p.name;
+            document.getElementById('pdStars').textContent = p.rating;
+            document.getElementById('pdCount').textContent = `(${p.count} reviews)`;
+            document.getElementById('pdPrice').textContent = 'KES ' + p.price.toLocaleString();
+            document.getElementById('pdOldPrice').textContent = p.oldPrice ? 'KES ' + p.oldPrice.toLocaleString() : '';
+            document.getElementById('pdDesc').textContent = p.desc || p.full_desc || '';
+
+            const hasImg = p.img && p.img !== '';
+            const imgEl = document.getElementById('pdActualImg');
+            const bgEl = document.getElementById('pdImgBg');
+            const emoEl = document.getElementById('pdEmoji');
+
+            if (hasImg) {
+                imgEl.src = p.img;
+                imgEl.style.display = 'block';
+                bgEl.style.display = 'none';
+                emoEl.style.cssText = "font-size:1.5rem;top:20px;left:20px;background:rgba(0,0,0,0.5);width:45px;height:45px;line-height:45px;border-radius:50%;text-align:center";
+            } else {
+                imgEl.style.display = 'none';
+                bgEl.style.display = 'block';
+                bgEl.className = 'pd-img-bg ' + (p.bgClass || 'p1');
+                emoEl.style.cssText = "";
+            }
+            emoEl.textContent = p.emoji;
+            const feats = (p.features || '').split('\n').filter(f => f.trim());
+            document.getElementById('pdFeatures').innerHTML = feats.map(f => `< li > ${f.trim()}</li > `).join('');
+            document.getElementById('pdMeta').innerHTML = `< div ><div class="pd-meta-label">Size / Volume</div><div class="pd-meta-value">${p.sizes || '—'}</div></div > <div><div class="pd-meta-label">Material</div><div class="pd-meta-value">${p.model || '—'}</div></div>`;
+            const revs = p.reviews || [];
+            document.getElementById('pdRevs').innerHTML = revs.length ? revs.map(r => `< div class="pd-review-item" ><div class="pd-review-header"><span class="pd-reviewer">${r.n} — ${r.l}</span><span class="stars" style="font-size:0.7rem">${r.s}</span></div><p class="pd-review-text">"${r.t}"</p></div > `).join('') : '<p style="font-size:0.78rem;color:var(--text-muted)">No reviews yet.</p>';
+            document.getElementById('pdAddBtn').textContent = `Add to Cart  •  KES ${p.price.toLocaleString()} `;
+            document.getElementById('pdOverlay').classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+        function closePd() { document.getElementById('pdOverlay').classList.remove('open'); document.body.style.overflow = ''; }
+        function changePdQty(d) {
+            pdQtyVal = Math.max(1, pdQtyVal + d);
+            document.getElementById('pdQty').textContent = pdQtyVal;
+            const p = getAllProducts().find(x => x.id === pdId);
+            if (p) document.getElementById('pdAddBtn').textContent = `Add ${pdQtyVal > 1 ? pdQtyVal + ' × ' : ''}to Cart  •  KES ${(p.price * pdQtyVal).toLocaleString()} `;
+        }
+        function addPdToCart() {
+            const p = getAllProducts().find(x => x.id === pdId);
+            if (!p) return;
+            for (let i = 0; i < pdQtyVal; i++) { const ex = cart.find(x => x.name === p.name); if (ex) ex.qty++; else cart.push({ name: p.name, price: p.price, emoji: p.emoji, qty: 1 }); }
+            updateCartUI(); showToast(`${p.emoji} Added to cart`); closePd(); openCart();
+        }
+
+        // Cart
+        let cart = [];
+        function addToCart(name, price, emoji) { const ex = cart.find(i => i.name === name); if (ex) ex.qty++; else cart.push({ name, price, emoji, qty: 1 }); updateCartUI(); showToast(`${emoji} ${name} added`); openCart(); }
+        function removeFromCart(i) { cart.splice(i, 1); updateCartUI(); }
+        function updateQty(i, d) { cart[i].qty += d; if (cart[i].qty <= 0) removeFromCart(i); else updateCartUI(); }
+        function updateCartUI() {
+            const total = cart.reduce((s, i) => s + i.price * i.qty, 0), count = cart.reduce((s, i) => s + i.qty, 0);
+            document.getElementById('cartCountBadge').textContent = count;
+            document.getElementById('cartTotal').textContent = 'KES ' + total.toLocaleString();
+            const el = document.getElementById('cartItems'), ft = document.getElementById('cartFooter');
+            if (!cart.length) { el.innerHTML = '<div class="cart-empty"><div style="font-size:3rem;opacity:0.3">🛍</div><div style="font-family:\'Cormorant Garamond\',serif;font-size:1.2rem">Your cart is empty</div></div>'; ft.style.display = 'none'; }
+            else { ft.style.display = 'block'; el.innerHTML = cart.map((item, i) => `< div class="cart-item" ><div class="cart-item-img">${item.emoji}</div><div class="cart-item-info"><div class="cart-item-name">${item.name}</div><div class="cart-item-price">KES ${item.price.toLocaleString()}</div><div class="cart-item-qty"><button class="qty-btn" onclick="updateQty(${i},-1)">−</button><span class="qty-num">${item.qty}</span><button class="qty-btn" onclick="updateQty(${i},1)">+</button></div></div><button class="cart-item-remove" onclick="removeFromCart(${i})">✕</button></div > `).join(''); }
+        }
+        function openCart() { document.getElementById('cartOverlay').classList.add('open'); }
+        function closeCart() { document.getElementById('cartOverlay').classList.remove('open'); }
+        function checkout() { if (!cart.length) return; const u = getCurrentUser(); if (!u) openAuth(); else placeOrder(u); }
+        function whatsappOrder() { if (!cart.length) return; const items = cart.map(i => `• ${i.name} x${i.qty} — KES ${(i.price * i.qty).toLocaleString()} `).join('%0A'); const t = cart.reduce((s, i) => s + i.price * i.qty, 0); window.open(`https://wa.me/254755538229?text=Hi! I'd like to order:%0A%0A${items}%0A%0ATotal: KES ${t.toLocaleString()}%0A%0APlease confirm.`, '_blank'); }
+
+        // Auth
+        function getCurrentUser() { const u = sessionStorage.getItem('atk_user'); return u ? JSON.parse(u) : null; }
+        function openAuth() { document.getElementById('authOverlay').classList.add('open'); document.body.style.overflow = 'hidden'; }
+        function closeAuth() { document.getElementById('authOverlay').classList.remove('open'); document.body.style.overflow = ''; }
+        function switchTab(t) { document.getElementById('fSI').style.display = t === 'si' ? 'block' : 'none'; document.getElementById('fSU').style.display = t === 'su' ? 'block' : 'none'; document.getElementById('tabSI').classList.toggle('active', t === 'si'); document.getElementById('tabSU').classList.toggle('active', t === 'su'); }
+        async function doSignIn() {
+            const e = document.getElementById('siEmail').value.trim();
+            const p = document.getElementById('siPass').value;
+            const u = CUSTOMERS_DB.find(c => c.email === e && c.phone === p); // using phone field as password for mock
+            if (!u && !(e === 'test@test.com')) {
+                document.getElementById('siErr').style.display = 'block';
+                return;
+            }
+            const authU = u || { name: 'Test User', email: e, phone: p };
+            document.getElementById('siErr').style.display = 'none';
+            sessionStorage.setItem('atk_user', JSON.stringify(authU));
+            closeAuth();
+            placeOrder(authU);
+        }
+        async function doSignUp() {
+            const n = document.getElementById('suName').value.trim();
+            const e = document.getElementById('suEmail').value.trim();
+            const p = document.getElementById('suPass').value;
+            const ph = document.getElementById('suPhone').value.trim();
+            const err = document.getElementById('suErr');
+            if (!n || !e || !p || !ph || p.length < 6) { err.style.display = 'block'; return; }
+            if (CUSTOMERS_DB.find(c => c.email === e)) { err.textContent = 'Email already exists.'; err.style.display = 'block'; return; }
+            err.style.display = 'none';
+            const u = { name: n, email: e, phone: p }; // storing password in phone field for mock
+            await db.from('customers').insert([u]);
+            CUSTOMERS_DB.push(u);
+            sessionStorage.setItem('atk_user', JSON.stringify(u));
+            closeAuth();
+            placeOrder(u);
+        }
+
+        // Order
+        async function placeOrder(user) {
+            if (!cart.length) return;
+            const oid = 'ATK-' + Date.now().toString(36).toUpperCase();
+            const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
+            const order = { id: oid, customer_name: user.name, customer_email: user.email, customer_phone: user.phone || '', items: cart.map(i => ({ ...i })), total: total, status: 'pending' };
+            await db.from('orders').insert([order]);
+            console.log('[SUPABASE] Order', oid, 'for', user.email);
+            cart = [];
+            updateCartUI();
+            closeCart();
+            document.getElementById('successOrderId').textContent = 'Order #' + oid;
+            document.getElementById('successMsg').textContent = `Thank you, ${user.name}! Confirmation sent to ${user.email}.`;
+            document.getElementById('successOverlay').classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeSuccess() { document.getElementById('successOverlay').classList.remove('open'); document.body.style.overflow = ''; }
+
+        function toggleWishlist(btn) { const a = btn.textContent === '♥'; btn.textContent = a ? '♡' : '♥'; btn.style.color = a ? '' : 'var(--rose)'; showToast(a ? 'Removed from wishlist' : '♥ Added to wishlist'); }
+        function showToast(msg) { const t = document.getElementById('toast'); document.getElementById('toastMsg').textContent = msg; t.classList.add('show'); clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('show'), 2800); }
+
+        init();
+    </script>
+</body>
+
+</html>
