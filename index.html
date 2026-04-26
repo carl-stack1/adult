@@ -3263,7 +3263,26 @@
       <div class="success-icon">🎉</div>
       <div class="success-title">Order Placed!</div>
       <div class="success-msg" id="successMsg">Thank you! Your order has been received.</div>
-      <div class="success-order-id" id="successOrderId">Order #ATK-000000</div>
+
+      <!-- Summary Section -->
+      <div
+        style="background:rgba(255,255,255,0.03); padding:1rem; border-radius:12px; margin: 1.5rem 0; border:1px solid var(--border)">
+        <div style="display:flex; justify-content:space-between; margin-bottom:0.6rem; font-size:0.85rem">
+          <span style="color:var(--text-muted)">Order ID:</span>
+          <span id="summId" style="color:var(--gold); font-family:monospace; font-weight:bold">#ATK-0000</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:0.6rem; font-size:0.85rem">
+          <span style="color:var(--text-muted)">Amount Due:</span>
+          <span id="summTotal" style="color:var(--white); font-weight:bold">KES 0</span>
+        </div>
+        <div
+          style="text-align:center; font-size:0.75rem; color:var(--text-muted); margin-top:0.8rem; padding-top:0.8rem; border-top:1px dashed var(--border)">
+          <span>Track this order in your </span>
+          <a href="#" onclick="closeSuccess(); setTimeout(()=>openProfile(),400); return false"
+            style="color:var(--rose); text-decoration:underline; font-weight:600">Account Profile →</a>
+        </div>
+      </div>
+
       <div class="success-steps">
         <div class="success-steps-title">What happens next</div>
         <div class="success-step">
@@ -3708,10 +3727,15 @@
         cart = [];
         updateCartUI();
         closeCart();
-        document.getElementById('successOrderId').textContent = 'Order #' + oid;
-        document.getElementById('successMsg').textContent = `Thank you, ${user.name}! Confirmation sent to ${user.email}.`;
+        document.getElementById('summId').textContent = '#' + oid;
+        document.getElementById('summTotal').textContent = `KES ${total.toLocaleString()}`;
+        document.getElementById('successMsg').textContent = `Thank you, ${user.name}! Your order has been received.`;
+
         document.getElementById('successOverlay').classList.add('open');
         document.body.style.overflow = 'hidden';
+      } catch (err) {
+        console.error(err);
+        showToast('❌ Failed to place order. Try again.');
       } finally {
         hideSpinner();
       }
