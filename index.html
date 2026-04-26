@@ -76,8 +76,14 @@
     }
 
     @media (hover: none) and (pointer: coarse) {
-      body { cursor: auto !important; }
-      .cursor, .cursor-ring { display: none !important; }
+      body {
+        cursor: auto !important;
+      }
+
+      .cursor,
+      .cursor-ring {
+        display: none !important;
+      }
     }
 
     /* NAV */
@@ -2264,11 +2270,13 @@
 
       .categories-grid {
         grid-template-columns: 1fr 1fr;
-        grid-template-rows: auto
+        grid-template-rows: auto;
+        gap: 1rem;
       }
 
-      .cat-card:first-child {
-        grid-row: span 1
+      .cat-card {
+        min-height: 180px;
+        grid-row: auto !important;
       }
 
       .products {
@@ -2349,49 +2357,98 @@
     }
 
     @media(pointer: coarse) {
-      .cursor, .cursor-ring { display: none !important; }
+
+      .cursor,
+      .cursor-ring {
+        display: none !important;
+      }
     }
 
     @media(max-width:480px) {
-      nav { padding: 0.8rem 1.25rem; }
-      .nav-logo { font-size: 1rem; }
-      #userProfile { display: none !important; } 
-      .mobile-menu-toggle { display: none !important; } /* Hide hamburger, use dot menu */
-      
+      nav {
+        padding: 0.8rem 1.25rem;
+      }
+
+      .nav-logo {
+        font-size: 1rem;
+      }
+
+      #userProfile {
+        display: none !important;
+      }
+
+      .mobile-menu-toggle {
+        display: none !important;
+      }
+
+      /* Hide hamburger, use dot menu */
+
       .hero {
         padding: 5rem 1.5rem 2rem;
         min-height: auto;
         display: block;
         text-align: left;
       }
+
       .hero-title {
         font-size: 2rem;
         line-height: 1.1;
         margin-bottom: 1rem;
       }
+
       .hero-desc {
         font-size: 0.85rem;
         line-height: 1.6;
         margin-bottom: 2rem;
         max-width: 100%;
       }
+
       .hero-actions {
         flex-direction: column;
         gap: 0.75rem;
       }
-      .hero-stats, .scroll-hint, .hero-deco { display: none !important; } /* Hide clutter on mobile */
+      .hero-stats, .scroll-hint, .hero-deco { display: none !important; } 
+      
+      .categories-grid {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+      }
 
-      .products-grid { grid-template-columns: 1fr; }
+      .cat-card {
+        min-height: 160px;
+      }
 
-      .btn-primary, .btn-secondary, .btn-checkout, .btn-login, .btn-add-cart {
+      .cat-name {
+        font-size: 1.2rem;
+      }
+
+      .products-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .btn-primary,
+      .btn-secondary,
+      .btn-checkout,
+      .btn-login,
+      .btn-add-cart {
         min-height: 48px;
         padding: 1rem;
         font-size: 0.78rem;
         letter-spacing: 0.1em;
         width: 100%;
       }
-      .pd-qty-btn, .qty-btn { min-width: 44px; min-height: 44px; }
-      .nav-icon { min-width: 36px; min-height: 36px; font-size: 1rem; }
+
+      .pd-qty-btn,
+      .qty-btn {
+        min-width: 44px;
+        min-height: 44px;
+      }
+
+      .nav-icon {
+        min-width: 36px;
+        min-height: 36px;
+        font-size: 1rem;
+      }
     }
 
     /* SEARCH BAR */
