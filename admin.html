@@ -1133,15 +1133,16 @@
                                     <tr>
                                         <th>Name</th>
                                         <th>Email</th>
+                                        <th>Phone</th>
+                                        <th>Location</th>
                                         <th>Orders</th>
                                         <th>Date Joined</th>
                                     </tr>
                                 </thead>
                                 <tbody id="customersTable">
                                     <tr>
-                                        <td colspan="4" style="text-align:center;color:var(--text-muted);padding:2rem">
-                                            No
-                                            registered customers yet.</td>
+                                        <td colspan="6" style="text-align:center;color:var(--text-muted);padding:2rem">
+                                            No registered customers yet.</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -1593,10 +1594,10 @@
             const customers = getCustomers();
             const orders = getOrders();
             const tbody = document.getElementById('customersTable');
-            if (!customers.length) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:2rem">No registered customers yet.</td></tr>'; return; }
+            if (!customers.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:2rem">No registered customers yet.</td></tr>'; return; }
             tbody.innerHTML = customers.map(c => {
                 const orderCount = orders.filter(o => o.customer_email === c.email).length;
-                return `<tr><td>${c.name}</td><td>${c.email}</td><td>${orderCount}</td><td style="font-size:0.72rem;color:var(--text-muted)">${c.created_at ? new Date(c.created_at).toLocaleDateString() : '—'}</td></tr>`;
+                return `<tr><td>${c.name}</td><td>${c.email}</td><td>${c.phone || '—'}</td><td>${c.location || '—'}</td><td>${orderCount}</td><td style="font-size:0.72rem;color:var(--text-muted)">${c.created_at ? new Date(c.created_at).toLocaleDateString() : '—'}</td></tr>`;
             }).join('');
         }
 
