@@ -2344,15 +2344,34 @@
     }
 
     @media(max-width:480px) {
-      .products-grid { grid-template-columns: 1fr }
-      .hero-title { font-size: 3rem }
-      .btn-primary, .btn-secondary, .btn-checkout, .btn-login, .btn-add-cart {
+      .products-grid {
+        grid-template-columns: 1fr
+      }
+
+      .hero-title {
+        font-size: 3rem
+      }
+
+      .btn-primary,
+      .btn-secondary,
+      .btn-checkout,
+      .btn-login,
+      .btn-add-cart {
         min-height: 44px;
         font-size: 0.82rem;
         width: 100%;
       }
-      .pd-qty-btn, .qty-btn { min-width: 44px; min-height: 44px; }
-      .nav-icon { min-width: 40px; min-height: 40px; }
+
+      .pd-qty-btn,
+      .qty-btn {
+        min-width: 44px;
+        min-height: 44px;
+      }
+
+      .nav-icon {
+        min-width: 40px;
+        min-height: 40px;
+      }
     }
 
     /* SEARCH BAR */
@@ -2360,7 +2379,7 @@
       width: 100%;
       padding: 0.65rem 1rem;
       border: 1px solid var(--border);
-      background: rgba(255,255,255,0.06);
+      background: rgba(255, 255, 255, 0.06);
       color: var(--white);
       border-radius: 4px;
       font-size: 0.85rem;
@@ -2368,8 +2387,15 @@
       font-family: 'DM Sans', sans-serif;
       box-sizing: border-box;
     }
-    .search-input::placeholder { color: var(--text-muted); }
-    .search-input:focus { border-color: var(--rose); }
+
+    .search-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .search-input:focus {
+      border-color: var(--rose);
+    }
+
     .search-results {
       background: var(--off-black);
       border: 1px solid var(--border);
@@ -2571,6 +2597,14 @@
         <button class="filter-btn" onclick="setFilter(this)">Lingerie</button>
         <button class="filter-btn" onclick="setFilter(this)">BDSM</button>
         <button class="filter-btn" onclick="setFilter(this)">On Sale</button>
+      </div>
+      <!-- PHASE 4: Price Range Filter -->
+      <div style="display:flex;align-items:center;gap:1rem;margin-top:1rem;flex-wrap:wrap">
+        <span style="font-size:0.7rem;color:var(--text-muted);letter-spacing:0.1em;text-transform:uppercase">Max
+          Price:</span>
+        <input type="range" id="priceRange" min="0" max="50000" step="500" value="50000"
+          oninput="applyPriceFilter(this.value)" style="flex:1;min-width:120px;accent-color:var(--rose);cursor:pointer">
+        <span id="priceDisplay" style="font-size:0.78rem;color:var(--gold);min-width:90px">KES 50,000</span>
       </div>
     </div>
     <div class="products-grid" id="mainProductsGrid">
@@ -2972,6 +3006,12 @@
 
         <button class="auth-btn" onclick="saveProfile()" id="savePrBtn">Save Changes</button>
 
+        <button onclick="viewOrderHistory()"
+          style="width:100%;margin-top:0.75rem;padding:0.75rem;background:rgba(255,255,255,0.04);border:1px solid var(--border);color:var(--white);font-family:'DM Sans',sans-serif;font-size:0.78rem;letter-spacing:0.15em;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:all 0.2s"
+          onmouseover="this.style.borderColor='var(--rose)'" onmouseout="this.style.borderColor='var(--border)'">
+          📦 My Order History
+        </button>
+
         <hr style="border:none; border-top:1px solid var(--border); margin:1.5rem 0">
 
         <div style="text-align:center">
@@ -3201,17 +3241,29 @@
       renderProducts();
     }
 
+    // ── PHASE 4: PRICE FILTER ─────────────────────────────────────────
+    let maxPriceFilter = 50000;
+    function applyPriceFilter(val) {
+      maxPriceFilter = parseInt(val);
+      const display = document.getElementById('priceDisplay');
+      if (display) display.textContent = 'KES ' + maxPriceFilter.toLocaleString();
+      renderProducts();
+    }
+
     function renderProducts() {
       let prods = getAllProducts();
 
-      // Handle filters (Category Page)
+      // Category filter
       if (urlCat && urlCat !== 'All') {
         const target = urlCat.toLowerCase();
         prods = prods.filter(p => {
-          const pc = p.category.toLowerCase();
+          const pc = (p.category || '').toLowerCase();
           return pc === target || (target === 'wellness' && pc === 'lubricants') || (target === 'couples' && pc === 'couples play');
         });
       }
+
+      // Phase 4: Price range filter
+      prods = prods.filter(p => (p.price || 0) <= maxPriceFilter);
 
       // Handle sorting (Category Page)
       if (currentSort === 'price-asc') prods.sort((a, b) => a.price - b.price);
@@ -3380,6 +3432,9 @@
         setTimeout(() => openProfile(), 1000);
         return;
       }
+
+      // Phase 3: Rate limiting (max 3 orders per 10 min)
+      if (!checkRateLimit()) return;
 
       showSpinner('Placing your order...');
       try {
@@ -3563,6 +3618,55 @@
       }
     });
 
+    // ── PHASE 3: CLIENT-SIDE RATE LIMITING ───────────────────────────
+    const orderTimestamps = [];
+    function checkRateLimit() {
+      const now = Date.now();
+      const windowMs = 10 * 60 * 1000; // 10 minutes
+      const maxOrders = 3;
+      // Remove old timestamps outside the window
+      while (orderTimestamps.length && now - orderTimestamps[0] > windowMs) orderTimestamps.shift();
+      if (orderTimestamps.length >= maxOrders) {
+        const wait = Math.ceil((windowMs - (now - orderTimestamps[0])) / 60000);
+        showToast(`⏳ Too many orders. Please wait ${wait} min before placing another.`);
+        return false;
+      }
+      orderTimestamps.push(now);
+      return true;
+    }
+
+    // ── PHASE 4: ORDER HISTORY ────────────────────────────────────────
+    async function viewOrderHistory() {
+      const user = getCurrentUser();
+      if (!user) { showToast('Please sign in to view orders.'); openAuth(); return; }
+      showSpinner('Loading your orders...');
+      try {
+        const { data: orders, error } = await db.from('orders')
+          .select('*').eq('customer_email', user.email)
+          .order('created_at', { ascending: false });
+        hideSpinner();
+        if (error) { showToast('⚠️ Could not load orders. Please try again.'); return; }
+        const html = orders && orders.length
+          ? orders.map(o => `
+            <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);padding:1.25rem;margin-bottom:0.85rem;border-radius:4px">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem">
+                <span style="font-size:0.72rem;color:var(--text-muted);letter-spacing:0.05em">${sanitizeHTML(o.id)}</span>
+                <span style="font-size:0.68rem;color:var(--rose);text-transform:uppercase;letter-spacing:0.12em;padding:0.2rem 0.6rem;border:1px solid var(--rose);border-radius:2px">${sanitizeHTML(o.status || 'pending')}</span>
+              </div>
+              <div style="font-family:'Cormorant Garamond',serif;font-size:1.15rem;margin-bottom:0.3rem">KES ${(o.total || 0).toLocaleString()}</div>
+              <div style="font-size:0.72rem;color:var(--text-muted)">${o.created_at ? new Date(o.created_at).toLocaleDateString('en-KE', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Just now'}</div>
+            </div>`).join('')
+          : '<p style="color:var(--text-muted);font-size:0.85rem;text-align:center;padding:2rem 0">No orders placed yet.</p>';
+        document.getElementById('orderHistoryList').innerHTML = html;
+        document.getElementById('orderHistoryOverlay').classList.add('open');
+        document.body.style.overflow = 'hidden';
+      } catch (e) {
+        hideSpinner();
+        showToast('⚠️ Error loading orders.');
+      }
+    }
+    function closeOrderHistory() { document.getElementById('orderHistoryOverlay').classList.remove('open'); document.body.style.overflow = ''; }
+
     // ── PHASE 1: SECURITY UTILITIES ───────────────────────────────────
     function sanitizeHTML(str) {
       if (!str) return '';
@@ -3617,7 +3721,7 @@
           ${p.img ? `<img src="${p.img}" style="width:42px;height:42px;object-fit:cover;border-radius:4px">` : '<div style="width:42px;height:42px;background:var(--border);border-radius:4px"></div>'}
           <div style="flex:1;min-width:0">
             <div style="font-size:0.78rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${sanitizeHTML(p.name)}</div>
-            <div style="font-size:0.72rem;color:var(--gold);margin-top:2px">KES ${(p.price||0).toLocaleString()}</div>
+            <div style="font-size:0.72rem;color:var(--gold);margin-top:2px">KES ${(p.price || 0).toLocaleString()}</div>
           </div>
         </div>`).join('');
       box.style.display = 'block';
@@ -3648,6 +3752,16 @@
     init();
 
   </script>
+  <!-- ORDER HISTORY MODAL -->
+  <div class="auth-overlay" id="orderHistoryOverlay" onclick="if(event.target===this)closeOrderHistory()">
+    <div class="auth-modal" style="max-height:85vh;overflow-y:auto">
+      <button class="auth-close-btn" onclick="closeOrderHistory()">×</button>
+      <div class="auth-logo" style="font-size:1.2rem">📦 Order History</div>
+      <div class="auth-sub" style="margin-bottom:1.5rem">Your recent orders on ADULTTOYSKE</div>
+      <div id="orderHistoryList" style="max-height:55vh;overflow-y:auto"></div>
+    </div>
+  </div>
+
   <!-- LOADING SPINNER -->
   <div id="loadingSpinner"
     style="display:none;position:fixed;inset:0;background:rgba(10,10,10,0.88);flex-direction:column;align-items:center;justify-content:center;z-index:99999;backdrop-filter:blur(6px)">
