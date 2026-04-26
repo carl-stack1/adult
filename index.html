@@ -3716,13 +3716,21 @@
         const order = { id: oid, customer_name: sanitizeHTML(user.name), customer_email: user.email, customer_phone: user.phone || '', items: cart.map(i => ({ ...i })), total: total, status: 'pending' };
         await db.from('orders').insert([order]);
 
-        emailjs.send("service_a2diqqb", "template_b7h4cw3", {
+        // Prepare all possible keys for the EmailJS template
+        const emailData = {
           order_id: oid,
           customer_name: user.name,
           customer_email: user.email,
           total_amount: `KES ${total.toLocaleString()}`,
-          items_summary: cart.map(i => `${i.name} (x${i.qty})`).join(', ')
-        }).then(() => console.log('[EMAIL] Sent')).catch(err => console.error('[EMAIL] Failed:', err));
+          total: `KES ${total.toLocaleString()}`,
+          items_summary: cart.map(i => `${i.name} (x${i.qty})`).join(', '),
+          items: cart.map(i => `• ${i.name} (x${i.qty})`).join('\n'),
+          tracking_url: `${location.origin}/#profile`
+        };
+
+        emailjs.send("service_a2diqqb", "template_b7h4cw3", emailData)
+          .then(() => console.log('[EMAIL] Sent Successfully'))
+          .catch(err => console.error('[EMAIL] Failed to send:', err));
 
         cart = [];
         updateCartUI();
