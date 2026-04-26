@@ -2760,7 +2760,10 @@
   <div class="pd-overlay" id="pdOverlay" onclick="handlePdOverlay(event)">
     <div class="pd-modal" id="pdModal">
       <div class="pd-img-panel">
-        <img src="" id="pdActualImg" style="width:100%;height:100%;object-fit:cover;display:none"
+        <img src="" id="pdActualImg" 
+          style="width:100%;height:100%;object-fit:contain;display:none;transition:transform 0.5s ease-out;cursor:zoom-in"
+          onmouseover="this.style.transform='scale(1.05)'"
+          onmouseout="this.style.transform='scale(1)'"
           onerror="this.style.display='none'">
         <div class="pd-img-bg" id="pdImgBg"></div>
         <div class="pd-img-emoji" id="pdEmoji">💜</div>
@@ -3150,9 +3153,7 @@
         return `
     <div class="product-card" onclick="openProduct('${p.id}')">
       <div class="product-img">
-        ${hasImg ? `<img src="${p.img}" class="product-actual-img" onerror="this.style.display='none'">` : ''}
-        <div class="product-img-bg ${p.bgClass || 'p1'}" ${hasImg ? 'style="display:none"' : ''}></div>
-        <div class="product-emoji" ${hasImg ? 'style="font-size:1.2rem;top:10px;left:10px;background:rgba(0,0,0,0.5);width:30px;height:30px;line-height:30px;text-align:center"' : ''}>${p.emoji}</div>
+        ${hasImg ? `<img src="${p.img}" class="product-actual-img" onerror="this.src='https://images.unsplash.com/photo-1549465220-1a8b9238cd48?q=80&w=1000&auto=format&fit=crop'">` : '<div class="product-img-bg p1"></div>'}
         ${p.badge ? `<span class="product-badge badge-${p.badge.toLowerCase()}">${p.badge}</span>` : ''}
         <button class="product-wishlist" onclick="event.stopPropagation();toggleWishlist(this)">♡</button>
       </div>
@@ -3165,7 +3166,7 @@
           ${p.oldPrice ? `<span class="price-old">KES ${p.oldPrice.toLocaleString()}</span>` : ''}
         </div>
         <div class="product-footer">
-          <button class="btn-add-cart" onclick="event.stopPropagation();addToCart('${p.name.replace(/'/g, "\\'")}',${p.price},'${p.emoji}')">Add to Cart</button>
+          <button class="btn-add-cart" onclick="event.stopPropagation();addToCart('${p.name.replace(/'/g, "\\'")}',${p.price},'')">Add to Cart</button>
           <span class="product-delivery">✓ Discreet</span>
         </div>
       </div>
@@ -3199,14 +3200,11 @@
         imgEl.src = p.img;
         imgEl.style.display = 'block';
         bgEl.style.display = 'none';
-        emoEl.style.cssText = "font-size:1.5rem;top:20px;left:20px;background:rgba(0,0,0,0.5);width:45px;height:45px;line-height:45px;border-radius:50%;text-align:center";
       } else {
         imgEl.style.display = 'none';
         bgEl.style.display = 'block';
         bgEl.className = 'pd-img-bg ' + (p.bgClass || 'p1');
-        emoEl.style.cssText = "";
       }
-      emoEl.textContent = p.emoji;
       const feats = (p.features || '').split('\n').filter(f => f.trim());
       document.getElementById('pdFeatures').innerHTML = feats.map(f => `<li>${f.trim()}</li>`).join('');
       document.getElementById('pdMeta').innerHTML = `< div ><div class="pd-meta-label">Size / Volume</div><div class="pd-meta-value">${p.sizes || '—'}</div></div > <div><div class="pd-meta-label">Material</div><div class="pd-meta-value">${p.model || '—'}</div></div>`;
@@ -3226,8 +3224,8 @@
     function addPdToCart() {
       const p = getAllProducts().find(x => x.id === pdId);
       if (!p) return;
-      for (let i = 0; i < pdQtyVal; i++) { const ex = cart.find(x => x.name === p.name); if (ex) ex.qty++; else cart.push({ name: p.name, price: p.price, emoji: p.emoji, qty: 1 }); }
-      updateCartUI(); showToast(`${p.emoji} Added to cart`); closePd(); openCart();
+      for (let i = 0; i < pdQtyVal; i++) { const ex = cart.find(x => x.name === p.name); if (ex) ex.qty++; else cart.push({ name: p.name, price: p.price, qty: 1 }); }
+      updateCartUI(); showToast(`Added to cart ✨`); closePd(); openCart();
     }
 
     // Cart
@@ -3241,7 +3239,7 @@
       document.getElementById('cartTotal').textContent = 'KES ' + total.toLocaleString();
       const el = document.getElementById('cartItems'), ft = document.getElementById('cartFooter');
       if (!cart.length) { el.innerHTML = '<div class="cart-empty"><div style="font-size:3rem;opacity:0.3">🛍</div><div style="font-family:\'Cormorant Garamond\',serif;font-size:1.2rem">Your cart is empty</div></div>'; ft.style.display = 'none'; }
-      else { ft.style.display = 'block'; el.innerHTML = cart.map((item, i) => `<div class="cart-item"><div class="cart-item-img">${item.emoji}</div><div class="cart-item-info"><div class="cart-item-name">${item.name}</div><div class="cart-item-price">KES ${item.price.toLocaleString()}</div><div class="cart-item-qty"><button class="qty-btn" onclick="updateQty(${i},-1)">−</button><span class="qty-num">${item.qty}</span><button class="qty-btn" onclick="updateQty(${i},1)">+</button></div></div><button class="cart-item-remove" onclick="removeFromCart(${i})">✕</button></div>`).join(''); }
+      else { ft.style.display = 'block'; el.innerHTML = cart.map((item, i) => `<div class="cart-item"><div class="cart-item-img">🛍</div><div class="cart-item-info"><div class="cart-item-name">${item.name}</div><div class="cart-item-price">KES ${item.price.toLocaleString()}</div><div class="cart-item-qty"><button class="qty-btn" onclick="updateQty(${i},-1)">−</button><span class="qty-num">${item.qty}</span><button class="qty-btn" onclick="updateQty(${i},1)">+</button></div></div><button class="cart-item-remove" onclick="removeFromCart(${i})">✕</button></div>`).join(''); }
     }
     function openCart() { document.getElementById('cartOverlay').classList.add('open'); }
     function closeCart() { document.getElementById('cartOverlay').classList.remove('open'); }
