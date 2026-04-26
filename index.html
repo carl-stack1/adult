@@ -266,8 +266,8 @@
     .hero {
       min-height: 100vh;
       display: flex;
-      align-items: flex-end;
-      padding: 0 4rem 6rem;
+      align-items: center;
+      padding: 8rem 4rem 4rem;
       position: relative;
       overflow: hidden
     }
@@ -2428,39 +2428,76 @@
     </div>
   </div>
 
+
   <!-- Navigation -->
   <nav id="navbar">
-    <a href="#" class="nav-logo" style="z-index: 2100;">
+    <a href="#" class="nav-logo" style="z-index:2100">
       ADULTTOYSKE
       <span>Adult Wellness Kenya</span>
     </a>
-    <div class="nav-links">
+
+    <!-- Desktop nav links -->
+    <div class="nav-links" id="navLinks">
       <a href="#categories">Shop</a>
       <a href="category.html?cat=Vibrators">Vibrators</a>
       <a href="category.html?cat=Couples">Couples</a>
       <a href="category.html?cat=Wellness">Wellness</a>
       <a href="category.html?cat=Lingerie">Lingerie</a>
       <a href="#faq">FAQ</a>
-      <a href="#" id="loginLink" onclick="openAuth(); return false"
-        style="color:var(--rose); font-weight:500;">Login</a>
-      <div id="userProfile"
-        style="display:none; align-items:center; gap:0.6rem; color:var(--white); font-size:0.82rem; letter-spacing:0.05em">
-        <span onclick="openProfile()" style="cursor:pointer">Welcome, <strong id="userName"
-            style="color:var(--gold); font-family:'Cormorant Garamond', serif; font-size:1rem">Guest</strong></span>
-        <button onclick="doLogout()"
-          style="background:none; border:none; color:var(--text-muted); font-size:0.65rem; cursor:pointer; text-decoration:underline; text-transform:uppercase; letter-spacing:0.1em; padding:0">Logout</button>
-      </div>
     </div>
+
+    <!-- Right Actions -->
     <div class="nav-actions">
+
+      <!-- User greeting / login -->
+      <a href="#" id="loginLink" onclick="openAuth();return false"
+        style="font-size:0.72rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--rose);text-decoration:none;white-space:nowrap">Sign In</a>
+
+      <div id="userProfile" style="display:none;align-items:center;gap:0.4rem">
+        <span style="font-size:0.78rem;color:rgba(255,255,255,0.6);">Hi,</span>
+        <strong id="userName" style="color:var(--gold);font-family:'Cormorant Garamond',serif;font-size:1rem;cursor:pointer" onclick="openProfile()">Guest</strong>
+      </div>
+
+      <!-- Cart -->
       <button class="nav-icon" onclick="openCart()" style="position:relative">
         🛍
         <span class="cart-count" id="cartCountBadge">0</span>
       </button>
-      <button class="nav-icon" onclick="toggleSearch()" title="Search products">🔍</button>
-      <button class="nav-icon" onclick="whatsappOrder()" title="WhatsApp Order">💬</button>
+
+      <!-- Three-dot menu -->
+      <div style="position:relative">
+        <button class="nav-icon" id="dotMenuBtn" onclick="toggleDotMenu()" title="More options"
+          style="font-size:1.3rem;letter-spacing:0.05em;padding:0 0.3rem">⋮</button>
+        <div id="dotMenu"
+          style="display:none;position:absolute;top:calc(100% + 8px);right:0;min-width:180px;background:var(--black);border:1px solid var(--border);border-radius:6px;overflow:hidden;z-index:4000;box-shadow:0 8px 32px rgba(0,0,0,0.5)">
+          <button onclick="toggleSearch();toggleDotMenu()"
+            style="display:flex;align-items:center;gap:0.75rem;width:100%;padding:0.85rem 1.1rem;background:none;border:none;border-bottom:1px solid var(--border);color:var(--white);font-family:'DM Sans',sans-serif;font-size:0.8rem;cursor:pointer;transition:background 0.2s"
+            onmouseover="this.style.background='rgba(196,88,122,0.1)'" onmouseout="this.style.background=''">
+            🔍 Search Products
+          </button>
+          <button onclick="whatsappOrder();toggleDotMenu()"
+            style="display:flex;align-items:center;gap:0.75rem;width:100%;padding:0.85rem 1.1rem;background:none;border:none;border-bottom:1px solid var(--border);color:var(--white);font-family:'DM Sans',sans-serif;font-size:0.8rem;cursor:pointer;transition:background 0.2s"
+            onmouseover="this.style.background='rgba(196,88,122,0.1)'" onmouseout="this.style.background=''">
+            💬 Order via WhatsApp
+          </button>
+          <button id="dotProfileBtn" onclick="openProfile();toggleDotMenu()"
+            style="display:none;align-items:center;gap:0.75rem;width:100%;padding:0.85rem 1.1rem;background:none;border:none;border-bottom:1px solid var(--border);color:var(--white);font-family:'DM Sans',sans-serif;font-size:0.8rem;cursor:pointer;transition:background 0.2s"
+            onmouseover="this.style.background='rgba(196,88,122,0.1)'" onmouseout="this.style.background=''">
+            👤 My Profile
+          </button>
+          <button id="dotLogoutBtn" onclick="doLogout();toggleDotMenu()"
+            style="display:none;align-items:center;gap:0.75rem;width:100%;padding:0.85rem 1.1rem;background:none;border:none;color:#e05252;font-family:'DM Sans',sans-serif;font-size:0.8rem;cursor:pointer;transition:background 0.2s"
+            onmouseover="this.style.background='rgba(224,82,82,0.08)'" onmouseout="this.style.background=''">
+            🚪 Sign Out
+          </button>
+        </div>
+      </div>
+
+      <!-- Mobile menu hamburger -->
       <button class="nav-icon mobile-menu-toggle" onclick="toggleMenu()" style="display:none">☰</button>
     </div>
-    <!-- SEARCH DROPDOWN -->
+
+    <!-- Search bar dropdown -->
     <div class="search-container" id="searchContainer"
       style="display:none;position:absolute;top:100%;right:4rem;left:auto;z-index:3000;width:300px">
       <input type="text" id="searchInput" placeholder="Search products..." class="search-input"
@@ -3550,10 +3587,14 @@
           const nameEl = document.getElementById('userName');
           if (nameEl) nameEl.textContent = u.name;
         }
+        if (document.getElementById('dotProfileBtn')) document.getElementById('dotProfileBtn').style.display = 'flex';
+        if (document.getElementById('dotLogoutBtn')) document.getElementById('dotLogoutBtn').style.display = 'flex';
       } else {
         // Logged out state
         if (document.getElementById('loginLink')) document.getElementById('loginLink').style.display = 'block';
         if (document.getElementById('userProfile')) document.getElementById('userProfile').style.display = 'none';
+        if (document.getElementById('dotProfileBtn')) document.getElementById('dotProfileBtn').style.display = 'none';
+        if (document.getElementById('dotLogoutBtn')) document.getElementById('dotLogoutBtn').style.display = 'none';
       }
     }
 
@@ -3691,6 +3732,12 @@
       if (el) el.style.display = 'none';
     }
 
+    // ── GENERAL NAV UTILS ─────────────────────────────────────────────
+    function toggleDotMenu() {
+      const menu = document.getElementById('dotMenu');
+      if (menu) menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+    }
+
     // ── PHASE 2B: SEARCH ──────────────────────────────────────────────
     function toggleSearch() {
       const container = document.getElementById('searchContainer');
@@ -3726,11 +3773,15 @@
         </div>`).join('');
       box.style.display = 'block';
     }
-    // Close search on outside click
+    // Close search/dot menu on outside click
     document.addEventListener('click', e => {
-      const container = document.getElementById('searchContainer');
-      if (container && !container.contains(e.target) && !e.target.closest('[onclick*="toggleSearch"]')) {
-        container.style.display = 'none';
+      const searchContainer = document.getElementById('searchContainer');
+      const dotMenu = document.getElementById('dotMenu');
+      if (searchContainer && !searchContainer.contains(e.target) && !e.target.closest('[onclick*="toggleSearch"]')) {
+        searchContainer.style.display = 'none';
+      }
+      if (dotMenu && !dotMenu.contains(e.target) && !e.target.closest('#dotMenuBtn')) {
+        dotMenu.style.display = 'none';
       }
     });
 
