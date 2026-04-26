@@ -2407,8 +2407,13 @@
         flex-direction: column;
         gap: 0.75rem;
       }
-      .hero-stats, .scroll-hint, .hero-deco { display: none !important; } 
-      
+
+      .hero-stats,
+      .scroll-hint,
+      .hero-deco {
+        display: none !important;
+      }
+
       .categories-grid {
         grid-template-columns: 1fr;
         gap: 0.75rem;
@@ -3369,60 +3374,65 @@
     }
 
     function renderProducts() {
+      const grid = document.getElementById('mainProductsGrid');
+      if (!grid) return;
+
       let prods = getAllProducts();
 
-      // Category filter
-      if (urlCat && urlCat !== 'All') {
-        const target = urlCat.toLowerCase();
-        prods = prods.filter(p => {
-          const pc = (p.category || '').toLowerCase();
-          return pc === target || (target === 'wellness' && pc === 'lubricants') || (target === 'couples' && pc === 'couples play');
-        });
+      // 1. Category Filter
+      if (activeFilter && activeFilter !== 'All') {
+        const target = activeFilter.toLowerCase();
+        if (target === 'on sale') {
+          prods = prods.filter(p => p.oldPrice);
+        } else {
+          prods = prods.filter(p => {
+            const pc = (p.category || '').toLowerCase();
+            return pc === target || (target === 'wellness' && pc === 'lubricants') || (target === 'couples' && pc === 'couples play');
+          });
+        }
       }
 
-      // Phase 4: Price range filter
-      prods = prods.filter(p => (p.price || 0) <= maxPriceFilter);
+      // 2. Price Filter
+      prods = prods.filter(p => {
+        const priceNum = (typeof p.price === 'number') ? p.price : parseFloat(String(p.price).replace(/[^0-9.]/g, ''));
+        return priceNum <= maxPriceFilter;
+      });
 
-      // Handle sorting (Category Page)
-      if (currentSort === 'price-asc') prods.sort((a, b) => a.price - b.price);
-      else if (currentSort === 'price-desc') prods.sort((a, b) => b.price - a.price);
-      else if (currentSort === 'new') prods = prods.filter(p => p.badge === 'New').concat(prods.filter(p => p.badge !== 'New'));
+      // 3. Search Filter (Optional - sync with existing search if needed)
 
       if (document.getElementById('resultCount')) {
         document.getElementById('resultCount').textContent = prods.length + ' product' + (prods.length !== 1 ? 's' : '');
       }
 
-      const grid = document.getElementById('productsGrid') || document.getElementById('mainProductsGrid');
-      if (!grid) return;
-
       if (!prods.length) {
-        grid.innerHTML = '<div class="empty-state">No products found.</div>';
+        grid.innerHTML = '<div class="empty-state" style="padding:4rem;text-align:center;width:100%;color:var(--text-muted)">No products found matching your criteria.</div>';
         return;
       }
+
       grid.innerHTML = prods.map(p => {
         const hasImg = p.img && p.img !== '';
         return `
-    <div class="product-card" onclick="openProduct('${p.id}')">
-      <div class="product-img">
-        ${hasImg ? `<img src="${p.img}" class="product-actual-img" onerror="this.src='https://images.unsplash.com/photo-1549465220-1a8b9238cd48?q=80&w=1000&auto=format&fit=crop'">` : '<div class="product-img-bg p1"></div>'}
-        ${p.badge ? `<span class="product-badge badge-${p.badge.toLowerCase()}">${p.badge}</span>` : ''}
-        <button class="product-wishlist" onclick="event.stopPropagation();toggleWishlist(this)">♡</button>
-      </div>
-      <div class="product-info">
-        <div class="product-category">${p.category}</div>
-        <div class="product-name">${p.name}</div>
-        <div class="product-rating"><span class="stars">${p.rating || '★★★★★'}</span><span class="rating-count">(${p.count || 0})</span></div>
-        <div class="product-pricing">
-          <span class="price">KES ${p.price.toLocaleString()}</span>
-          ${p.oldPrice ? `<span class="price-old">KES ${p.oldPrice.toLocaleString()}</span>` : ''}
-        </div>
-        <div class="product-footer">
-          <button class="btn-add-cart" onclick="event.stopPropagation();addToCart('${p.name.replace(/'/g, "\\'")}',${p.price},'')">Add to Cart</button>
-          <span class="product-delivery">✓ Discreet</span>
-        </div>
-      </div>
-    </div>
-  `;
+          <div class="product-card" onclick="openProduct('${p.id}')">
+            <div class="product-img">
+              ${hasImg ? `<img src="${p.img}" class="product-actual-img" onerror="this.src='https://images.unsplash.com/photo-1549465220-1a8b9238cd48?q=80&w=1000&auto=format&fit=crop'">` : '<div class="product-img-bg p1"></div>'}
+              ${p.badge ? `<span class="product-badge badge-${p.badge.toLowerCase()}">${p.badge}</span>` : ''}
+              <button class="product-wishlist" onclick="event.stopPropagation();toggleWishlist(this)">♡</button>
+            </div>
+            <div class="product-info">
+              <div class="product-category">${p.category}</div>
+              <div class="product-name">${p.name}</div>
+              <div class="product-rating"><span class="stars">${p.rating || '★★★★★'}</span><span class="rating-count">(${p.count || 0})</span></div>
+              <div class="product-pricing">
+                <span class="price">KES ${p.price.toLocaleString()}</span>
+                ${p.oldPrice ? `<span class="price-old">KES ${p.oldPrice.toLocaleString()}</span>` : ''}
+              </div>
+              <div class="product-footer">
+                <button class="btn-add-cart" onclick="event.stopPropagation();addToCart('${p.name.replace(/'/g, "\\'")}',${p.price},'')">Add to Cart</button>
+                <span class="product-delivery">✓ Discreet</span>
+              </div>
+            </div>
+          </div>
+        `;
       }).join('');
     }
 
@@ -3602,32 +3612,7 @@
       activeFilter = btn.textContent.trim();
       document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-      let prods = getAllProducts();
-      if (activeFilter === 'On Sale') prods = prods.filter(p => p.oldPrice);
-      else if (activeFilter !== 'All') prods = prods.filter(p => p.category.toLowerCase() === activeFilter.toLowerCase());
-      const grid = document.getElementById('mainProductsGrid');
-      if (!grid) return;
-      if (!prods.length) { grid.innerHTML = '<div class="empty-state">No products in this category.</div>'; return; }
-      grid.innerHTML = prods.map(p => {
-        const hasImg = p.img && p.img !== '';
-        return `<div class="product-card" onclick="openProduct('${p.id}')">
-          <div class="product-img">
-            ${hasImg ? `<img src="${p.img}" class="product-actual-img" onerror="this.src='https://images.unsplash.com/photo-1549465220-1a8b9238cd48?q=80&w=1000&auto=format&fit=crop'">` : '<div class="product-img-bg p1"></div>'}
-            ${p.badge ? `<span class="product-badge badge-${p.badge.toLowerCase()}">${p.badge}</span>` : ''}
-            <button class="product-wishlist" onclick="event.stopPropagation();toggleWishlist(this)">♡</button>
-          </div>
-          <div class="product-info">
-            <div class="product-category">${p.category}</div>
-            <div class="product-name">${p.name}</div>
-            <div class="product-rating"><span class="stars">${p.rating || '★★★★★'}</span><span class="rating-count">(${p.count || 0})</span></div>
-            <div class="product-pricing"><span class="price">KES ${p.price.toLocaleString()}</span>${p.oldPrice ? `<span class="price-old">KES ${p.oldPrice.toLocaleString()}</span>` : ''}</div>
-            <div class="product-footer">
-              <button class="btn-add-cart" onclick="event.stopPropagation();addToCart('${p.name.replace(/'/g, "\\'")}',${p.price},'')">Add to Cart</button>
-              <span class="product-delivery">✓ Discreet</span>
-            </div>
-          </div>
-        </div>`;
-      }).join('');
+      renderProducts();
     }
 
     // FAQ TOGGLE
