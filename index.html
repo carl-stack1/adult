@@ -2344,13 +2344,39 @@
     }
 
     @media(max-width:480px) {
-      .products-grid {
-        grid-template-columns: 1fr
+      .products-grid { grid-template-columns: 1fr }
+      .hero-title { font-size: 3rem }
+      .btn-primary, .btn-secondary, .btn-checkout, .btn-login, .btn-add-cart {
+        min-height: 44px;
+        font-size: 0.82rem;
+        width: 100%;
       }
+      .pd-qty-btn, .qty-btn { min-width: 44px; min-height: 44px; }
+      .nav-icon { min-width: 40px; min-height: 40px; }
+    }
 
-      .hero-title {
-        font-size: 3rem
-      }
+    /* SEARCH BAR */
+    .search-input {
+      width: 100%;
+      padding: 0.65rem 1rem;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.06);
+      color: var(--white);
+      border-radius: 4px;
+      font-size: 0.85rem;
+      outline: none;
+      font-family: 'DM Sans', sans-serif;
+      box-sizing: border-box;
+    }
+    .search-input::placeholder { color: var(--text-muted); }
+    .search-input:focus { border-color: var(--rose); }
+    .search-results {
+      background: var(--off-black);
+      border: 1px solid var(--border);
+      border-top: none;
+      max-height: 320px;
+      overflow-y: auto;
+      border-radius: 0 0 4px 4px;
     }
   </style>
 </head>
@@ -2404,8 +2430,16 @@
         🛍
         <span class="cart-count" id="cartCountBadge">0</span>
       </button>
+      <button class="nav-icon" onclick="toggleSearch()" title="Search products">🔍</button>
       <button class="nav-icon" onclick="whatsappOrder()" title="WhatsApp Order">💬</button>
       <button class="nav-icon mobile-menu-toggle" onclick="toggleMenu()" style="display:none">☰</button>
+    </div>
+    <!-- SEARCH DROPDOWN -->
+    <div class="search-container" id="searchContainer"
+      style="display:none;position:absolute;top:100%;right:4rem;left:auto;z-index:3000;width:300px">
+      <input type="text" id="searchInput" placeholder="Search products..." class="search-input"
+        oninput="handleSearch(this.value)" autocomplete="off">
+      <div id="searchResults" class="search-results" style="display:none"></div>
     </div>
   </nav>
 
@@ -2999,6 +3033,9 @@
           <span class="cart-subtotal-value" id="cartTotal">KES 0</span>
         </div>
         <div class="cart-discrete-note">✓ Discreet packaging on all orders</div>
+        <button class="btn-primary" onclick="quickCheckout()"
+          style="width:100%;margin-bottom:0.6rem;letter-spacing:0.15em;font-size:0.75rem">⚡ Quick Checkout (saved
+          address)</button>
         <button class="btn-checkout" onclick="checkout()">Proceed to Checkout</button>
         <button class="btn-whatsapp-order" onclick="whatsappOrder()">💬 Order via WhatsApp</button>
       </div>
@@ -3316,7 +3353,11 @@
       const p = document.getElementById('suPass').value;
       const ph = document.getElementById('suPhone').value.trim();
       const err = document.getElementById('suErr');
-      if (!n || !e || !p || !ph || p.length < 6) { err.style.display = 'block'; return; }
+      function validatePassword(pw) {
+        return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{10,}$/.test(pw);
+      }
+      if (!n || !e || !ph) { err.textContent = 'All fields are required.'; err.style.display = 'block'; return; }
+      if (!validatePassword(p)) { err.textContent = 'Password must be 10+ characters and include uppercase, lowercase, a number, and a special character (e.g. @$!%*?&).'; err.style.display = 'block'; return; }
       if (CUSTOMERS_DB.find(c => c.email === e)) { err.textContent = 'Email already exists.'; err.style.display = 'block'; return; }
       err.style.display = 'none';
       const u = { name: n, email: e, phone: ph, location: '' };
@@ -3333,43 +3374,45 @@
     async function placeOrder(user) {
       if (!cart.length) return;
 
-      // SECURITY VERIFICATION RULE: Email, Phone, and Location are mandatory
+      // SECURITY: Mandatory profile check
       if (!user.email || !user.phone || !user.location) {
-        showToast('⚠️ Security Rule: Please provide your Email, Phone, and Delivery Location before checkout.');
-        setTimeout(() => openProfile(), 1000); // Open profile modal to help user
+        showToast('⚠️ Please complete your profile (Email, Phone & Location) before checkout.');
+        setTimeout(() => openProfile(), 1000);
         return;
       }
 
-      const oid = 'ATK-' + Date.now().toString(36).toUpperCase();
-      const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
-      const order = { id: oid, customer_name: user.name, customer_email: user.email, customer_phone: user.phone || '', items: cart.map(i => ({ ...i })), total: total, status: 'pending' };
-      await db.from('orders').insert([order]);
+      showSpinner('Placing your order...');
+      try {
+        const oid = 'ATK-' + Date.now().toString(36).toUpperCase();
+        const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
+        const order = { id: oid, customer_name: sanitizeHTML(user.name), customer_email: user.email, customer_phone: user.phone || '', items: cart.map(i => ({ ...i })), total: total, status: 'pending' };
+        await db.from('orders').insert([order]);
 
-      // SEND EMAIL NOTIFICATION
-      emailjs.send("service_a2diqqb", "template_b7h4cw3", {
-        order_id: oid,
-        customer_name: user.name,
-        customer_email: user.email,
-        total_amount: `KES ${total.toLocaleString()}`,
-        items_summary: cart.map(i => `${i.name} (x${i.qty})`).join(', ')
-      }).then(() => console.log('[EMAIL] Sent order confirmation')).catch(err => console.error('[EMAIL] Failed:', err));
+        emailjs.send("service_a2diqqb", "template_b7h4cw3", {
+          order_id: oid,
+          customer_name: user.name,
+          customer_email: user.email,
+          total_amount: `KES ${total.toLocaleString()}`,
+          items_summary: cart.map(i => `${i.name} (x${i.qty})`).join(', ')
+        }).then(() => console.log('[EMAIL] Sent')).catch(err => console.error('[EMAIL] Failed:', err));
 
-      console.log('[SUPABASE] Order', oid, 'for', user.email);
-      cart = [];
-      updateCartUI();
-      closeCart();
-      document.getElementById('successOrderId').textContent = 'Order #' + oid;
-      document.getElementById('successMsg').textContent = `Thank you, ${user.name}! Confirmation sent to ${user.email}.`;
-      document.getElementById('successOverlay').classList.add('open');
-      document.body.style.overflow = 'hidden';
+        cart = [];
+        updateCartUI();
+        closeCart();
+        document.getElementById('successOrderId').textContent = 'Order #' + oid;
+        document.getElementById('successMsg').textContent = `Thank you, ${user.name}! Confirmation sent to ${user.email}.`;
+        document.getElementById('successOverlay').classList.add('open');
+        document.body.style.overflow = 'hidden';
+      } finally {
+        hideSpinner();
+      }
     }
     function closeSuccess() { document.getElementById('successOverlay').classList.remove('open'); document.body.style.overflow = ''; }
 
     function toggleWishlist(btn) { const a = btn.textContent === '♥'; btn.textContent = a ? '♡' : '♥'; btn.style.color = a ? '' : 'var(--rose)'; showToast(a ? 'Removed from wishlist' : '♥ Added to wishlist'); }
     function showToast(msg) { const t = document.getElementById('toast'); document.getElementById('toastMsg').textContent = msg; t.classList.add('show'); clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('show'), 2800); }
 
-    // Admin Access Shortcut: Ctrl + Shift + A
-    document.addEventListener('keydown', e => { if (e.ctrlKey && e.shiftKey && e.key === 'A') { location.href = 'admin.html'; } });
+    // Admin shortcut removed for security
 
     // FADE-IN ANIMATIONS (IntersectionObserver)
     const fadeEls = document.querySelectorAll('.fade-in');
@@ -3520,10 +3563,101 @@
       }
     });
 
+    // ── PHASE 1: SECURITY UTILITIES ───────────────────────────────────
+    function sanitizeHTML(str) {
+      if (!str) return '';
+      const div = document.createElement('div');
+      div.textContent = String(str);
+      return div.innerHTML;
+    }
+    function sanitizeId(id) {
+      if (!id) return '';
+      return String(id).replace(/[^a-zA-Z0-9_-]/g, '');
+    }
+
+    // ── PHASE 2A: LOADING SPINNER ─────────────────────────────────────
+    function showSpinner(msg = 'Processing...') {
+      const el = document.getElementById('loadingSpinner');
+      if (!el) return;
+      document.getElementById('spinnerMsg').textContent = msg;
+      el.style.display = 'flex';
+    }
+    function hideSpinner() {
+      const el = document.getElementById('loadingSpinner');
+      if (el) el.style.display = 'none';
+    }
+
+    // ── PHASE 2B: SEARCH ──────────────────────────────────────────────
+    function toggleSearch() {
+      const container = document.getElementById('searchContainer');
+      const isHidden = container.style.display === 'none';
+      container.style.display = isHidden ? 'block' : 'none';
+      if (isHidden) {
+        document.getElementById('searchInput').focus();
+        document.getElementById('searchInput').value = '';
+        document.getElementById('searchResults').style.display = 'none';
+      }
+    }
+    function handleSearch(query) {
+      const box = document.getElementById('searchResults');
+      if (!query.trim()) { box.style.display = 'none'; return; }
+      const results = getAllProducts().filter(p =>
+        (p.name || '').toLowerCase().includes(query.toLowerCase()) ||
+        (p.category || '').toLowerCase().includes(query.toLowerCase())
+      ).slice(0, 8);
+      if (!results.length) {
+        box.innerHTML = '<div style="padding:1rem;font-size:0.8rem;color:var(--text-muted)">No products found.</div>';
+        box.style.display = 'block';
+        return;
+      }
+      box.innerHTML = results.map(p => `
+        <div onclick="openProduct('${sanitizeId(p.id)}');document.getElementById('searchContainer').style.display='none'"
+          style="display:flex;gap:0.75rem;padding:0.75rem;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.2s"
+          onmouseover="this.style.background='rgba(196,88,122,0.1)'" onmouseout="this.style.background=''">
+          ${p.img ? `<img src="${p.img}" style="width:42px;height:42px;object-fit:cover;border-radius:4px">` : '<div style="width:42px;height:42px;background:var(--border);border-radius:4px"></div>'}
+          <div style="flex:1;min-width:0">
+            <div style="font-size:0.78rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${sanitizeHTML(p.name)}</div>
+            <div style="font-size:0.72rem;color:var(--gold);margin-top:2px">KES ${(p.price||0).toLocaleString()}</div>
+          </div>
+        </div>`).join('');
+      box.style.display = 'block';
+    }
+    // Close search on outside click
+    document.addEventListener('click', e => {
+      const container = document.getElementById('searchContainer');
+      if (container && !container.contains(e.target) && !e.target.closest('[onclick*="toggleSearch"]')) {
+        container.style.display = 'none';
+      }
+    });
+
+    // ── PHASE 2C: QUICK CHECKOUT ──────────────────────────────────────
+    function quickCheckout() {
+      if (!cart.length) { showToast('Your cart is empty.'); return; }
+      const user = getCurrentUser();
+      if (!user) { openAuth(); return; }
+      if (!user.email || !user.phone || !user.location) {
+        showToast('⚠️ Please save your phone & delivery location first.');
+        openProfile();
+        return;
+      }
+      closeCart();
+      placeOrder(user);
+    }
+
     restoreAuthState();
     init();
 
   </script>
+  <!-- LOADING SPINNER -->
+  <div id="loadingSpinner"
+    style="display:none;position:fixed;inset:0;background:rgba(10,10,10,0.88);flex-direction:column;align-items:center;justify-content:center;z-index:99999;backdrop-filter:blur(6px)">
+    <div
+      style="width:52px;height:52px;border:3px solid rgba(196,88,122,0.25);border-top-color:var(--rose);border-radius:50%;animation:spin 0.75s linear infinite">
+    </div>
+    <p id="spinnerMsg" style="margin-top:1.25rem;color:rgba(255,255,255,0.6);font-size:0.88rem;letter-spacing:0.05em">
+      Processing...</p>
+  </div>
+
 </body>
 
 </html>
