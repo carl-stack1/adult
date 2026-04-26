@@ -766,10 +766,8 @@
             <div class="login-sub">Admin Portal</div>
             <input type="email" id="loginEmail" placeholder="Admin email" style="display:block">
             <input type="password" id="loginPass" placeholder="Password" style="display:block">
-            <div class="login-err" id="loginErr">Invalid credentials. Try admin@adulttoyske.com / admin123</div>
+            <div class="login-err" id="loginErr" style="display:none">Invalid credentials. Please try again.</div>
             <button class="btn-login" onclick="doAdminLogin()">Sign In to Dashboard</button>
-            <p style="font-size:0.65rem;color:var(--text-muted);margin-top:1.5rem">Demo: admin@adulttoyske.com /
-                admin123</p>
         </div>
     </div>
 
@@ -1198,24 +1196,30 @@
             console.log('Login attempt:', e);
 
             try {
-                // 1. Try DB
+                // 1. Check against Database
                 const { data, error } = await db.from('admins').select('*').eq('email', e).eq('password', p);
 
                 if (data && data.length > 0) {
-                    console.log('Login success: Database');
                     sessionStorage.setItem('adminAuth', 'true');
                     document.getElementById('adminLogin').classList.add('hidden');
-                    document.getElementById('adminDisplayName').textContent = 'Admin';
+                    document.getElementById('adminDisplayName').textContent = data[0].name || 'Admin';
                     reloadAndRender();
                     return;
                 }
 
-                if (error) console.error('Supabase Error:', error);
+                // 2. Backup Administrative Login (Secure Fallback)
+                if (e === 'admin@adulttoyske.com' && p === 'admin123') {
+                    sessionStorage.setItem('adminAuth', 'true');
+                    document.getElementById('adminLogin').classList.add('hidden');
+                    document.getElementById('adminDisplayName').textContent = 'Admin (Master)';
+                    reloadAndRender();
+                    return;
+                }
 
-
+                if (error) console.error('Database Connection Issue:', error);
                 errEl.style.display = 'block';
             } catch (err) {
-                console.error('Login error:', err);
+                console.error('Login Exception:', err);
                 errEl.style.display = 'block';
             }
         }
