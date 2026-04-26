@@ -2301,7 +2301,33 @@
       }
 
       .nav-links {
-        display: none
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 80%;
+        height: 100vh;
+        background: var(--black);
+        display: flex;
+        flex-direction: column;
+        padding: 6rem 2.5rem;
+        transition: right 0.4s cubic-bezier(0.2, 0, 0.2, 1);
+        z-index: 2000;
+        box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
+      }
+
+      .nav-links.active {
+        display: flex;
+        right: 0;
+      }
+
+      .nav-links a {
+        font-size: 1.1rem;
+        font-family: 'Cormorant Garamond', serif;
+        margin-bottom: 1.5rem;
+      }
+
+      .mobile-menu-toggle {
+        display: block !important;
       }
 
       .cart-drawer {
@@ -2352,7 +2378,7 @@
 
   <!-- Navigation -->
   <nav id="navbar">
-    <a href="#" class="nav-logo">
+    <a href="#" class="nav-logo" style="z-index: 2100;">
       ADULTTOYSKE
       <span>Adult Wellness Kenya</span>
     </a>
@@ -2379,6 +2405,7 @@
         <span class="cart-count" id="cartCountBadge">0</span>
       </button>
       <button class="nav-icon" onclick="whatsappOrder()" title="WhatsApp Order">💬</button>
+      <button class="nav-icon mobile-menu-toggle" onclick="toggleMenu()" style="display:none">☰</button>
     </div>
   </nav>
 
@@ -2760,10 +2787,9 @@
   <div class="pd-overlay" id="pdOverlay" onclick="handlePdOverlay(event)">
     <div class="pd-modal" id="pdModal">
       <div class="pd-img-panel">
-        <img src="" id="pdActualImg" 
+        <img src="" id="pdActualImg"
           style="width:100%;height:100%;object-fit:contain;display:none;transition:transform 0.5s ease-out;cursor:zoom-in"
-          onmouseover="this.style.transform='scale(1.05)'"
-          onmouseout="this.style.transform='scale(1)'"
+          onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'"
           onerror="this.style.display='none'">
         <div class="pd-img-bg" id="pdImgBg"></div>
         <div class="pd-img-emoji" id="pdEmoji">💜</div>
@@ -3002,6 +3028,24 @@
     document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; if (cursor) cursor.style.transform = `translate(${mx - 6}px,${my - 6}px)`; });
     (function animRing() { rx += (mx - rx - 18) * 0.15; ry += (my - ry - 18) * 0.15; if (cursorRing) cursorRing.style.transform = `translate(${rx}px,${ry}px)`; requestAnimationFrame(animRing); })();
     window.addEventListener('scroll', () => { if (document.getElementById('navbar')) document.getElementById('navbar').classList.toggle('scrolled', scrollY > 60); });
+
+    function toggleMenu() {
+      const links = document.querySelector('.nav-links');
+      const btn = document.querySelector('.mobile-menu-toggle');
+      links.classList.toggle('active');
+      btn.textContent = links.classList.contains('active') ? '✕' : '☰';
+      if (links.classList.contains('active')) document.body.style.overflow = 'hidden';
+      else document.body.style.overflow = '';
+    }
+
+    // Close menu on link click
+    document.querySelectorAll('.nav-links a').forEach(a => {
+      a.addEventListener('click', () => {
+        document.querySelector('.nav-links').classList.remove('active');
+        document.querySelector('.mobile-menu-toggle').textContent = '☰';
+        document.body.style.overflow = '';
+      });
+    });
 
     // PRODUCT DATA (Master Fallback) - EMPTY (Using DB only)
     const ALL_PRODUCTS = [];
