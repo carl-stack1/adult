@@ -1690,33 +1690,40 @@
 
         async function savePromos() {
             const p1 = {
+                type: 'promo1',
                 eyebrow: document.getElementById('m1_eyebrow').value,
                 title: document.getElementById('m1_title').value,
                 description: document.getElementById('m1_desc').value,
                 button_text: document.getElementById('m1_btn').value
             };
             const p2 = {
+                type: 'promo2',
                 eyebrow: document.getElementById('m2_eyebrow').value,
                 title: document.getElementById('m2_title').value,
                 description: document.getElementById('m2_desc').value,
                 button_text: document.getElementById('m2_btn').value
             };
-            const pMarq = { title: document.getElementById('m_marquee').value };
+            const pMarq = {
+                type: 'marquee',
+                title: document.getElementById('m_marquee').value,
+                description: document.getElementById('m_marquee').value // Mirror to desc for safety
+            };
 
             try {
-                const res1 = await db.from('promo_banners').update(p1).eq('type', 'promo1');
-                const res2 = await db.from('promo_banners').update(p2).eq('type', 'promo2');
-                const res3 = await db.from('promo_banners').update(pMarq).eq('type', 'marquee');
+                // Use upsert to handle missing rows
+                const { error: e1 } = await db.from('promo_banners').upsert(p1, { onConflict: 'type' });
+                const { error: e2 } = await db.from('promo_banners').upsert(p2, { onConflict: 'type' });
+                const { error: e3 } = await db.from('promo_banners').upsert(pMarq, { onConflict: 'type' });
 
-                if (res1.error || res2.error || res3.error) {
-                    throw new Error('Database Error');
+                if (e1 || e2 || e3) {
+                    throw new Error(e1?.message || e2?.message || e3?.message);
                 }
 
                 showAdminToast('📣 Marketing banners updated successfully!');
                 await fetchAllData();
             } catch (err) {
                 console.error(err);
-                showAdminToast('❌ Failed to update banners. check console.');
+                showAdminToast('❌ Database Error: ' + err.message);
             }
         }
 

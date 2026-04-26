@@ -3414,10 +3414,12 @@
 
       // 1. Marquee / Marketing Banner
       const marquee = PROMOS_DB.find(p => p.type === 'marquee');
-      if (marquee && marquee.description) {
+      const marqueeText = (marquee ? (marquee.title || marquee.description) : null);
+      if (marqueeText) {
         const inner = document.querySelector('.marquee-inner');
         if (inner) {
-          const text = marquee.description.split(',').map(s => `<span>${s.trim()}</span><span class="dot">✦</span>`).join(' ');
+          const segments = marqueeText.split(',');
+          const text = segments.map(s => `<span>${s.trim()}</span><span class="dot">✦</span>`).join(' ');
           inner.innerHTML = text + text; // Double for seamless loop
         }
       }
