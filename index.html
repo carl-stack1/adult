@@ -3406,11 +3406,12 @@
         }
         CUSTOMERS_DB = cRes.data || [];
         PROMOS_DB = bRes.data || [];
+        renderPromos(); // Ensure UI updates as soon as data arrives
       } catch (err) { console.error('DB Fetch Error:', err); }
     }
 
     function renderPromos() {
-      if (!window.PROMOS_DB || !PROMOS_DB.length) return;
+      if (!PROMOS_DB || !PROMOS_DB.length) return;
 
       // 1. Marquee / Marketing Banner
       const marquee = PROMOS_DB.find(p => p.type === 'marquee');
