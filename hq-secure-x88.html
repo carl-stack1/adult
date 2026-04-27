@@ -1643,18 +1643,25 @@
 
         function viewOrder(orderId) {
             const orders = getOrders();
+            const customers = getCustomers();
             const o = orders.find(o => o.id === orderId);
             if (!o) return;
             const statusClass = { pending: 'status-pending', confirmed: 'status-confirmed', shipped: 'status-confirmed', delivered: 'status-delivered', cancelled: 'status-cancelled' }[o.status];
+
+            // Cross-reference customer database to fetch delivery location
+            const matchedCustomer = customers.find(c => c.email === o.customer_email);
+            const deliveryLocation = matchedCustomer && matchedCustomer.location ? matchedCustomer.location : 'Not provided yet';
+
             document.getElementById('orderModalBody').innerHTML = `
     <div class="order-detail-row"><span class="order-detail-label">Order ID</span><span style="font-family:monospace">${o.id}</span></div>
     <div class="order-detail-row"><span class="order-detail-label">Customer</span><span>${o.customer_name}</span></div>
     <div class="order-detail-row"><span class="order-detail-label">Email</span><span>${o.customer_email}</span></div>
     <div class="order-detail-row"><span class="order-detail-label">Phone</span><span>${o.customer_phone || '—'}</span></div>
+    <div class="order-detail-row"><span class="order-detail-label">Location</span><span style="font-weight:600; color:var(--rose)">${deliveryLocation}</span></div>
     <div class="order-detail-row"><span class="order-detail-label">Date</span><span>${new Date(o.created_at || Date.now()).toLocaleString()}</span></div>
     <div class="order-detail-row"><span class="order-detail-label">Status</span><span class="status-badge ${statusClass}">${o.status}</span></div>
     <div style="margin:1rem 0;font-size:0.7rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--text-muted)">Items Ordered</div>
-    ${(o.items || []).map(i => `<div class="order-detail-row"><span>${i.emoji} ${i.name} × ${i.qty}</span><span>KES ${(i.price * i.qty).toLocaleString()}</span></div>`).join('')}
+    ${(o.items || []).map(i => `<div class="order-detail-row"><span>${i.emoji || '📦'} ${i.name} × ${i.qty}</span><span>KES ${(i.price * i.qty).toLocaleString()}</span></div>`).join('')}
     <div class="order-detail-row" style="margin-top:0.5rem;border-top:1px solid var(--border);padding-top:0.75rem"><span style="font-weight:500">Total</span><span style="color:var(--rose);font-size:1.1rem">KES ${(o.total || 0).toLocaleString()}</span></div>
     <div style="margin-top:1.5rem;display:flex;gap:0.75rem;flex-wrap:wrap">
       <button class="btn-primary" onclick="updateStatus('${o.id}','confirmed');closeOrderModal()">✅ Confirm Order</button>

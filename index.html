@@ -3730,15 +3730,16 @@
       const e = document.getElementById('suEmail').value.trim();
       const p = document.getElementById('suPass').value;
       const ph = document.getElementById('suPhone').value.trim();
+      const loc = document.getElementById('suLoc').value.trim();
       const err = document.getElementById('suErr');
       function validatePassword(pw) {
         return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{10,}$/.test(pw);
       }
-      if (!n || !e || !ph) { err.textContent = 'All fields are required.'; err.style.display = 'block'; return; }
+      if (!n || !e || !ph || !loc) { err.textContent = 'All fields, including Delivery Location, are required.'; err.style.display = 'block'; return; }
       if (!validatePassword(p)) { err.textContent = 'Password must be 10+ characters and include uppercase, lowercase, a number, and a special character (e.g. @$!%*?&).'; err.style.display = 'block'; return; }
       if (CUSTOMERS_DB.find(c => c.email === e)) { err.textContent = 'Email already exists.'; err.style.display = 'block'; return; }
       err.style.display = 'none';
-      const u = { name: n, email: e, phone: ph, location: '' };
+      const u = { name: n, email: e, phone: ph, location: loc };
       await db.from('customers').insert([u]);
       CUSTOMERS_DB.push(u);
       sessionStorage.setItem('atk_user', JSON.stringify(u));
