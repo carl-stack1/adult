@@ -4045,7 +4045,8 @@
     async function openProfile() {
       document.getElementById('profileOverlay').classList.add('open');
       document.body.style.overflow = 'hidden';
-      const u = getCurrentUser();
+      const u = await getCurrentUser();
+
       if (u) {
         // Display Mode
         document.getElementById('dispName').textContent = u.name || '—';
@@ -4064,7 +4065,8 @@
     }
 
     async function renderOrderTracking() {
-      const u = getCurrentUser();
+      const u = await getCurrentUser();
+
       const listEl = document.getElementById('orderTrackingList');
       if (!u || !listEl) return;
 
@@ -4108,7 +4110,7 @@
     function closeProfile() { document.getElementById('profileOverlay').classList.remove('open'); document.body.style.overflow = ''; }
 
     async function saveProfile() {
-      const u = getCurrentUser();
+      const u = await getCurrentUser();
       if (!u) return;
 
       const newU = {
@@ -4117,6 +4119,11 @@
         phone: document.getElementById('prPhone').value.trim(),
         location: document.getElementById('prLoc').value.trim()
       };
+
+      const oldPass = document.getElementById('prOldPass').value;
+      const newPass = document.getElementById('prNewPass').value;
+      const confirmPass = document.getElementById('prConfirmPass').value;
+
 
       if (newPass) {
         if (!oldPass) { showToast('Please enter your current password to change it.'); return; }
