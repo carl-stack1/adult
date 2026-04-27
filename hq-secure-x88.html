@@ -1389,12 +1389,22 @@
         ['click', 'keydown', 'mousemove', 'scroll'].forEach(e => document.addEventListener(e, resetInactivityTimer));
 
         // ── BRUTE FORCE PROTECTION ─────────────────────────────────────
-        let loginAttempts = 0;
         const MAX_LOGIN_ATTEMPTS = 5;
+        const LOCKOUT_TIME = 60 * 60 * 1000; // 1 hour
 
         async function doAdminLogin(evt) {
+            let loginAttempts = parseInt(localStorage.getItem('admin_login_attempts') || '0');
+            let lockoutUntil = parseInt(localStorage.getItem('admin_lockout_until') || '0');
+
+            if (lockoutUntil > Date.now()) {
+                const minsLeft = Math.ceil((lockoutUntil - Date.now()) / 60000);
+                showAdminToast(`❌ Account locked. Try again in ${minsLeft} minutes.`);
+                return;
+            }
+
             if (loginAttempts >= MAX_LOGIN_ATTEMPTS) {
-                showAdminToast('❌ Account locked due to too many attempts. Refresh and try later.');
+                localStorage.setItem('admin_lockout_until', (Date.now() + LOCKOUT_TIME).toString());
+                showAdminToast('❌ Max attempts reached. Brute-force protection activated.');
                 return;
             }
 
@@ -1414,10 +1424,12 @@
 
                 if (error) {
                     loginAttempts++;
+                    localStorage.setItem('admin_login_attempts', loginAttempts.toString());
                     errEl.textContent = `${error.message}. (${MAX_LOGIN_ATTEMPTS - loginAttempts} attempts left)`;
                     errEl.style.display = 'block';
                 } else if (data.session) {
-                    loginAttempts = 0;
+                    localStorage.removeItem('admin_login_attempts');
+                    localStorage.removeItem('admin_lockout_until');
                     document.getElementById('adminLogin').classList.add('hidden');
                     document.getElementById('adminDisplayName').textContent = data.user?.email || 'Admin';
                     reloadAndRender();
