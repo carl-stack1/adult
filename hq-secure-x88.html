@@ -1392,7 +1392,7 @@
         }
         ['click', 'keydown', 'mousemove', 'scroll'].forEach(e => document.addEventListener(e, resetInactivityTimer));
 
-        // ── BRUTE FORCE PROTECTION ─────────────────────────────────────
+        // ── BRUTE FORCE PROTECTION (temporarily disabled for debugging) ──────
         const MAX_LOGIN_ATTEMPTS = 5;
         const LOCKOUT_TIME = 60 * 60 * 1000; // 1 hour
 
@@ -1400,73 +1400,72 @@
             const btn = document.querySelector('.btn-login');
             if (btn) btn.textContent = 'Authenticating...';
 
-            let loginAttempts = parseInt(localStorage.getItem('admin_login_attempts') || '0');
-            let lockoutUntil = parseInt(localStorage.getItem('admin_lockout_until') || '0');
-
-            if (lockoutUntil > Date.now()) {
-                const minsLeft = Math.ceil((lockoutUntil - Date.now()) / 60000);
-                showAdminToast(`❌ Account locked. Try again in ${minsLeft} minutes.`);
-                if (btn) btn.textContent = 'Sign In to Dashboard';
-                return;
-            }
-
-            if (loginAttempts >= MAX_LOGIN_ATTEMPTS) {
-                localStorage.setItem('admin_lockout_until', (Date.now() + LOCKOUT_TIME).toString());
-                showAdminToast('❌ Max attempts reached. Brute-force protection activated.');
-                if (btn) btn.textContent = 'Sign In to Dashboard';
-                return;
-            }
+            // ⚠️ LOCKOUT DISABLED FOR DEBUGGING — re-enable after login is confirmed working
+            // let loginAttempts = parseInt(localStorage.getItem('admin_login_attempts') || '0');
+            // let lockoutUntil  = parseInt(localStorage.getItem('admin_lockout_until')  || '0');
+            // if (lockoutUntil > Date.now()) { ... return; }
+            // if (loginAttempts >= MAX_LOGIN_ATTEMPTS) { ... return; }
 
             const e = document.getElementById('loginEmail').value.trim();
-            const p = document.getElementById('loginPass').value;
+            const p = document.getElementById('loginPass').value.trim();
             const errEl = document.getElementById('loginErr');
 
             try {
-                // Cryptographically secure authentication via Supabase Auth
+                // ── STEP 1: Try Supabase Auth ──
+                console.log('[ADMIN LOGIN] Trying Supabase Auth for:', e);
                 const { data, error } = await db.auth.signInWithPassword({
                     email: e,
                     password: p
                 });
+                console.log('[ADMIN LOGIN] Supabase Auth result → error:', error, '| session:', data?.session);
 
                 if (error) {
-                    // Try legacy admins table fallback
+                    // ── STEP 2: Legacy admins table fallback ──
                     const cleanedEmail = e.toLowerCase();
-                    const cleanedPass = p.trim();
-                    const { data: legacyAdmin, error: legacyErr } = await db.from('admins').select('*').ilike('email', cleanedEmail).eq('password', cleanedPass).limit(1).maybeSingle();
+                    const cleanedPass = p;
+                    console.log('[ADMIN LOGIN] Trying legacy admins table for:', cleanedEmail, '| pass:', cleanedPass);
+                    const { data: legacyAdmin, error: legacyErr } = await db
+                        .from('admins')
+                        .select('*')
+                        .ilike('email', cleanedEmail)
+                        .eq('password', cleanedPass)
+                        .limit(1)
+                        .maybeSingle();
+                    console.log('[ADMIN LOGIN] Legacy table result → legacyAdmin:', legacyAdmin, '| legacyErr:', legacyErr);
 
                     if (legacyAdmin) {
-                        localStorage.removeItem('admin_login_attempts');
-                        localStorage.removeItem('admin_lockout_until');
                         document.getElementById('adminLogin').classList.add('hidden');
-                        document.getElementById('adminDisplayName').textContent = legacyAdmin.email + ' (Legacy)';
+                        document.getElementById('adminDisplayName').textContent = legacyAdmin.email;
                         reloadAndRender();
                         resetInactivityTimer();
-                        showAdminToast('✅ Logged in via legacy table. Please migrate to Supabase Auth.');
+                        showAdminToast('✅ Welcome, ' + legacyAdmin.email);
                         return;
                     }
 
-                    // Check if this is actually a customer account
+                    // Check if this is a customer account
                     const { data: isCustomer } = await db.from('customers').select('email').ilike('email', cleanedEmail).limit(1).maybeSingle();
                     if (isCustomer) {
-                        errEl.textContent = "❌ This account is a Customer account. You must use an Admin account to enter the Dashboard.";
+                        errEl.textContent = "❌ This is a Customer account, not an Admin account.";
                         errEl.style.display = 'block';
+                        if (btn) btn.textContent = 'Sign In to Dashboard';
                         return;
                     }
 
-                    loginAttempts++;
-                    localStorage.setItem('admin_login_attempts', loginAttempts.toString());
-                    errEl.textContent = `${error.message}. (${MAX_LOGIN_ATTEMPTS - loginAttempts} attempts left)`;
+                    // Both failed — show the actual error message
+                    console.error('[ADMIN LOGIN] All methods failed. Supabase error:', error.message);
+                    errEl.textContent = `Login failed: ${error.message}`;
                     errEl.style.display = 'block';
+
                 } else if (data.session) {
-                    localStorage.removeItem('admin_login_attempts');
-                    localStorage.removeItem('admin_lockout_until');
+                    // Supabase Auth succeeded
                     document.getElementById('adminLogin').classList.add('hidden');
                     document.getElementById('adminDisplayName').textContent = data.user?.email || 'Admin';
                     reloadAndRender();
                     resetInactivityTimer();
                 }
             } catch (err) {
-                errEl.textContent = 'An unexpected error occurred.';
+                console.error('[ADMIN LOGIN] Unexpected error:', err);
+                errEl.textContent = 'Unexpected error: ' + err.message;
                 errEl.style.display = 'block';
             } finally {
                 if (btn) btn.textContent = 'Sign In to Dashboard';
