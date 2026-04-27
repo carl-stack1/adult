@@ -1356,47 +1356,46 @@
             const e = document.getElementById('loginEmail').value.trim();
             const p = document.getElementById('loginPass').value;
             const errEl = document.getElementById('loginErr');
-
-            console.log('Login attempt:', e);
+            const btn = event?.target;
+            if (btn && btn.tagName === 'BUTTON') btn.textContent = 'Authenticating...';
 
             try {
-                // 1. Check against Database
-                const { data, error } = await db.from('admins').select('*').eq('email', e).eq('password', p);
+                // Cryptographically secure authentication via Supabase Auth
+                const { data, error } = await db.auth.signInWithPassword({
+                    email: e,
+                    password: p
+                });
 
-                if (data && data.length > 0) {
-                    sessionStorage.setItem('adminAuth', 'true');
+                if (error) {
+                    errEl.style.display = 'block';
+                } else if (data.session) {
                     document.getElementById('adminLogin').classList.add('hidden');
-                    document.getElementById('adminDisplayName').textContent = data[0].name || 'Admin';
+                    document.getElementById('adminDisplayName').textContent = data.user?.email || 'Admin';
                     reloadAndRender();
-                    return;
                 }
-
-                // 2. Backup Administrative Login (Secure Fallback)
-                if (e === 'admin@adulttoyske.com' && p === 'admin123') {
-                    sessionStorage.setItem('adminAuth', 'true');
-                    document.getElementById('adminLogin').classList.add('hidden');
-                    document.getElementById('adminDisplayName').textContent = 'Admin (Master)';
-                    reloadAndRender();
-                    return;
-                }
-
-                if (error) console.error('Database Connection Issue:', error);
-                errEl.style.display = 'block';
             } catch (err) {
-                console.error('Login Exception:', err);
                 errEl.style.display = 'block';
+            } finally {
+                if (btn && btn.tagName === 'BUTTON') btn.textContent = 'Access Portal';
             }
         }
-        function adminLogout() {
-            sessionStorage.removeItem('adminAuth');
+
+        async function adminLogout() {
+            await db.auth.signOut();
             location.reload();
         }
-        if (!sessionStorage.getItem('adminAuth')) {
-            // stays on login screen
-        } else {
-            document.getElementById('adminLogin').classList.add('hidden');
-            reloadAndRender();
+
+        async function initAdminAuth() {
+            const { data: { session } } = await db.auth.getSession();
+            if (session) {
+                document.getElementById('adminLogin').classList.add('hidden');
+                document.getElementById('adminDisplayName').textContent = session.user?.email || 'Admin';
+                reloadAndRender();
+            }
         }
+
+        initAdminAuth();
+
         document.getElementById('loginEmail').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('loginPass').focus(); });
         document.getElementById('loginPass').addEventListener('keydown', e => { if (e.key === 'Enter') doAdminLogin(); });
 
@@ -1707,8 +1706,9 @@
         }
 
         // Poll for new orders
-        setInterval(() => {
-            if (sessionStorage.getItem('adminAuth')) {
+        setInterval(async () => {
+            const { data: { session } } = await db.auth.getSession();
+            if (session) {
                 fetchAllData().then(() => {
                     renderOrdersTable();
                     renderCustomersTable();
