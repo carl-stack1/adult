@@ -1542,11 +1542,22 @@
         }
 
         async function adminLogout() {
+            // Clear attempt counter on intentional logout — admin should always be able to log back in
+            localStorage.removeItem('admin_login_attempts');
+            localStorage.removeItem('admin_lockout_until');
             await db.auth.signOut();
             location.reload();
         }
 
         async function initAdminAuth() {
+            // Hidden escape hatch: visit the page with ?resetlock=1 to clear a stale lockout
+            if (new URLSearchParams(window.location.search).get('resetlock') === '1') {
+                localStorage.removeItem('admin_login_attempts');
+                localStorage.removeItem('admin_lockout_until');
+                // Clean URL
+                history.replaceState({}, '', window.location.pathname);
+            }
+
             const { data: { session } } = await db.auth.getSession();
             if (session) {
                 document.getElementById('adminLogin').classList.add('hidden');
