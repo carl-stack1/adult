@@ -4071,8 +4071,10 @@
       if (!u || !listEl) return;
 
       try {
-        const { data, error } = await db.from('orders').select('*').eq('customer_email', u.email).order('created_at', { ascending: false }).limit(3);
+        // Use ilike for case-insensitive matching in case some emails were saved with varied casing
+        const { data, error } = await db.from('orders').select('*').ilike('customer_email', u.email).order('created_at', { ascending: false }).limit(3);
         if (error) throw error;
+
 
         if (!data || data.length === 0) {
           listEl.innerHTML = '<p style="font-size:0.75rem; color:var(--text-muted)">No active orders to track.</p>';
