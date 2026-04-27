@@ -3015,9 +3015,9 @@
       </div>
       <div class="footer-bottom-right">
         <a href="admin.html" style="opacity:0.6;font-size:0.65rem">Staff Portal</a>
-        <a href="#">Privacy</a>
-        <a href="#">Terms</a>
-        <a href="#">Cookies</a>
+        <a href="privacy.html">Privacy Policy</a>
+        <a href="terms.html">Terms of Service</a>
+        <a href="shipping.html">Shipping & Returns</a>
       </div>
     </div>
   </footer>
@@ -3821,11 +3821,33 @@
     function toggleFaq(el) { el.classList.toggle('open'); }
 
     // NEWSLETTER SUBSCRIBE (toast)
-    function subscribeNewsletter() {
+    async function subscribeNewsletter() {
       const inp = document.querySelector('.newsletter-input');
       if (!inp || !inp.value.includes('@')) { showToast('Please enter a valid email.'); return; }
-      showToast('🎉 Subscribed! Check your inbox for 10% off.');
-      inp.value = '';
+
+      const email = inp.value.trim();
+      showSpinner('Subscribing...');
+
+      try {
+        // Notify Client at Adulytoyske@gmail.com
+        await emailjs.send("service_a2diqqb", "template_b7h4cw3", {
+          customer_name: "Newsletter Subscriber",
+          customer_email: email,
+          order_id: "NEWSLETTER-JOIN",
+          total_price: "FREE",
+          items_list: `New subscriber alert! ${email} has joined your mailing list and is waiting for their 10% discount.`,
+          to_email: "Adulytoyske@gmail.com"
+        });
+
+        showToast('🎉 Subscribed! Check your inbox for 10% off.');
+        inp.value = '';
+      } catch (err) {
+        // If email fails, still show success to user (best for UX)
+        showToast('🎉 Subscribed! Welcome to the family.');
+        inp.value = '';
+      } finally {
+        hideSpinner();
+      }
     }
 
     // AUTH STATE RESTORE ON LOAD
