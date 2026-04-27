@@ -865,6 +865,8 @@
                 Customers</button>
             <button class="nav-item" onclick="showPage('catalogue',this)"><span class="nav-icon">📋</span>
                 Catalogue</button>
+            <button class="nav-item" onclick="showPage('subscribers',this)"><span class="nav-icon">📧</span>
+                Subscribers</button>
             <button class="nav-item" onclick="showPage('marketing',this)"><span class="nav-icon">📢</span>
                 Marketing</button>
             <button class="nav-item" onclick="showPage('reviews',this)"><span class="nav-icon">⭐</span>
@@ -1156,6 +1158,35 @@
                 </div>
             </div>
 
+            <!-- SUBSCRIBERS PAGE -->
+            <div class="tab-content" id="page-subscribers">
+                <div class="panel">
+                    <div class="panel-header">
+                        <div class="panel-title">Newsletter Subscribers</div>
+                        <div style="font-size:0.75rem; color:var(--text-muted)">Latest mailing list signups</div>
+                    </div>
+                    <div class="panel-body" style="padding:0">
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Email Address</th>
+                                        <th>Date Subscribed</th>
+                                        <th style="text-align:right">Management</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="subscribersTable">
+                                    <tr>
+                                        <td colspan="3" style="text-align:center;color:var(--text-muted);padding:2rem">
+                                            Syncing subscribers...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- MARKETING PAGE -->
             <div class="tab-content" id="page-marketing">
                 <div class="panel">
@@ -1293,6 +1324,34 @@
         const SUPABASE_ANON_KEY = 'sb_publishable_Kb2j5iHBhdev3hZp1MX5lg_Rqi9Galn';
         const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+        function renderSubscribersTable() {
+            const table = document.getElementById('subscribersTable');
+            if (!table || !DB_SUBSCRIBERS) return;
+            if (DB_SUBSCRIBERS.length === 0) {
+                table.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:2rem">No subscribers yet.</td></tr>';
+                return;
+            }
+            table.innerHTML = DB_SUBSCRIBERS.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).map(s => `
+                <tr>
+                    <td><div style="font-weight:600">${s.email}</div></td>
+                    <td>${new Date(s.created_at).toLocaleDateString()}</td>
+                    <td style="text-align:right">
+                         <button class="btn-ghost" onclick="deleteSubscriber('${s.id}')" style="color:#ef4444">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        async function deleteSubscriber(id) {
+            if (!confirm('Are you sure you want to remove this subscriber?')) return;
+            const { error } = await db.from('newsletter_subscribers').delete().eq('id', id);
+            if (error) { alert('Error deleting subscriber'); }
+            else {
+                showAdminToast('🗑 Subscriber removed');
+                reloadAndRender();
+            }
+        }
+
         async function doAdminLogin() {
             const e = document.getElementById('loginEmail').value.trim();
             const p = document.getElementById('loginPass').value;
@@ -1342,24 +1401,24 @@
         document.getElementById('loginPass').addEventListener('keydown', e => { if (e.key === 'Enter') doAdminLogin(); });
 
         // ===================== DATA =====================
-        let DB_PRODUCTS = [];
-        let DB_ORDERS = [];
-        let DB_CUSTOMERS = [];
+        let DB_PRODUCTS = [], DB_ORDERS = [], DB_CUSTOMERS = [], DB_PROMOS = [], DB_REVIEWS = [], DB_SUBSCRIBERS = [];
 
         async function fetchAllData() {
             try {
-                const [pRes, oRes, cRes, bRes, rRes] = await Promise.all([
+                const [pRes, oRes, cRes, bRes, rRes, sRes] = await Promise.all([
                     db.from('products').select('*'),
                     db.from('orders').select('*'),
                     db.from('customers').select('*'),
                     db.from('promo_banners').select('*'),
-                    db.from('product_reviews').select('*')
+                    db.from('product_reviews').select('*'),
+                    db.from('newsletter_subscribers').select('*')
                 ]);
                 DB_PRODUCTS = pRes.data || [];
                 DB_ORDERS = oRes.data || [];
                 DB_CUSTOMERS = cRes.data || [];
                 DB_PROMOS = bRes.data || [];
                 DB_REVIEWS = rRes.data || [];
+                DB_SUBSCRIBERS = sRes ? (sRes.data || []) : [];
                 console.log('Synced with Cloud:', DB_PRODUCTS.length, 'products');
             } catch (err) {
                 console.error('Fetch Error:', err);
@@ -1665,11 +1724,12 @@
             document.getElementById('page-' + id).classList.add('active');
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
             if (btn) btn.classList.add('active');
-            const titles = { dashboard: 'Dashboard', orders: 'Orders', products: 'Products', addProduct: 'Add Product', customers: 'Customers', catalogue: 'Catalogue', marketing: 'Marketing', reviews: 'Reviews' };
+            const titles = { dashboard: 'Dashboard', orders: 'Orders', products: 'Products', addProduct: 'Add Product', customers: 'Customers', catalogue: 'Catalogue', marketing: 'Marketing', reviews: 'Reviews', subscribers: 'Subscribers' };
             document.getElementById('pageTitle').textContent = titles[id] || id;
             if (id === 'products') renderProductsTable();
             if (id === 'orders') renderOrdersTable();
             if (id === 'customers') renderCustomersTable();
+            if (id === 'subscribers') renderSubscribersTable();
             if (id === 'catalogue') renderCatalogue();
             if (window.innerWidth <= 1024) toggleSidebar(false);
         }

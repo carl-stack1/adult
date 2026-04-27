@@ -2853,61 +2853,20 @@
         ever.</p>
       <div class="newsletter-form">
         <input type="email" class="newsletter-input" placeholder="your@email.com">
-        <button class="newsletter-btn">Subscribe</button>
+        <button class="newsletter-btn" onclick="subscribeNewsletter()">Subscribe</button>
       </div>
       <p class="newsletter-privacy">🔒 Your information is private and never shared. Unsubscribe anytime.</p>
     </div>
   </section>
 
-  <!-- Reviews -->
+  <!-- TESTIMONIALS -->
   <section class="reviews" id="reviews">
-    <div class="section-label fade-in">What Clients Say</div>
-    <h2 class="section-title fade-in"><em>Reviews</em></h2>
-    <div class="reviews-grid">
-      <div class="review-card fade-in">
-        <div class="review-quote">"</div>
-        <p class="review-text">Ordered late evening and it arrived by noon the next day, packaged so discreetly I
-          thought it was a regular parcel. Product quality is excellent and exactly as described.</p>
-        <div class="review-footer">
-          <div class="reviewer-info">
-            <div class="reviewer-name">Sarah M.</div>
-            <div class="reviewer-location">Nairobi, Kenya</div>
-          </div>
-          <div>
-            <div class="review-stars">★★★★★</div>
-            <div class="verified-badge">✓ Verified buyer</div>
-          </div>
-        </div>
-      </div>
-      <div class="review-card fade-in fade-in-delay-1">
-        <div class="review-quote">"</div>
-        <p class="review-text">Best adult shop in Kenya, hands down. The WhatsApp ordering is so convenient and the team
-          is professional and discreet. My partner and I are regular customers.</p>
-        <div class="review-footer">
-          <div class="reviewer-info">
-            <div class="reviewer-name">James K.</div>
-            <div class="reviewer-location">Mombasa, Kenya</div>
-          </div>
-          <div>
-            <div class="review-stars">★★★★★</div>
-            <div class="verified-badge">✓ Verified buyer</div>
-          </div>
-        </div>
-      </div>
-      <div class="review-card fade-in fade-in-delay-2">
-        <div class="review-quote">"</div>
-        <p class="review-text">I was nervous about ordering but the process was so smooth and private. M-Pesa payment
-          worked instantly and delivery to Kisumu was just 2 days. Will definitely order again.</p>
-        <div class="review-footer">
-          <div class="reviewer-info">
-            <div class="reviewer-name">Amina W.</div>
-            <div class="reviewer-location">Kisumu, Kenya</div>
-          </div>
-          <div>
-            <div class="review-stars">★★★★★</div>
-            <div class="verified-badge">✓ Verified buyer</div>
-          </div>
-        </div>
+    <div class="section-label fade-in">Testimonials</div>
+    <h2 class="section-title fade-in">What Our <em>Clients</em> Say</h2>
+    <div class="reviews-grid" id="testimonialGrid">
+      <!-- Dynamic Reviews Load Here -->
+      <div class="review-card">
+        <p style="color:var(--text-muted)">Loading real customer stories...</p>
       </div>
     </div>
   </section>
@@ -3405,10 +3364,11 @@
 
     async function fetchDbData() {
       try {
-        const [pRes, cRes, bRes] = await Promise.all([
+        const [pRes, cRes, bRes, rRes] = await Promise.all([
           db.from('products').select('*'),
           db.from('customers').select('*'),
-          db.from('promo_banners').select('*')
+          db.from('promo_banners').select('*'),
+          db.from('product_reviews').select('*').order('created_at', { ascending: false }).limit(6)
         ]);
         if (pRes.data) {
           ALL_PRODUCTS_DB = pRes.data.map(ap => ({
@@ -3429,6 +3389,7 @@
             reviews: []
           }));
         }
+        if (rRes.data) renderDynamicReviews(rRes.data);
         CUSTOMERS_DB = cRes.data || [];
         PROMOS_DB = bRes.data || [];
         renderPromos(); // Ensure UI updates as soon as data arrives
@@ -3824,32 +3785,63 @@
     async function subscribeNewsletter() {
       const inp = document.querySelector('.newsletter-input');
       if (!inp || !inp.value.includes('@')) { showToast('Please enter a valid email.'); return; }
+      const btn = document.querySelector('.newsletter-btn');
+      const originalText = btn.textContent;
 
       const email = inp.value.trim();
-      showSpinner('Subscribing...');
+      btn.disabled = true;
+      btn.textContent = 'Joining...';
 
       try {
-        // Notify Client at Adulytoyske@gmail.com
-        await emailjs.send("service_a2diqqb", "template_b7h4cw3", {
-          customer_name: "Newsletter Subscriber",
-          customer_email: email,
-          order_id: "NEWSLETTER-JOIN",
-          total_price: "FREE",
-          items_list: `New subscriber alert! ${email} has joined your mailing list and is waiting for their 10% discount.`,
-          to_email: "Adulytoyske@gmail.com"
-        });
+        // Save to Database for Admin to see
+        const { error } = await db.from('newsletter_subscribers').insert([{ email: email }]);
+        if (error) {
+          // Check if table exists, if not, fallback to EmailJS
+          if (error.code === '42P01') throw new Error('Table missing');
+          throw error;
+        }
 
-        console.log('[NEWSLETTER] Client notified');
-        showToast('🎉 Subscribed! Welcome to the family.');
+        btn.textContent = '🎉 Joined!';
+        showToast('🎉 Welcome to the family!');
         inp.value = '';
+        setTimeout(() => { btn.textContent = originalText; btn.disabled = false; }, 3000);
       } catch (err) {
-        console.error(err);
-        // Still show success to user if logic worked up to here
-        showToast('🎉 Subscription confirmed!');
-        inp.value = '';
-      } finally {
-        hideSpinner();
+        console.warn('DB Subscribe failed, falling back to Email notify:', err);
+        try {
+          await emailjs.send("service_a2diqqb", "template_b7h4cw3", {
+            customer_name: "Newsletter Subscriber", customer_email: email, order_id: "NEWSLETTER-JOIN",
+            items_list: `New subscriber alert! ${email}`, to_email: "Adulytoyske@gmail.com"
+          });
+          btn.textContent = '🎉 Done!';
+          showToast('🎉 Subscription confirmed!');
+          inp.value = '';
+        } catch (e2) {
+          showToast('❌ Unable to subscribe. Try again.');
+          btn.textContent = originalText; btn.disabled = false;
+        }
       }
+    }
+
+    function renderDynamicReviews(rows) {
+      const grid = document.getElementById('testimonialGrid');
+      if (!grid || !rows.length) return;
+
+      grid.innerHTML = rows.slice(0, 3).map((r, i) => `
+        <div class="review-card fade-in" style="animation-delay:${i * 0.1}s">
+          <div class="review-quote">"</div>
+          <p class="review-text">${r.review_text.length > 150 ? r.review_text.slice(0, 150) + '...' : r.review_text}</p>
+          <div class="review-footer">
+            <div class="reviewer-info">
+              <div class="reviewer-name">${r.customer_name}</div>
+              <div class="reviewer-location">Verified Customer</div>
+            </div>
+            <div>
+              <div class="review-stars">★★★★★</div>
+              <div class="verified-badge">✓ Verified buyer</div>
+            </div>
+          </div>
+        </div>
+      `).join('');
     }
 
     // AUTH STATE RESTORE ON LOAD
