@@ -4017,25 +4017,22 @@
       const u = await getCurrentUser();
 
       if (u) {
+        // Logged In State
         if (document.getElementById('loginLink')) document.getElementById('loginLink').style.display = 'none';
         if (document.getElementById('userProfile')) {
           document.getElementById('userProfile').style.display = 'flex';
           const nameEl = document.getElementById('userName');
           if (nameEl) nameEl.textContent = u.name;
         }
+        if (document.getElementById('dotProfileBtn')) document.getElementById('dotProfileBtn').style.display = 'block';
+        if (document.getElementById('dotLogoutBtn')) document.getElementById('dotLogoutBtn').style.display = 'block';
       } else {
+        // Logged Out State
         if (document.getElementById('loginLink')) document.getElementById('loginLink').style.display = 'block';
         if (document.getElementById('userProfile')) document.getElementById('userProfile').style.display = 'none';
+        if (document.getElementById('dotProfileBtn')) document.getElementById('dotProfileBtn').style.display = 'none';
+        if (document.getElementById('dotLogoutBtn')) document.getElementById('dotLogoutBtn').style.display = 'none';
       }
-    } if (document.getElementById('dotProfileBtn')) document.getElementById('dotProfileBtn').style.display = 'flex';
-    if (document.getElementById('dotLogoutBtn')) document.getElementById('dotLogoutBtn').style.display = 'flex';
-      } else {
-      // Logged out state
-      if (document.getElementById('loginLink')) document.getElementById('loginLink').style.display = 'block';
-      if (document.getElementById('userProfile')) document.getElementById('userProfile').style.display = 'none';
-      if (document.getElementById('dotProfileBtn')) document.getElementById('dotProfileBtn').style.display = 'none';
-      if (document.getElementById('dotLogoutBtn')) document.getElementById('dotLogoutBtn').style.display = 'none';
-    }
     }
 
     function toggleProfileEdit(isEdit) {
