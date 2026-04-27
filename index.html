@@ -3389,10 +3389,10 @@
               img: ap.img,
               stock: ap.stock || 0,
               reviews: productReviews.map(r => ({
-                n: r.customer_name,
+                n: r.customer_name || 'Verified Customer',
                 l: 'Verified Customer',
                 s: '★'.repeat(r.rating || 5),
-                t: r.review_text
+                t: r.review_text || ''
               }))
             };
           });
@@ -3903,13 +3903,16 @@
       const grid = document.getElementById('testimonialGrid');
       if (!grid || !rows.length) return;
 
-      grid.innerHTML = rows.slice(0, 3).map((r, i) => `
+      grid.innerHTML = rows.slice(0, 3).map((r, i) => {
+        const text = r.review_text || '';
+        const shortText = text.length > 150 ? text.slice(0, 150) + '...' : text;
+        return `
         <div class="review-card fade-in" style="animation-delay:${i * 0.1}s">
           <div class="review-quote">"</div>
-          <p class="review-text">${r.review_text.length > 150 ? r.review_text.slice(0, 150) + '...' : r.review_text}</p>
+          <p class="review-text">${shortText}</p>
           <div class="review-footer">
             <div class="reviewer-info">
-              <div class="reviewer-name">${r.customer_name}</div>
+              <div class="reviewer-name">${r.customer_name || 'Verified Customer'}</div>
               <div class="reviewer-location">Verified Customer</div>
             </div>
             <div>
@@ -3918,7 +3921,8 @@
             </div>
           </div>
         </div>
-      `).join('');
+        `;
+      }).join('');
     }
 
     // AUTH STATE RESTORE ON LOAD
