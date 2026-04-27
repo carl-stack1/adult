@@ -3717,7 +3717,10 @@
     // Auth - Secure Source of Truth
     async function getCurrentUser() {
       const { data: { session } } = await db.auth.getSession();
-      if (!session) return null;
+      if (!session) {
+        const legacy = sessionStorage.getItem('legacy_user');
+        return legacy ? JSON.parse(legacy) : null;
+      }
 
       const user = session.user;
       const meta = user.user_metadata || {};
@@ -3737,21 +3740,76 @@
     function switchTab(t) { document.getElementById('fSI').style.display = t === 'si' ? 'block' : 'none'; document.getElementById('fSU').style.display = t === 'su' ? 'block' : 'none'; document.getElementById('tabSI').classList.toggle('active', t === 'si'); document.getElementById('tabSU').classList.toggle('active', t === 'su'); }
     async function doSignIn() {
       const e = document.getElementById('siEmail').value.trim();
-      const p = document.getElementById('siPass').value;
+      const p = document.getElementById('siPass').value.trim();
       const err = document.getElementById('siErr');
+      err.style.display = 'none';
+
+      if (!e || !p) {
+        err.textContent = 'Please enter your email and password.';
+        err.style.display = 'block';
+        return;
+      }
 
       showSpinner('Signing in...');
       try {
+        // ── STEP 1: Try Supabase Auth (for users who signed up via the normal flow) ──
         const { data, error } = await db.auth.signInWithPassword({ email: e, password: p });
-        if (error) throw error;
 
-        // Data is persisted via session, restoreAuthState will handle the rest
-        restoreAuthState();
-        closeAuth();
-        showToast('Welcome back! ✨');
+        if (!error && data.session) {
+          // Supabase Auth succeeded — user has a proper account
+          await restoreAuthState();
+          closeAuth();
+          showToast('Welcome back! ✨');
+          return;
+        }
+
+        // ── STEP 2: Legacy fallback — user exists only in customers table ──
+        // Search by email (case-insensitive)
+        const { data: byEmail } = await db
+          .from('customers')
+          .select('*')
+          .ilike('email', e)
+          .limit(5);
+
+        // Also search by phone number in case they typed phone in the email field
+        const { data: byPhone } = await db
+          .from('customers')
+          .select('*')
+          .eq('phone', e)
+          .limit(5);
+
+        const candidates = [...(byEmail || []), ...(byPhone || [])];
+        const legacyUser = candidates.find(u => u.password === p);
+
+        if (legacyUser) {
+          const mockUser = {
+            name: legacyUser.name,
+            email: legacyUser.email,
+            phone: legacyUser.phone,
+            location: legacyUser.delivery_location || legacyUser.location || ''
+          };
+          sessionStorage.setItem('legacy_user', JSON.stringify(mockUser));
+          await restoreAuthState();
+          closeAuth();
+          showToast('Welcome back, ' + legacyUser.name + '! ✨');
+          return;
+        }
+
+        // ── Both methods failed — show specific error ──
+        if (candidates.length > 0) {
+          // Account found but password is wrong
+          err.textContent = 'Incorrect password. Please try again.';
+        } else {
+          // No account found at all
+          err.textContent = 'No account found with that email. Please create an account first.';
+        }
+        err.style.display = 'block';
+
       } catch (authError) {
         console.error('[AUTH ERROR]', authError);
-        err.textContent = authError.message || 'Invalid email or password.';
+        let msg = authError.message || 'Sign in failed. Please try again.';
+        if (msg.includes('Email not confirmed')) msg = '⚠️ Please check your inbox and click the confirmation link first.';
+        err.textContent = msg;
         err.style.display = 'block';
       } finally {
         hideSpinner();
@@ -3766,7 +3824,7 @@
       const err = document.getElementById('suErr');
 
       function validatePassword(pw) {
-        return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{10,}$/.test(pw);
+        return pw.length >= 6;
       }
 
       if (!n || !e || !ph || !loc) { err.textContent = 'All fields, including Delivery Location, are required.'; err.style.display = 'block'; return; }
@@ -4169,7 +4227,7 @@
     }
 
     async function deleteAccount() { if (confirm('Delete your account permanently?')) { sessionStorage.removeItem('atk_user'); location.reload(); } }
-    function doLogout() { sessionStorage.removeItem('atk_user'); location.reload(); }
+    function doLogout() { sessionStorage.removeItem('atk_user'); sessionStorage.removeItem('legacy_user'); location.reload(); }
     function loginWithGoogle() { db.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.origin + location.pathname } }); }
     function handleAuthOverlay(e) { if (e.target === document.getElementById('authOverlay')) closeAuth(); }
     function handleCartOverlayClick(e) { if (e.target === document.getElementById('cartOverlay')) closeCart(); }

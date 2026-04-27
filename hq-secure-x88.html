@@ -678,7 +678,7 @@
             border: 1px solid rgba(76, 175, 125, 0.4);
             padding: 1rem 1.5rem;
             font-size: 0.82rem;
-            z-index: 9999;
+            z-index: 10001;
             transform: translateY(80px);
             opacity: 0;
             transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
@@ -766,6 +766,10 @@
 
         .btn-login:hover {
             background: var(--wine);
+        }
+
+        .btn-login:active {
+            transform: scale(0.98);
         }
 
         /* RESPONSIVE */
@@ -1393,27 +1397,29 @@
         const LOCKOUT_TIME = 60 * 60 * 1000; // 1 hour
 
         async function doAdminLogin(evt) {
+            const btn = document.querySelector('.btn-login');
+            if (btn) btn.textContent = 'Authenticating...';
+
             let loginAttempts = parseInt(localStorage.getItem('admin_login_attempts') || '0');
             let lockoutUntil = parseInt(localStorage.getItem('admin_lockout_until') || '0');
 
             if (lockoutUntil > Date.now()) {
                 const minsLeft = Math.ceil((lockoutUntil - Date.now()) / 60000);
                 showAdminToast(`❌ Account locked. Try again in ${minsLeft} minutes.`);
+                if (btn) btn.textContent = 'Sign In to Dashboard';
                 return;
             }
 
             if (loginAttempts >= MAX_LOGIN_ATTEMPTS) {
                 localStorage.setItem('admin_lockout_until', (Date.now() + LOCKOUT_TIME).toString());
                 showAdminToast('❌ Max attempts reached. Brute-force protection activated.');
+                if (btn) btn.textContent = 'Sign In to Dashboard';
                 return;
             }
 
             const e = document.getElementById('loginEmail').value.trim();
             const p = document.getElementById('loginPass').value;
             const errEl = document.getElementById('loginErr');
-            const btn = document.querySelector('.btn-login');
-
-            if (btn) btn.textContent = 'Authenticating...';
 
             try {
                 // Cryptographically secure authentication via Supabase Auth
@@ -1423,6 +1429,30 @@
                 });
 
                 if (error) {
+                    // Try legacy admins table fallback
+                    const cleanedEmail = e.toLowerCase();
+                    const cleanedPass = p.trim();
+                    const { data: legacyAdmin, error: legacyErr } = await db.from('admins').select('*').ilike('email', cleanedEmail).eq('password', cleanedPass).limit(1).maybeSingle();
+
+                    if (legacyAdmin) {
+                        localStorage.removeItem('admin_login_attempts');
+                        localStorage.removeItem('admin_lockout_until');
+                        document.getElementById('adminLogin').classList.add('hidden');
+                        document.getElementById('adminDisplayName').textContent = legacyAdmin.email + ' (Legacy)';
+                        reloadAndRender();
+                        resetInactivityTimer();
+                        showAdminToast('✅ Logged in via legacy table. Please migrate to Supabase Auth.');
+                        return;
+                    }
+
+                    // Check if this is actually a customer account
+                    const { data: isCustomer } = await db.from('customers').select('email').ilike('email', cleanedEmail).limit(1).maybeSingle();
+                    if (isCustomer) {
+                        errEl.textContent = "❌ This account is a Customer account. You must use an Admin account to enter the Dashboard.";
+                        errEl.style.display = 'block';
+                        return;
+                    }
+
                     loginAttempts++;
                     localStorage.setItem('admin_login_attempts', loginAttempts.toString());
                     errEl.textContent = `${error.message}. (${MAX_LOGIN_ATTEMPTS - loginAttempts} attempts left)`;
@@ -1457,7 +1487,6 @@
             }
         }
 
-        initAdminAuth();
 
         document.getElementById('loginEmail').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('loginPass').focus(); });
         document.getElementById('loginPass').addEventListener('keydown', e => { if (e.key === 'Enter') doAdminLogin(); });
@@ -1926,7 +1955,7 @@
             }
         }
 
-        init();
+        initAdminAuth();
     </script>
 </body>
 

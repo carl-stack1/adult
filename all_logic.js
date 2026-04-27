@@ -263,17 +263,71 @@ window.switchAuthTab = function (tab) {
 
 window.doSignIn = async function () {
     const email = document.getElementById('siEmail').value.trim();
-    const pass = document.getElementById('siPass').value;
-    const { data: admin } = await db.from('admins').select('*').eq('email', email).eq('password', pass);
-    if (admin && admin.length > 0) { sessionStorage.setItem('adminAuth', 'true'); window.location.href = 'admin.html'; return; }
+    const pass = document.getElementById('siPass').value.trim();
+    const err = document.getElementById('siErr');
+    if (err) err.style.display = 'none';
 
-    const { data: user } = await db.from('customers').select('*').eq('email', email).eq('password', pass).single();
-    if (user) {
-        sessionStorage.setItem('atk_user', JSON.stringify(user));
-        closeAuth(); initAuthUI();
-        if (cart.length > 0) placeOrder(user);
-        else showToast(`Welcome back, ${user.name}!`);
-    } else { alert('Invalid credentials'); }
+    if (!email || !pass) {
+        if (err) { err.textContent = 'Please enter your email and password.'; err.style.display = 'block'; }
+        return;
+    }
+
+    const btn = document.querySelector('.auth-btn');
+
+    try {
+        // ── STEP 1: Try Supabase Auth (accounts created via the normal sign-up flow) ──
+        const { data, error } = await db.auth.signInWithPassword({ email, password: pass });
+
+        if (!error && data.session) {
+            // Supabase Auth succeeded — pull their profile from the customers table
+            let { data: customer } = await db.from('customers').select('*').ilike('email', email).limit(1).maybeSingle();
+            if (!customer) {
+                // First Google/Auth login — create a stub record
+                const newUser = { name: data.user.user_metadata?.full_name || email.split('@')[0], email, password: 'auth_managed', phone: '', delivery_location: '' };
+                const { data: inserted } = await db.from('customers').insert([newUser]).select().single();
+                customer = inserted;
+            }
+            if (customer) {
+                sessionStorage.setItem('atk_user', JSON.stringify(customer));
+                closeAuth();
+                initAuthUI();
+                if (cart.length > 0) placeOrder(customer);
+                else showToast(`Welcome back, ${customer.name}! ✨`);
+            }
+            return;
+        }
+
+        // ── STEP 2: Legacy fallback — search customers table directly ──
+        // Use ilike for case-insensitive email match
+        const { data: byEmail } = await db.from('customers').select('*').ilike('email', email).limit(5);
+        // Also allow phone number as the "username"
+        const { data: byPhone } = await db.from('customers').select('*').eq('phone', email).limit(5);
+
+        const candidates = [...(byEmail || []), ...(byPhone || [])];
+        const match = candidates.find(u => u.password === pass);
+
+        if (match) {
+            sessionStorage.setItem('atk_user', JSON.stringify(match));
+            closeAuth();
+            initAuthUI();
+            if (cart.length > 0) placeOrder(match);
+            else showToast(`Welcome back, ${match.name}! ✨`);
+            return;
+        }
+
+        // ── Provide specific error message ──
+        const msg = candidates.length > 0
+            ? 'Incorrect password. Please try again.'
+            : 'No account found with that email. Please create an account.';
+        if (err) { err.textContent = msg; err.style.display = 'block'; }
+
+    } catch (e) {
+        console.error('[SIGN IN ERROR]', e);
+        const msg = e.message?.includes('Email not confirmed')
+            ? '⚠️ Please check your email inbox and click the confirmation link.'
+            : 'Sign in failed. Please try again.';
+        if (err) { err.textContent = msg; err.style.display = 'block'; }
+    }
 }
 
 window.doForgotPassword = async function () {
