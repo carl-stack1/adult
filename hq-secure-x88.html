@@ -1392,7 +1392,7 @@
         let loginAttempts = 0;
         const MAX_LOGIN_ATTEMPTS = 5;
 
-        async function doAdminLogin() {
+        async function doAdminLogin(evt) {
             if (loginAttempts >= MAX_LOGIN_ATTEMPTS) {
                 showAdminToast('❌ Account locked due to too many attempts. Refresh and try later.');
                 return;
@@ -1401,8 +1401,9 @@
             const e = document.getElementById('loginEmail').value.trim();
             const p = document.getElementById('loginPass').value;
             const errEl = document.getElementById('loginErr');
-            const btn = event?.target;
-            if (btn && btn.tagName === 'BUTTON') btn.textContent = 'Authenticating...';
+            const btn = document.querySelector('.btn-login');
+
+            if (btn) btn.textContent = 'Authenticating...';
 
             try {
                 // Cryptographically secure authentication via Supabase Auth
@@ -1413,7 +1414,7 @@
 
                 if (error) {
                     loginAttempts++;
-                    errEl.textContent = `Invalid credentials. (${MAX_LOGIN_ATTEMPTS - loginAttempts} attempts left)`;
+                    errEl.textContent = `${error.message}. (${MAX_LOGIN_ATTEMPTS - loginAttempts} attempts left)`;
                     errEl.style.display = 'block';
                 } else if (data.session) {
                     loginAttempts = 0;
@@ -1423,9 +1424,10 @@
                     resetInactivityTimer();
                 }
             } catch (err) {
+                errEl.textContent = 'An unexpected error occurred.';
                 errEl.style.display = 'block';
             } finally {
-                if (btn && btn.tagName === 'BUTTON') btn.textContent = 'Access Portal';
+                if (btn) btn.textContent = 'Sign In to Dashboard';
             }
         }
 
