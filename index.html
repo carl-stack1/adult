@@ -17,9 +17,14 @@
     })();
   </script>
 
-  <link
-    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap"
-    rel="stylesheet">
+  href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap"
+  rel="stylesheet">
+
+  <!-- Security Headers -->
+  <meta http-equiv="X-Frame-Options" content="DENY">
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'self' https: 'unsafe-inline' 'unsafe-eval'; img-src 'self' https: data:; font-src 'self' https: data:;">
+
   <style>
     :root {
       --black: #0a0a0a;
@@ -3713,17 +3718,24 @@
     async function doSignIn() {
       const e = document.getElementById('siEmail').value.trim();
       const p = document.getElementById('siPass').value;
-      const u = CUSTOMERS_DB.find(c => c.email === e && c.phone === p); // using phone field as password for mock
-      if (!u && !(e === 'test@test.com')) {
+      const err = document.getElementById('siErr');
+
+      showSpinner('Signing in...');
+      try {
+        const { data, error } = await db.auth.signInWithPassword({ email: e, password: p });
+        if (error) throw error;
+
+        // Data is persisted via session, restoreAuthState will handle the rest
+        restoreAuthState();
+        closeAuth();
+        showToast('Welcome back! ✨');
+      } catch (err) {
+        console.error('[AUTH ERROR]', err);
+        err.textContent = 'Invalid email or password.';
         document.getElementById('siErr').style.display = 'block';
-        return;
+      } finally {
+        hideSpinner();
       }
-      const authU = u || { name: 'Test User', email: e, phone: p };
-      document.getElementById('siErr').style.display = 'none';
-      sessionStorage.setItem('atk_user', JSON.stringify(authU));
-      restoreAuthState(); // Update Navbar UI
-      closeAuth();
-      placeOrder(authU);
     }
     async function doSignUp() {
       const n = document.getElementById('suName').value.trim();
@@ -3732,21 +3744,41 @@
       const ph = document.getElementById('suPhone').value.trim();
       const loc = document.getElementById('suLoc').value.trim();
       const err = document.getElementById('suErr');
+
       function validatePassword(pw) {
         return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{10,}$/.test(pw);
       }
+
       if (!n || !e || !ph || !loc) { err.textContent = 'All fields, including Delivery Location, are required.'; err.style.display = 'block'; return; }
       if (!validatePassword(p)) { err.textContent = 'Password must be 10+ characters and include uppercase, lowercase, a number, and a special character (e.g. @$!%*?&).'; err.style.display = 'block'; return; }
-      if (CUSTOMERS_DB.find(c => c.email === e)) { err.textContent = 'Email already exists.'; err.style.display = 'block'; return; }
-      err.style.display = 'none';
-      const u = { name: n, email: e, phone: ph, location: loc };
-      await db.from('customers').insert([u]);
-      CUSTOMERS_DB.push(u);
-      sessionStorage.setItem('atk_user', JSON.stringify(u));
-      restoreAuthState(); // Update Navbar UI
-      showToast(`Welcome, ${n}! Your account was created successfully. ✨`);
-      closeAuth();
-      placeOrder(u);
+
+      showSpinner('Creating your account...');
+      try {
+        // 1. Create true Supabase Auth account
+        const { data: authData, error: authErr } = await db.auth.signUp({
+          email: e,
+          password: p,
+          options: {
+            data: { full_name: n, phone_number: ph, location: loc }
+          }
+        });
+        if (authErr) throw authErr;
+
+        // 2. Sync with Customers table for order history cross-referencing
+        const u = { name: n, email: e, phone: ph, location: loc };
+        await db.from('customers').insert([u]);
+        CUSTOMERS_DB.push(u);
+
+        showToast('✨ Account created! Please check your email for verification.');
+        restoreAuthState();
+        closeAuth();
+      } catch (err) {
+        console.error('[SIGNUP ERROR]', err);
+        err.textContent = err.message || 'Error creating account.';
+        err.style.display = 'block';
+      } finally {
+        hideSpinner();
+      }
     }
 
     // Order
@@ -3916,10 +3948,10 @@
         return `
         <div class="review-card fade-in" style="animation-delay:${i * 0.1}s">
           <div class="review-quote">"</div>
-          <p class="review-text">${shortText}</p>
+          <p class="review-text">${sanitizeHTML(shortText)}</p>
           <div class="review-footer">
             <div class="reviewer-info">
-              <div class="reviewer-name">${r.customer_name || 'Verified Customer'}</div>
+              <div class="reviewer-name">${sanitizeHTML(r.customer_name || 'Verified Customer')}</div>
               <div class="reviewer-location">Verified Customer</div>
             </div>
             <div>
@@ -4070,17 +4102,18 @@
         location: document.getElementById('prLoc').value.trim()
       };
 
-      // Handle Password Change
-      const oldPass = document.getElementById('prOldPass').value;
-      const newPass = document.getElementById('prNewPass').value;
-      const confirmPass = document.getElementById('prConfirmPass').value;
-
       if (newPass) {
+        if (!oldPass) { showToast('Please enter your current password to change it.'); return; }
         if (newPass !== confirmPass) { showToast('New passwords do not match!'); return; }
-        if (newPass.length < 6) { showToast('Password must be at least 6 characters.'); return; }
-        // Note: Supabase updatePassword doesn't strictly need old pass if session is active but it's good practice
+        if (newPass.length < 10) { showToast('New password must be at least 10 characters.'); return; }
+
+        // Point 11: Verify old password by re-signing in
+        const { error: reAuthErr } = await db.auth.signInWithPassword({ email: u.email, password: oldPass });
+        if (reAuthErr) { showToast('Current password incorrect.'); return; }
+
         const { error } = await db.auth.updateUser({ password: newPass });
         if (error) { showToast('Error updating password: ' + error.message); return; }
+        showToast('Password updated successfully!');
       }
 
       sessionStorage.setItem('atk_user', JSON.stringify(newU));

@@ -6,9 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard | ADULTTOYSKE</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap"
-        rel="stylesheet">
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap"
+    rel="stylesheet">
+
+    <!-- Security Headers -->
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self' https: 'unsafe-inline' 'unsafe-eval'; img-src 'self' https: data:; font-src 'self' https: data:;">
+
     <style>
         :root {
             --black: #0a0a0a;
@@ -837,8 +842,10 @@
         <div class="login-box">
             <div class="login-logo">ADULTTOYSKE</div>
             <div class="login-sub">Admin Portal</div>
-            <input type="email" id="loginEmail" placeholder="Admin email" style="display:block">
-            <input type="password" id="loginPass" placeholder="Password" style="display:block">
+            <input type="email" id="loginEmail" placeholder="Admin email" style="display:block" autocomplete="username">
+            <input type="password" id="loginPass" placeholder="Password" style="display:block"
+                autocomplete="current-password">
+
             <div class="login-err" id="loginErr" style="display:none">Invalid credentials. Please try again.</div>
             <button class="btn-login" onclick="doAdminLogin()">Sign In to Dashboard</button>
         </div>
@@ -1352,7 +1359,32 @@
             }
         }
 
+        // ── SECURITY UTILITIES ─────────────────────────────────────────
+        function sanitizeHTML(str) {
+            if (!str) return '';
+            const div = document.createElement('div');
+            div.textContent = String(str);
+            return div.innerHTML;
+        }
+
+        // ── INACTIVITY TIMER (30 MIN) ──────────────────────────────────
+        let inactivityTimer;
+        function resetInactivityTimer() {
+            clearTimeout(inactivityTimer);
+            inactivityTimer = setTimeout(() => adminLogout(), 30 * 60 * 1000);
+        }
+        ['click', 'keydown', 'mousemove', 'scroll'].forEach(e => document.addEventListener(e, resetInactivityTimer));
+
+        // ── BRUTE FORCE PROTECTION ─────────────────────────────────────
+        let loginAttempts = 0;
+        const MAX_LOGIN_ATTEMPTS = 5;
+
         async function doAdminLogin() {
+            if (loginAttempts >= MAX_LOGIN_ATTEMPTS) {
+                showAdminToast('❌ Account locked due to too many attempts. Refresh and try later.');
+                return;
+            }
+
             const e = document.getElementById('loginEmail').value.trim();
             const p = document.getElementById('loginPass').value;
             const errEl = document.getElementById('loginErr');
@@ -1367,11 +1399,15 @@
                 });
 
                 if (error) {
+                    loginAttempts++;
+                    errEl.textContent = `Invalid credentials. (${MAX_LOGIN_ATTEMPTS - loginAttempts} attempts left)`;
                     errEl.style.display = 'block';
                 } else if (data.session) {
+                    loginAttempts = 0;
                     document.getElementById('adminLogin').classList.add('hidden');
                     document.getElementById('adminDisplayName').textContent = data.user?.email || 'Admin';
                     reloadAndRender();
+                    resetInactivityTimer();
                 }
             } catch (err) {
                 errEl.style.display = 'block';
@@ -1418,7 +1454,7 @@
                 DB_PROMOS = bRes.data || [];
                 DB_REVIEWS = rRes.data || [];
                 DB_SUBSCRIBERS = sRes ? (sRes.data || []) : [];
-                console.log('Synced with Cloud:', DB_PRODUCTS.length, 'products');
+                // Data synced successfully
             } catch (err) {
                 console.error('Fetch Error:', err);
             }
@@ -1653,15 +1689,15 @@
             const deliveryLocation = matchedCustomer && matchedCustomer.location ? matchedCustomer.location : 'Not provided yet';
 
             document.getElementById('orderModalBody').innerHTML = `
-    <div class="order-detail-row"><span class="order-detail-label">Order ID</span><span style="font-family:monospace">${o.id}</span></div>
-    <div class="order-detail-row"><span class="order-detail-label">Customer</span><span>${o.customer_name}</span></div>
-    <div class="order-detail-row"><span class="order-detail-label">Email</span><span>${o.customer_email}</span></div>
-    <div class="order-detail-row"><span class="order-detail-label">Phone</span><span>${o.customer_phone || '—'}</span></div>
-    <div class="order-detail-row"><span class="order-detail-label">Location</span><span style="font-weight:600; color:var(--rose)">${deliveryLocation}</span></div>
+    <div class="order-detail-row"><span class="order-detail-label">Order ID</span><span style="font-family:monospace">${sanitizeHTML(o.id)}</span></div>
+    <div class="order-detail-row"><span class="order-detail-label">Customer</span><span>${sanitizeHTML(o.customer_name)}</span></div>
+    <div class="order-detail-row"><span class="order-detail-label">Email</span><span>${sanitizeHTML(o.customer_email)}</span></div>
+    <div class="order-detail-row"><span class="order-detail-label">Phone</span><span>${sanitizeHTML(o.customer_phone || '—')}</span></div>
+    <div class="order-detail-row"><span class="order-detail-label">Location</span><span style="font-weight:600; color:var(--rose)">${sanitizeHTML(deliveryLocation)}</span></div>
     <div class="order-detail-row"><span class="order-detail-label">Date</span><span>${new Date(o.created_at || Date.now()).toLocaleString()}</span></div>
-    <div class="order-detail-row"><span class="order-detail-label">Status</span><span class="status-badge ${statusClass}">${o.status}</span></div>
+    <div class="order-detail-row"><span class="order-detail-label">Status</span><span class="status-badge ${statusClass}">${sanitizeHTML(o.status)}</span></div>
     <div style="margin:1rem 0;font-size:0.7rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--text-muted)">Items Ordered</div>
-    ${(o.items || []).map(i => `<div class="order-detail-row"><span>${i.emoji || '📦'} ${i.name} × ${i.qty}</span><span>KES ${(i.price * i.qty).toLocaleString()}</span></div>`).join('')}
+    ${(o.items || []).map(i => `<div class="order-detail-row"><span>${i.emoji || '📦'} ${sanitizeHTML(i.name)} × ${i.qty}</span><span>KES ${(i.price * i.qty).toLocaleString()}</span></div>`).join('')}
     <div class="order-detail-row" style="margin-top:0.5rem;border-top:1px solid var(--border);padding-top:0.75rem"><span style="font-weight:500">Total</span><span style="color:var(--rose);font-size:1.1rem">KES ${(o.total || 0).toLocaleString()}</span></div>
     <div style="margin-top:1.5rem;display:flex;gap:0.75rem;flex-wrap:wrap">
       <button class="btn-primary" onclick="updateStatus('${o.id}','confirmed');closeOrderModal()">✅ Confirm Order</button>
@@ -1835,14 +1871,14 @@
                 return `
                     <tr>
                         <td>
-                            <div style="font-weight:600">${r.customer_name}</div>
+                            <div style="font-weight:600">${sanitizeHTML(r.customer_name)}</div>
                             ${badge}
                         </td>
-                        <td>${r.customer_email || '—'}</td>
+                        <td>${sanitizeHTML(r.customer_email || '—')}</td>
                         <td><span style="color:var(--rose)">${'★'.repeat(r.rating)}</span></td>
                         <td style="max-width:300px; font-size:0.85rem; color:var(--text-muted)">
-                            <div style="font-weight:600;color:white;margin-bottom:2px">ID: ${r.product_id}</div>
-                            "${r.review_text}"
+                            <div style="font-weight:600;color:white;margin-bottom:2px">ID: ${sanitizeHTML(r.product_id)}</div>
+                            "${sanitizeHTML(r.review_text)}"
                         </td>
                         <td>
                             <button class="btn-ghost" onclick="deleteReview('${r.id}')" style="color:#ef4444">Delete</button>
