@@ -3923,6 +3923,13 @@
         </div>
         `;
       }).join('');
+      
+      // Observe new dynamic elements for scroll-reveal animations
+      if (typeof fadeObs !== 'undefined') {
+         grid.querySelectorAll('.fade-in').forEach(el => fadeObs.observe(el));
+      } else {
+         grid.querySelectorAll('.fade-in').forEach(el => el.classList.add('visible'));
+      }
     }
 
     // AUTH STATE RESTORE ON LOAD
