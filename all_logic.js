@@ -259,6 +259,10 @@ window.closeAuth = function () { document.getElementById('authOverlay').classLis
 window.switchAuthTab = function (tab) {
     document.getElementById('formSignIn').style.display = tab === 'signin' ? 'block' : 'none';
     document.getElementById('formSignUp').style.display = tab === 'signup' ? 'block' : 'none';
+    document.getElementById('formResetPassword').style.display = tab === 'reset' ? 'block' : 'none';
+
+    if (document.getElementById('tabSignIn')) document.getElementById('tabSignIn').classList.toggle('active', tab === 'signin');
+    if (document.getElementById('tabSignUp')) document.getElementById('tabSignUp').classList.toggle('active', tab === 'signup');
 }
 
 window.doSignIn = async function () {
@@ -327,6 +331,38 @@ window.doSignIn = async function () {
             ? '⚠️ Please check your email inbox and click the confirmation link.'
             : 'Sign in failed. Please try again.';
         if (err) { err.textContent = msg; err.style.display = 'block'; }
+    }
+}
+
+window.doUpdatePassword = async function () {
+    const p1 = document.getElementById('rpPass').value;
+    const p2 = document.getElementById('rpPassConfirm').value;
+    const err = document.getElementById('rpErr');
+    if (err) err.style.display = 'none';
+
+    if (p1.length < 6 || p1 !== p2) {
+        if (err) {
+            err.textContent = p1 !== p2 ? "Passwords do not match." : "Password must be at least 6 characters.";
+            err.style.display = 'block';
+        }
+        return;
+    }
+
+    try {
+        const { error } = await db.auth.updateUser({ password: p1 });
+        if (error) throw error;
+
+        // Also update the legacy customers table for consistency
+        const { data: { user } } = await db.auth.getUser();
+        if (user) {
+            await db.from('customers').update({ password: p1 }).eq('email', user.email);
+        }
+
+        showToast("✨ Password updated successfully!");
+        closeAuth();
+        location.reload(); // Refresh to clean hash and session state
+    } catch (e) {
+        if (err) { err.textContent = e.message; err.style.display = 'block'; }
     }
 }
 
@@ -454,6 +490,11 @@ async function init() {
 }
 
 db.auth.onAuthStateChange(async (event, session) => {
+    if (event === 'PASSWORD_RECOVERY') {
+        openAuth();
+        switchAuthTab('reset');
+    }
+
     if (session && session.user && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) {
         let { data: customer } = await db.from('customers').select('*').eq('email', session.user.email).maybeSingle();
         if (!customer) {

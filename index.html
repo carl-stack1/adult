@@ -3116,6 +3116,17 @@
         <p class="auth-note" style="margin-top:1rem">Have an account? <a href="#"
             onclick="switchAuthTab('signin');return false" style="color:var(--rose)">Sign in →</a></p>
       </div>
+      <!-- RESET PASSWORD FORM -->
+      <div id="formResetPassword" style="display:none">
+        <div class="auth-form">
+          <div class="auth-note" style="margin-bottom:1rem; color:var(--rose)">Reset Your Password — Choose a new secure
+            password below.</div>
+          <input class="auth-input" type="password" id="rpPass" placeholder="New Password (min 6 chars)">
+          <input class="auth-input" type="password" id="rpPassConfirm" placeholder="Confirm New Password">
+          <div class="auth-err" id="rpErr">Passwords must match and be 6+ characters.</div>
+          <button class="auth-btn" onclick="doUpdatePassword()">Update Password &amp; Sign In</button>
+        </div>
+      </div>
       <p class="auth-note" style="margin-top:1.25rem">🔒 Your information is kept completely private and never shared.
       </p>
     </div>
@@ -4232,7 +4243,45 @@
     function handleAuthOverlay(e) { if (e.target === document.getElementById('authOverlay')) closeAuth(); }
     function handleCartOverlayClick(e) { if (e.target === document.getElementById('cartOverlay')) closeCart(); }
     function handlePdOverlay(e) { if (e.target === document.getElementById('pdOverlay')) closePd(); }
-    function switchAuthTab(t) { document.getElementById('formSignIn').style.display = t === 'signin' ? 'block' : 'none'; document.getElementById('formSignUp').style.display = t === 'signup' ? 'block' : 'none'; document.getElementById('tabSignIn').classList.toggle('active', t === 'signin'); document.getElementById('tabSignUp').classList.toggle('active', t === 'signup'); }
+    function switchAuthTab(t) {
+      document.getElementById('formSignIn').style.display = t === 'signin' ? 'block' : 'none';
+      document.getElementById('formSignUp').style.display = t === 'signup' ? 'block' : 'none';
+      document.getElementById('formResetPassword').style.display = t === 'reset' ? 'block' : 'none';
+      document.getElementById('tabSignIn').classList.toggle('active', t === 'signin');
+      document.getElementById('tabSignUp').classList.toggle('active', t === 'signup');
+    }
+
+    async function doUpdatePassword() {
+      const p1 = document.getElementById('rpPass').value;
+      const p2 = document.getElementById('rpPassConfirm').value;
+      const err = document.getElementById('rpErr');
+      err.style.display = 'none';
+
+      if (p1.length < 6 || p1 !== p2) {
+        err.textContent = p1 !== p2 ? "Passwords do not match." : "Minimum 6 characters required.";
+        err.style.display = 'block';
+        return;
+      }
+
+      showSpinner('Updating password...');
+      try {
+        const { error } = await db.auth.updateUser({ password: p1 });
+        if (error) throw error;
+
+        // Sync legacy table
+        const u = await getCurrentUser();
+        if (u) await db.from('customers').update({ password: p1 }).eq('email', u.email);
+
+        showToast('✨ Password updated! You are now signed in.');
+        closeAuth();
+        location.href = window.location.origin + window.location.pathname; // Clear recovery hash from URL
+      } catch (e) {
+        err.textContent = e.message;
+        err.style.display = 'block';
+      } finally {
+        hideSpinner();
+      }
+    }
     function enterSite() { localStorage.setItem('atk_age', 'ok'); document.getElementById('ageGate').classList.add('hidden'); }
     function exitSite() { location.href = 'https://www.google.com'; }
 
@@ -4243,6 +4292,10 @@
     db.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_IN' || event === 'USER_UPDATED') {
         restoreAuthState();
+      }
+      if (event === 'PASSWORD_RECOVERY') {
+        openAuth();
+        switchAuthTab('reset');
       }
     });
 
