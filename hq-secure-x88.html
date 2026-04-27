@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard | ADULTTOYSKE</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script>emailjs.init("KpJG7VlsvAp9gTry3");</script>
     <link
         href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap"
         rel="stylesheet">
@@ -1392,19 +1394,74 @@
         }
         ['click', 'keydown', 'mousemove', 'scroll'].forEach(e => document.addEventListener(e, resetInactivityTimer));
 
-        // ── BRUTE FORCE PROTECTION (temporarily disabled for debugging) ──────
+        // ── BRUTE FORCE PROTECTION + SILENT SECURITY ALERTS ────────────
         const MAX_LOGIN_ATTEMPTS = 5;
-        const LOCKOUT_TIME = 60 * 60 * 1000; // 1 hour
+        const LOCKOUT_TIME = 60 * 60 * 1000; // 1 hour lockout
+        const ALERT_THRESHOLD = 3;            // Send alert after 3 failed attempts
+        const OWNER_ALERT_EMAIL = 'wambuat197@gmail.com';
+
+        // Silently email the owner when brute force is detected
+        async function sendBruteForceAlert(attemptCount) {
+            try {
+                const timestamp = new Date().toLocaleString('en-KE', { timeZone: 'Africa/Nairobi' });
+                const browserInfo = navigator.userAgent;
+                await emailjs.send('service_a2diqqb', 'template_b7h4cw3', {
+                    to_email: OWNER_ALERT_EMAIL,
+                    customer_name: '⚠️ SECURITY ALERT — AdultToysKe Admin Portal',
+                    order_id: `BRUTE-FORCE-DETECTED`,
+                    total_price: `${attemptCount} failed attempt(s)`,
+                    items_list: `Time: ${timestamp}\nBrowser: ${browserInfo}\nACTION: Admin login page is being targeted. If this was not you, the site has been locked for 1 hour.`,
+                });
+                console.warn('[SECURITY] Brute force alert sent to owner.');
+            } catch (e) {
+                // Silent — never reveal email failures to attacker
+                console.warn('[SECURITY] Alert email failed silently.');
+            }
+        }
+
+        // Put the site into maintenance mode (hides content, shows locked message)
+        function activateMaintenanceMode() {
+            document.body.innerHTML = `
+                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;
+                    min-height:100vh;background:#0a0a0a;color:#fdf8f5;font-family:'DM Sans',sans-serif;
+                    text-align:center;padding:2rem;">
+                    <div style="font-size:3rem;margin-bottom:1.5rem;">🔒</div>
+                    <h1 style="font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:300;
+                        color:#c4587a;letter-spacing:0.05em;margin-bottom:1rem;">
+                        Site Under Maintenance
+                    </h1>
+                    <p style="color:#888;font-size:0.9rem;max-width:400px;line-height:1.6;">
+                        This page is temporarily unavailable due to a security event.<br>
+                        Please check back later. If you are the administrator, check your email.
+                    </p>
+                    <p style="margin-top:2rem;font-size:0.72rem;color:#555;letter-spacing:0.1em;">
+                        ADULTTOYSKE · SECURITY LOCKDOWN
+                    </p>
+                </div>`;
+        }
 
         async function doAdminLogin(evt) {
             const btn = document.querySelector('.btn-login');
             if (btn) btn.textContent = 'Authenticating...';
 
-            // ⚠️ LOCKOUT DISABLED FOR DEBUGGING — re-enable after login is confirmed working
-            // let loginAttempts = parseInt(localStorage.getItem('admin_login_attempts') || '0');
-            // let lockoutUntil  = parseInt(localStorage.getItem('admin_lockout_until')  || '0');
-            // if (lockoutUntil > Date.now()) { ... return; }
-            // if (loginAttempts >= MAX_LOGIN_ATTEMPTS) { ... return; }
+            let loginAttempts = parseInt(localStorage.getItem('admin_login_attempts') || '0');
+            let lockoutUntil = parseInt(localStorage.getItem('admin_lockout_until') || '0');
+
+            // ── CHECK EXISTING LOCKOUT ──
+            if (lockoutUntil > Date.now()) {
+                const minsLeft = Math.ceil((lockoutUntil - Date.now()) / 60000);
+                showAdminToast(`🔒 Account locked. Try again in ${minsLeft} minute(s).`);
+                if (btn) btn.textContent = 'Sign In to Dashboard';
+                return;
+            }
+
+            // ── MAX ATTEMPTS REACHED → LOCKOUT + MAINTENANCE MODE ──
+            if (loginAttempts >= MAX_LOGIN_ATTEMPTS) {
+                localStorage.setItem('admin_lockout_until', (Date.now() + LOCKOUT_TIME).toString());
+                await sendBruteForceAlert(loginAttempts); // Silent alert
+                activateMaintenanceMode();                // Pull the site down
+                return;
+            }
 
             const e = document.getElementById('loginEmail').value.trim();
             const p = document.getElementById('loginPass').value.trim();
@@ -1412,28 +1469,23 @@
 
             try {
                 // ── STEP 1: Try Supabase Auth ──
-                console.log('[ADMIN LOGIN] Trying Supabase Auth for:', e);
-                const { data, error } = await db.auth.signInWithPassword({
-                    email: e,
-                    password: p
-                });
-                console.log('[ADMIN LOGIN] Supabase Auth result → error:', error, '| session:', data?.session);
+                const { data, error } = await db.auth.signInWithPassword({ email: e, password: p });
 
                 if (error) {
                     // ── STEP 2: Legacy admins table fallback ──
                     const cleanedEmail = e.toLowerCase();
-                    const cleanedPass = p;
-                    console.log('[ADMIN LOGIN] Trying legacy admins table for:', cleanedEmail, '| pass:', cleanedPass);
-                    const { data: legacyAdmin, error: legacyErr } = await db
+                    const { data: legacyAdmin } = await db
                         .from('admins')
                         .select('*')
                         .ilike('email', cleanedEmail)
-                        .eq('password', cleanedPass)
+                        .eq('password', p)
                         .limit(1)
                         .maybeSingle();
-                    console.log('[ADMIN LOGIN] Legacy table result → legacyAdmin:', legacyAdmin, '| legacyErr:', legacyErr);
 
                     if (legacyAdmin) {
+                        // ✅ Legacy login success — clear counters
+                        localStorage.removeItem('admin_login_attempts');
+                        localStorage.removeItem('admin_lockout_until');
                         document.getElementById('adminLogin').classList.add('hidden');
                         document.getElementById('adminDisplayName').textContent = legacyAdmin.email;
                         reloadAndRender();
@@ -1451,20 +1503,37 @@
                         return;
                     }
 
-                    // Both failed — show the actual error message
-                    console.error('[ADMIN LOGIN] All methods failed. Supabase error:', error.message);
-                    errEl.textContent = `Login failed: ${error.message}`;
+                    // ── FAILED ATTEMPT — increment counter ──
+                    loginAttempts++;
+                    localStorage.setItem('admin_login_attempts', loginAttempts.toString());
+                    const attemptsLeft = MAX_LOGIN_ATTEMPTS - loginAttempts;
+
+                    // Send silent alert at threshold (3 attempts)
+                    if (loginAttempts === ALERT_THRESHOLD) {
+                        sendBruteForceAlert(loginAttempts); // fire and forget — don't await
+                    }
+
+                    // Pull site down and notify at max attempts
+                    if (loginAttempts >= MAX_LOGIN_ATTEMPTS) {
+                        localStorage.setItem('admin_lockout_until', (Date.now() + LOCKOUT_TIME).toString());
+                        await sendBruteForceAlert(loginAttempts);
+                        activateMaintenanceMode();
+                        return;
+                    }
+
+                    errEl.textContent = `❌ Incorrect credentials. ${attemptsLeft} attempt(s) left.`;
                     errEl.style.display = 'block';
 
                 } else if (data.session) {
-                    // Supabase Auth succeeded
+                    // ✅ Supabase Auth success — clear counters
+                    localStorage.removeItem('admin_login_attempts');
+                    localStorage.removeItem('admin_lockout_until');
                     document.getElementById('adminLogin').classList.add('hidden');
                     document.getElementById('adminDisplayName').textContent = data.user?.email || 'Admin';
                     reloadAndRender();
                     resetInactivityTimer();
                 }
             } catch (err) {
-                console.error('[ADMIN LOGIN] Unexpected error:', err);
                 errEl.textContent = 'Unexpected error: ' + err.message;
                 errEl.style.display = 'block';
             } finally {
