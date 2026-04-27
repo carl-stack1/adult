@@ -3749,10 +3749,10 @@
         restoreAuthState();
         closeAuth();
         showToast('Welcome back! ✨');
-      } catch (err) {
-        console.error('[AUTH ERROR]', err);
-        err.textContent = 'Invalid email or password.';
-        document.getElementById('siErr').style.display = 'block';
+      } catch (authError) {
+        console.error('[AUTH ERROR]', authError);
+        err.textContent = authError.message || 'Invalid email or password.';
+        err.style.display = 'block';
       } finally {
         hideSpinner();
       }
@@ -3792,9 +3792,9 @@
         showToast('✨ Account created! Please check your email for verification.');
         restoreAuthState();
         closeAuth();
-      } catch (err) {
-        console.error('[SIGNUP ERROR]', err);
-        err.textContent = err.message || 'Error creating account.';
+      } catch (signUpErr) {
+        console.error('[SIGNUP ERROR]', signUpErr);
+        err.textContent = signUpErr.message || 'Error creating account.';
         err.style.display = 'block';
       } finally {
         hideSpinner();
