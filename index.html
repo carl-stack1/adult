@@ -3368,26 +3368,34 @@
           db.from('products').select('*'),
           db.from('customers').select('*'),
           db.from('promo_banners').select('*'),
-          db.from('product_reviews').select('*').order('created_at', { ascending: false }).limit(6)
+          db.from('product_reviews').select('*').order('created_at', { ascending: false })
         ]);
         if (pRes.data) {
-          ALL_PRODUCTS_DB = pRes.data.map(ap => ({
-            id: ap.id || ap.name,
-            name: ap.name,
-            category: ap.category,
-            price: ap.price,
-            oldPrice: ap.old_price,
-            badge: ap.badge || '',
-            rating: '★★★★★',
-            count: 0,
-            sizes: ap.sizes || 'One Size',
-            model: ap.model || '—',
-            desc: ap.full_desc || ap.short_desc || '',
-            features: ap.features || '',
-            img: ap.img,
-            stock: ap.stock || 0,
-            reviews: []
-          }));
+          ALL_PRODUCTS_DB = pRes.data.map(ap => {
+            const productReviews = rRes.data ? rRes.data.filter(r => r.product_id === String(ap.id || ap.name)) : [];
+            return {
+              id: ap.id || ap.name,
+              name: ap.name,
+              category: ap.category,
+              price: ap.price,
+              oldPrice: ap.old_price,
+              badge: ap.badge || '',
+              rating: '★★★★★',
+              count: productReviews.length,
+              sizes: ap.sizes || 'One Size',
+              model: ap.model || '—',
+              desc: ap.full_desc || ap.short_desc || '',
+              features: ap.features || '',
+              img: ap.img,
+              stock: ap.stock || 0,
+              reviews: productReviews.map(r => ({
+                n: r.customer_name,
+                l: 'Verified Customer',
+                s: '★'.repeat(r.rating || 5),
+                t: r.review_text
+              }))
+            };
+          });
         }
         if (rRes.data) renderDynamicReviews(rRes.data);
         CUSTOMERS_DB = cRes.data || [];
