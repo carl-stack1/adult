@@ -970,6 +970,7 @@
                                 <option value="all">All Statuses</option>
                                 <option value="pending">Pending</option>
                                 <option value="confirmed">Confirmed</option>
+                                <option value="shipped">Shipped</option>
                                 <option value="delivered">Delivered</option>
                                 <option value="cancelled">Cancelled</option>
                             </select>
@@ -1079,6 +1080,10 @@
                             <div class="form-group">
                                 <label>Emoji / Icon</label>
                                 <input type="text" id="pEmoji" placeholder="e.g. 💜" maxlength="4">
+                            </div>
+                            <div class="form-group">
+                                <label>Stock Availability</label>
+                                <input type="number" id="pStock" placeholder="e.g. 100" value="50">
                             </div>
                             <div class="form-group">
                                 <label>Available Sizes (comma-separated)</label>
@@ -1431,6 +1436,7 @@
             document.getElementById('pShortDesc').value = p.short_desc || '';
             document.getElementById('pFullDesc').value = p.full_desc || '';
             document.getElementById('pFeatures').value = p.features || '';
+            document.getElementById('pStock').value = p.stock || 0;
 
             const imgPrev = document.getElementById('imgPreview');
             if (p.img) {
@@ -1472,7 +1478,7 @@
                 short_desc: document.getElementById('pShortDesc').value,
                 full_desc: document.getElementById('pFullDesc').value,
                 features: document.getElementById('pFeatures').value,
-                stock: 50
+                stock: parseInt(document.getElementById('pStock').value) || 0
             };
 
             const editIdx = document.getElementById('pName').dataset.editIndex;
@@ -1533,7 +1539,7 @@
         }
 
         function orderRow(o, showEmail) {
-            const statusClass = { pending: 'status-pending', confirmed: 'status-confirmed', delivered: 'status-delivered', cancelled: 'status-cancelled' }[o.status] || 'status-pending';
+            const statusClass = { pending: 'status-pending', confirmed: 'status-confirmed', shipped: 'status-confirmed', delivered: 'status-delivered', cancelled: 'status-cancelled' }[o.status] || 'status-pending';
             const itemsSummary = (o.items || []).slice(0, 2).map(i => i.name).join(', ') + (o.items && o.items.length > 2 ? ` +${o.items.length - 2} more` : '');
             const emailCol = showEmail ? `<td>${o.customer_email || '—'}</td>` : '';
             return `
@@ -1555,6 +1561,21 @@
         }
 
         async function updateStatus(orderId, newStatus) {
+            // Deduct stock if marked as delivered
+            if (newStatus === 'delivered') {
+                const order = getOrders().find(o => o.id === orderId);
+                if (order && order.items && order.status !== 'delivered') {
+                    for (const item of order.items) {
+                        // Find product by name or id (assuming item has name and we match it in DB_PRODUCTS)
+                        const prod = DB_PRODUCTS.find(p => p.name === item.name);
+                        if (prod) {
+                            const newStock = Math.max(0, (prod.stock || 0) - (item.qty || 1));
+                            await db.from('products').update({ stock: newStock }).eq('id', prod.id);
+                        }
+                    }
+                }
+            }
+
             const { error } = await db.from('orders').update({ status: newStatus }).eq('id', orderId);
             if (!error) {
                 showAdminToast(`Order ${orderId} marked as ${newStatus}`);
@@ -1566,7 +1587,7 @@
             const orders = getOrders();
             const o = orders.find(o => o.id === orderId);
             if (!o) return;
-            const statusClass = { pending: 'status-pending', confirmed: 'status-confirmed', delivered: 'status-delivered', cancelled: 'status-cancelled' }[o.status];
+            const statusClass = { pending: 'status-pending', confirmed: 'status-confirmed', shipped: 'status-confirmed', delivered: 'status-delivered', cancelled: 'status-cancelled' }[o.status];
             document.getElementById('orderModalBody').innerHTML = `
     <div class="order-detail-row"><span class="order-detail-label">Order ID</span><span style="font-family:monospace">${o.id}</span></div>
     <div class="order-detail-row"><span class="order-detail-label">Customer</span><span>${o.customer_name}</span></div>
@@ -1577,8 +1598,9 @@
     <div style="margin:1rem 0;font-size:0.7rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--text-muted)">Items Ordered</div>
     ${(o.items || []).map(i => `<div class="order-detail-row"><span>${i.emoji} ${i.name} × ${i.qty}</span><span>KES ${(i.price * i.qty).toLocaleString()}</span></div>`).join('')}
     <div class="order-detail-row" style="margin-top:0.5rem;border-top:1px solid var(--border);padding-top:0.75rem"><span style="font-weight:500">Total</span><span style="color:var(--rose);font-size:1.1rem">KES ${(o.total || 0).toLocaleString()}</span></div>
-    <div style="margin-top:1.5rem;display:flex;gap:0.75rem">
+    <div style="margin-top:1.5rem;display:flex;gap:0.75rem;flex-wrap:wrap">
       <button class="btn-primary" onclick="updateStatus('${o.id}','confirmed');closeOrderModal()">✅ Confirm Order</button>
+      <button class="btn-ghost" onclick="updateStatus('${o.id}','shipped');closeOrderModal()">🚚 Mark Shipped</button>
       <button class="btn-ghost" onclick="updateStatus('${o.id}','delivered');closeOrderModal()">📦 Mark Delivered</button>
       <button class="btn-ghost" onclick="updateStatus('${o.id}','cancelled');closeOrderModal()" style="border-color:var(--danger);color:var(--danger)">❌ Cancel</button>
     </div>

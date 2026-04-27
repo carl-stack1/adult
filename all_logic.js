@@ -128,7 +128,7 @@ async function fetchProducts() {
                 id: p.id, name: p.name, category: p.category, emoji: p.emoji, bgClass: 'p1',
                 price: p.price, oldPrice: p.old_price || null, badge: p.badge, rating: '★★★★★', count: Math.floor(Math.random() * 50) + 15,
                 sizes: p.sizes || 'One Size', model: p.model || '—', desc: p.full_desc || p.short_desc || '',
-                features: p.features || '', img: p.img, reviews: []
+                features: p.features || '', img: p.img, reviews: [], stock: p.stock || 0
             }));
             renderProductsGrid();
         }
@@ -181,8 +181,8 @@ function renderProductsGrid() {
             ${p.oldPrice ? `<span class="price-old">KES ${p.oldPrice.toLocaleString()}</span>` : ''}
           </div>
           <div class="product-footer">
-            <button class="btn-add-cart" onclick="event.stopPropagation(); addToCart('${p.name.replace(/'/g, "\\'")}', ${p.price}, '${p.emoji}')">Add to Cart</button>
-            <span class="product-delivery">✓ Discreet delivery</span>
+            <button class="btn-add-cart" ${p.stock <= 0 ? 'disabled' : ''} onclick="event.stopPropagation(); addToCart('${p.name.replace(/'/g, "\\'")}', ${p.price}, '${p.emoji}')">${p.stock > 0 ? 'Add to Cart' : 'Out of Stock'}</button>
+            <span class="product-delivery">${p.stock > 0 ? `✓ ${p.stock} in stock` : '❌ Out of stock'}</span>
           </div>
         </div>
       </div>
@@ -210,6 +210,18 @@ window.openProduct = function (id) {
     document.getElementById('pdPrice').textContent = 'KES ' + p.price.toLocaleString();
     document.getElementById('pdOldPrice').textContent = p.oldPrice ? 'KES ' + p.oldPrice.toLocaleString() : '';
     document.getElementById('pdDesc').textContent = p.desc || p.full_desc || '';
+
+    const stockEl = document.getElementById('pdStock');
+    if (stockEl) {
+        stockEl.textContent = p.stock > 0 ? `${p.stock} units available` : 'Currently out of stock';
+        stockEl.style.color = p.stock > 0 ? 'var(--success)' : 'var(--danger)';
+    }
+
+    const modalAddBtn = document.getElementById('pdAddBtn');
+    if (modalAddBtn) {
+        modalAddBtn.disabled = p.stock <= 0;
+        modalAddBtn.textContent = p.stock > 0 ? 'Add to Cart' : 'Out of Stock';
+    }
 
     const imgEl = document.getElementById('pdActualImg');
     const bgEl = document.getElementById('pdImgBg');
@@ -262,6 +274,21 @@ window.doSignIn = async function () {
         if (cart.length > 0) placeOrder(user);
         else showToast(`Welcome back, ${user.name}!`);
     } else { alert('Invalid credentials'); }
+}
+
+window.doForgotPassword = async function () {
+    const email = document.getElementById('siEmail').value.trim();
+    if (!email) { alert('Please enter your email address in the Sign In form first.'); return; }
+
+    const { error } = await db.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin + window.location.pathname
+    });
+
+    if (error) {
+        alert('Error: ' + error.message);
+    } else {
+        alert('Password reset link sent to your email! ✨ Check your inbox (and spam folder).');
+    }
 }
 
 window.initAuthUI = function () {

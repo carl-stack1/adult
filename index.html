@@ -3057,6 +3057,7 @@
             <span class="pd-qty-num" id="pdQty">1</span>
             <button class="pd-qty-btn" onclick="changePdQty(1)">+</button>
           </div>
+          <div id="pdStock" style="font-size:0.75rem; font-weight:500; margin-left:1rem; flex:1"></div>
           <button class="pd-add-btn" id="pdAddBtn" onclick="addPdToCart()">Add to Cart</button>
         </div>
         <div style="border-top:1px solid var(--border);padding-top:1rem">
@@ -3116,6 +3117,10 @@
           <input class="auth-input" type="password" id="siPass" placeholder="Password">
           <div class="auth-err" id="siErr">Incorrect email or password. Try signing up first.</div>
           <button class="auth-btn" onclick="doSignIn()">Sign In &amp; Place Order</button>
+          <div style="text-align:right; margin-top:0.5rem">
+            <a href="#" onclick="doForgotPassword();return false"
+              style="font-size:0.7rem; color:var(--text-muted); text-decoration:none">Forgot Password?</a>
+          </div>
 
           <div style="display:flex; align-items:center; gap:0.5rem; margin:0.5rem 0; opacity:0.3">
             <hr style="flex:1; border:none; border-top:1px solid white">
@@ -3420,6 +3425,7 @@
             desc: ap.full_desc || ap.short_desc || '',
             features: ap.features || '',
             img: ap.img,
+            stock: ap.stock || 0,
             reviews: []
           }));
         }
@@ -3560,8 +3566,8 @@
                 ${p.oldPrice ? `<span class="price-old">KES ${p.oldPrice.toLocaleString()}</span>` : ''}
               </div>
               <div class="product-footer">
-                <button class="btn-add-cart" onclick="event.stopPropagation();addToCart('${p.name.replace(/'/g, "\\'")}',${p.price},'')">Add to Cart</button>
-                <span class="product-delivery">✓ Discreet</span>
+                <button class="btn-add-cart" ${p.stock <= 0 ? 'disabled' : ''} onclick="event.stopPropagation();addToCart('${p.name.replace(/'/g, "\\'")}',${p.price},'')">${p.stock > 0 ? 'Add to Cart' : 'Out of Stock'}</button>
+                <div style="font-size:0.65rem; color:${p.stock > 0 ? 'var(--gold)' : 'var(--rose)'}; margin-top:0.4rem; font-weight:500">${p.stock > 0 ? `✓ ${p.stock} in stock` : '❌ Out of stock'}</div>
               </div>
             </div>
           </div>
@@ -3604,7 +3610,17 @@
       document.getElementById('pdMeta').innerHTML = `<div><div class="pd-meta-label">Size / Volume</div><div class="pd-meta-value">${p.sizes || '—'}</div></div> <div><div class="pd-meta-label">Material</div><div class="pd-meta-value">${p.model || '—'}</div></div>`;
       const revs = p.reviews || [];
       document.getElementById('pdReviewsList').innerHTML = revs.length ? revs.map(r => `<div class="pd-review-item"><div class="pd-review-header"><span class="pd-reviewer">${r.n} — ${r.l}</span><span class="stars" style="font-size:0.7rem">${r.s}</span></div><p class="pd-review-text">"${r.t}"</p></div>`).join('') : '<p style="font-size:0.78rem;color:var(--text-muted)">No reviews yet.</p>';
-      document.getElementById('pdAddBtn').textContent = `Add to Cart  •  KES ${p.price.toLocaleString()} `;
+
+      const stockEl = document.getElementById('pdStock');
+      if (stockEl) {
+        stockEl.textContent = p.stock > 0 ? `${p.stock} units in stock` : 'Currently Out of Stock';
+        stockEl.style.color = p.stock > 0 ? 'var(--gold)' : 'var(--rose)';
+      }
+
+      const addBtn = document.getElementById('pdAddBtn');
+      addBtn.disabled = (p.stock <= 0);
+      addBtn.textContent = p.stock > 0 ? `Add to Cart  •  KES ${p.price.toLocaleString()} ` : 'Out of Stock';
+
       document.getElementById('pdOverlay').classList.add('open');
       document.body.style.overflow = 'hidden';
       updateReviewVisibility();
@@ -3696,6 +3712,27 @@
     }
 
     // Order
+    async function doForgotPassword() {
+      const email = document.getElementById('siEmail').value.trim();
+      if (!email) {
+        showToast('⚠️ Please enter your email address first.');
+        return;
+      }
+      showSpinner('Sending reset link...');
+      try {
+        const { error } = await db.auth.resetPasswordForEmail(email, {
+          redirectTo: window.location.origin
+        });
+        if (error) throw error;
+        showToast('✉️ Password reset link sent to your email!');
+      } catch (err) {
+        console.error(err);
+        showToast('❌ Error: ' + err.message);
+      } finally {
+        hideSpinner();
+      }
+    }
+
     async function placeOrder(user) {
       if (!cart.length) return;
 
@@ -3883,7 +3920,7 @@
 
         listEl.innerHTML = data.map(ord => {
           const status = (ord.status || 'pending').toLowerCase();
-          const steps = ['pending', 'confirmed', 'processed', 'shipped', 'delivered'];
+          const steps = ['pending', 'confirmed', 'shipped', 'delivered'];
           const currentIdx = steps.indexOf(status);
 
           return `
