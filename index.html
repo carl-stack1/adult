@@ -2663,7 +2663,7 @@
       </p>
       <div class="hero-actions">
         <a href="#categories" class="btn-primary"><span>Shop Now</span></a>
-        <a href="https://wa.me/254745799633?text=Hi!%20I%20want%20to%20browse%20your%20catalogue" target="_blank"
+        <a href="https://wa.me/254755538229?text=Hi!%20I%20want%20to%20browse%20your%20catalogue" target="_blank"
           class="btn-ghost">Order via WhatsApp</a>
       </div>
     </div>
@@ -2933,7 +2933,7 @@
           <a href="#" class="social-link">f</a>
           <a href="#" class="social-link">in</a>
           <a href="#" class="social-link">tw</a>
-          <a href="https://wa.me/254745799633" class="social-link" target="_blank">wa</a>
+          <a href="https://wa.me/254755538229" class="social-link" target="_blank">wa</a>
         </div>
       </div>
       <div>
@@ -2964,7 +2964,7 @@
         </div>
         <div class="contact-item">⏰ <div><strong>Hours:</strong><br>Mon–Sun, 8AM – 10PM</div>
         </div>
-        <a href="https://wa.me/254745799633?text=Hi!%20I'd%20like%20to%20place%20an%20order" target="_blank"
+        <a href="https://wa.me/254755538229?text=Hi!%20I'd%20like%20to%20place%20an%20order" target="_blank"
           class="whatsapp-btn">
           💬 Chat on WhatsApp
         </a>
@@ -3711,7 +3711,7 @@
     function closeCart() { document.getElementById('cartOverlay').classList.remove('open'); }
     async function checkout() { if (!cart.length) return; const u = await getCurrentUser(); if (!u) openAuth(); else placeOrder(u); }
 
-    function whatsappOrder() { if (!cart.length) return; const items = cart.map(i => `• ${i.name} x${i.qty} — KES ${(i.price * i.qty).toLocaleString()} `).join('%0A'); const t = cart.reduce((s, i) => s + i.price * i.qty, 0); window.open(`https://wa.me/254745799633?text=Hi! I'd like to order:%0A%0A${items}%0A%0ATotal: KES ${t.toLocaleString()}%0A%0APlease confirm.`, '_blank'); }
+    function whatsappOrder() { if (!cart.length) return; const items = cart.map(i => `• ${i.name} x${i.qty} — KES ${(i.price * i.qty).toLocaleString()} `).join('%0A'); const t = cart.reduce((s, i) => s + i.price * i.qty, 0); window.open(`https://wa.me/254755538229?text=Hi! I'd like to order:%0A%0A${items}%0A%0ATotal: KES ${t.toLocaleString()}%0A%0APlease confirm.`, '_blank'); }
 
     // Auth
     // Auth - Secure Source of Truth
