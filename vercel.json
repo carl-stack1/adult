@@ -3,8 +3,8 @@
   "trailingSlash": false,
   "rewrites": [
     {
-      "source": "/admin",
-      "destination": "/admin.html"
+      "source": "/hq-secure-x88",
+      "destination": "/hq-secure-x88.html"
     },
     {
       "source": "/store",
