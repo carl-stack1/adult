@@ -2953,7 +2953,7 @@
         <div class="footer-col-title">Contact Us</div>
         <div class="contact-item">📍 <div><strong>Location:</strong><br>Nairobi, Kenya (Online Only)</div>
         </div>
-        <div class="contact-item">📧 <div><strong>Email:</strong><br>adulytoyske@gmail.com</div>
+        <div class="contact-item">📧 <div><strong>Email:</strong><br>adulttoyske@gmail.com</div>
         </div>
         <div class="contact-item">⏰ <div><strong>Hours:</strong><br>Mon–Sun, 8AM – 10PM</div>
         </div>
@@ -3597,6 +3597,75 @@
         if (document.getElementById('revLoginNotice')) document.getElementById('revLoginNotice').style.display = 'block';
       }
     }
+
+    async function submitReview() {
+      const u = getCurrentUser();
+      if (!u) { showToast('⚠️ Please sign in to leave a review.'); openAuth(); return; }
+
+      const ratingEl = document.getElementById('revRating');
+      const textEl = document.getElementById('revText');
+      const btn = document.querySelector('#pdReviewForm .btn-primary');
+
+      const rating = ratingEl ? parseInt(ratingEl.value) : 5;
+      const text = textEl ? textEl.value.trim() : '';
+
+      if (!text || text.length < 10) {
+        showToast('⚠️ Please write at least 10 characters in your review.');
+        return;
+      }
+      if (!pdId) { showToast('⚠️ Could not identify the product.'); return; }
+
+      const originalBtnHTML = btn ? btn.innerHTML : '';
+      if (btn) { btn.disabled = true; btn.innerHTML = '<span>Submitting...</span>'; }
+
+      try {
+        const { error } = await db.from('product_reviews').insert([{
+          product_id: String(pdId),
+          customer_name: u.name,
+          customer_email: u.email,
+          rating: rating,
+          review_text: text
+        }]);
+
+        if (error) throw error;
+
+        showToast('⭐ Review posted! Thank you for your feedback.');
+        if (textEl) textEl.value = '';
+
+        // Refresh reviews on the current product modal
+        const { data: freshRevs } = await db.from('product_reviews')
+          .select('*').eq('product_id', String(pdId))
+          .order('created_at', { ascending: false });
+
+        if (freshRevs) {
+          const listEl = document.getElementById('pdReviewsList');
+          if (listEl) {
+            listEl.innerHTML = freshRevs.length
+              ? freshRevs.map(r => `
+                  <div class="pd-review-item">
+                    <div class="pd-review-header">
+                      <span class="pd-reviewer">${r.customer_name}</span>
+                      <span class="stars" style="font-size:0.7rem">${'★'.repeat(r.rating || 5)}</span>
+                    </div>
+                    <p class="pd-review-text">"${r.review_text}"</p>
+                  </div>`).join('')
+              : '<p style="font-size:0.78rem;color:var(--text-muted)">No reviews yet.</p>';
+          }
+        }
+
+        // Also refresh the homepage testimonials
+        const { data: allRevs } = await db.from('product_reviews')
+          .select('*').order('created_at', { ascending: false }).limit(6);
+        if (allRevs) renderDynamicReviews(allRevs);
+
+      } catch (err) {
+        console.error('[REVIEW ERROR]', err);
+        showToast('❌ Could not post review: ' + (err.message || 'Unknown error'));
+      } finally {
+        if (btn) { btn.disabled = false; btn.innerHTML = originalBtnHTML || '<span>Post Review</span>'; }
+      }
+    }
+
     function closePd() { document.getElementById('pdOverlay').classList.remove('open'); document.body.style.overflow = ''; }
     function changePdQty(d) {
       pdQtyVal = Math.max(1, pdQtyVal + d);
@@ -3810,7 +3879,7 @@
         try {
           await emailjs.send("service_a2diqqb", "template_b7h4cw3", {
             customer_name: "Newsletter Subscriber", customer_email: email, order_id: "NEWSLETTER-JOIN",
-            items_list: `New subscriber alert! ${email}`, to_email: "Adulytoyske@gmail.com"
+            items_list: `New subscriber alert! ${email}`, to_email: "adulttoyske@gmail.com"
           });
           btn.textContent = '🎉 Done!';
           showToast('🎉 Subscription confirmed!');
