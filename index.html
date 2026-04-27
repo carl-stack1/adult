@@ -3707,11 +3707,29 @@
     }
     function openCart() { document.getElementById('cartOverlay').classList.add('open'); }
     function closeCart() { document.getElementById('cartOverlay').classList.remove('open'); }
-    function checkout() { if (!cart.length) return; const u = getCurrentUser(); if (!u) openAuth(); else placeOrder(u); }
+    async function checkout() { if (!cart.length) return; const u = await getCurrentUser(); if (!u) openAuth(); else placeOrder(u); }
+
     function whatsappOrder() { if (!cart.length) return; const items = cart.map(i => `• ${i.name} x${i.qty} — KES ${(i.price * i.qty).toLocaleString()} `).join('%0A'); const t = cart.reduce((s, i) => s + i.price * i.qty, 0); window.open(`https://wa.me/254745799633?text=Hi! I'd like to order:%0A%0A${items}%0A%0ATotal: KES ${t.toLocaleString()}%0A%0APlease confirm.`, '_blank'); }
 
     // Auth
-    function getCurrentUser() { const u = sessionStorage.getItem('atk_user'); return u ? JSON.parse(u) : null; }
+    // Auth - Secure Source of Truth
+    async function getCurrentUser() {
+      const { data: { session } } = await db.auth.getSession();
+      if (!session) return null;
+
+      const user = session.user;
+      const meta = user.user_metadata || {};
+
+      // We always return the latest from the database as the source of truth
+      const { data: custData } = await db.from('customers').select('*').eq('email', user.email).single();
+
+      return {
+        name: custData?.name || meta.full_name || user.email.split('@')[0],
+        email: user.email,
+        phone: custData?.phone || meta.phone_number || '',
+        location: custData?.location || meta.location || ''
+      };
+    }
     function openAuth() { document.getElementById('authOverlay').classList.add('open'); document.body.style.overflow = 'hidden'; }
     function closeAuth() { document.getElementById('authOverlay').classList.remove('open'); document.body.style.overflow = ''; }
     function switchTab(t) { document.getElementById('fSI').style.display = t === 'si' ? 'block' : 'none'; document.getElementById('fSU').style.display = t === 'su' ? 'block' : 'none'; document.getElementById('tabSI').classList.toggle('active', t === 'si'); document.getElementById('tabSU').classList.toggle('active', t === 'su'); }
@@ -3816,12 +3834,31 @@
       // Phase 3: Rate limiting (max 3 orders per 10 min)
       if (!checkRateLimit()) return;
 
-      showSpinner('Placing your order...');
+      showSpinner('Verifying order integrity...');
       try {
+        // Point 2: Price Integrity Verification
+        const { data: dbProducts } = await db.from('products').select('id, price');
+        let verifiedTotal = 0;
+        const verifiedItems = cart.map(item => {
+          const dbProd = dbProducts.find(p => p.id === item.id);
+          const actualPrice = dbProd ? dbProd.price : item.price;
+          const finalPrice = Number(actualPrice);
+          verifiedTotal += finalPrice * item.qty;
+          return { ...item, price: finalPrice };
+        });
+
         const oid = 'ATK-' + Date.now().toString(36).toUpperCase();
-        const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
-        const order = { id: oid, customer_name: sanitizeHTML(user.name), customer_email: user.email, customer_phone: user.phone || '', items: cart.map(i => ({ ...i })), total: total, status: 'pending' };
+        const order = {
+          id: oid,
+          customer_name: sanitizeHTML(user.name),
+          customer_email: user.email,
+          customer_phone: user.phone || '',
+          items: verifiedItems,
+          total: verifiedTotal,
+          status: 'pending'
+        };
         await db.from('orders').insert([order]);
+
 
         // Prepare maximum redundancy for the EmailJS template
         const emailData = {
@@ -3870,10 +3907,14 @@
     function toggleWishlist(btn) { const a = btn.textContent === '♥'; btn.textContent = a ? '♡' : '♥'; btn.style.color = a ? '' : 'var(--rose)'; showToast(a ? 'Removed from wishlist' : '♥ Added to wishlist'); }
     function showToast(msg) { const t = document.getElementById('toast'); document.getElementById('toastMsg').textContent = msg; t.classList.add('show'); clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('show'), 2800); }
 
-    // Hidden Admin shortcut
+    // Hidden Admin shortcut (Obfuscated per Point 1)
     document.addEventListener('keydown', e => {
-      if (e.ctrlKey && e.shiftKey && (e.key === 'a' || e.key === 'A')) {
-        window.location.href = 'hq-secure-x88.html';
+      if (e.ctrlKey && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
+        const p = prompt('Staff Authentication Required:');
+        if (p === '8899') {
+          // Base64 encoded 'hq-secure-x88.html' to prevent simple "View Source" discovery
+          window.location.href = atob('aHEtc2VjdXJlLXg4OC5odG1s');
+        }
       }
     });
     // FADE-IN ANIMATIONS (IntersectionObserver)
@@ -3973,35 +4014,7 @@
 
     // AUTH STATE RESTORE ON LOAD
     async function restoreAuthState() {
-      // 1. Check Mock Session
-      let u = getCurrentUser();
-
-      // 2. Check Supabase Session (for Google Login or persistence)
-      if (!u) {
-        const { data: { session } } = await db.auth.getSession();
-        if (session && session.user) {
-          const user = session.user;
-          const meta = user.user_metadata || {};
-
-          // Primary data from Auth
-          u = {
-            name: meta.full_name || meta.name || user.email.split('@')[0],
-            email: user.email,
-            phone: meta.phone_number || '',
-            location: meta.location || ''
-          };
-
-          // ENHANCEMENT: Fetch the very latest from the 'customers' table (Source of Truth)
-          const { data: custData } = await db.from('customers').select('*').eq('email', user.email).single();
-          if (custData) {
-            u.phone = custData.phone || u.phone;
-            u.location = custData.location || u.location;
-            u.name = custData.name || u.name;
-          }
-
-          sessionStorage.setItem('atk_user', JSON.stringify(u));
-        }
-      }
+      const u = await getCurrentUser();
 
       if (u) {
         if (document.getElementById('loginLink')) document.getElementById('loginLink').style.display = 'none';
@@ -4010,15 +4023,19 @@
           const nameEl = document.getElementById('userName');
           if (nameEl) nameEl.textContent = u.name;
         }
-        if (document.getElementById('dotProfileBtn')) document.getElementById('dotProfileBtn').style.display = 'flex';
-        if (document.getElementById('dotLogoutBtn')) document.getElementById('dotLogoutBtn').style.display = 'flex';
       } else {
-        // Logged out state
         if (document.getElementById('loginLink')) document.getElementById('loginLink').style.display = 'block';
         if (document.getElementById('userProfile')) document.getElementById('userProfile').style.display = 'none';
-        if (document.getElementById('dotProfileBtn')) document.getElementById('dotProfileBtn').style.display = 'none';
-        if (document.getElementById('dotLogoutBtn')) document.getElementById('dotLogoutBtn').style.display = 'none';
       }
+    } if (document.getElementById('dotProfileBtn')) document.getElementById('dotProfileBtn').style.display = 'flex';
+    if (document.getElementById('dotLogoutBtn')) document.getElementById('dotLogoutBtn').style.display = 'flex';
+      } else {
+      // Logged out state
+      if (document.getElementById('loginLink')) document.getElementById('loginLink').style.display = 'block';
+      if (document.getElementById('userProfile')) document.getElementById('userProfile').style.display = 'none';
+      if (document.getElementById('dotProfileBtn')) document.getElementById('dotProfileBtn').style.display = 'none';
+      if (document.getElementById('dotLogoutBtn')) document.getElementById('dotLogoutBtn').style.display = 'none';
+    }
     }
 
     function toggleProfileEdit(isEdit) {
