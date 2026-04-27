@@ -2983,11 +2983,11 @@
       <div>
         <div class="footer-col-title">Policies</div>
         <ul class="footer-links">
-          <li><a href="#">Privacy Policy</a></li>
-          <li><a href="#">Shipping Policy</a></li>
-          <li><a href="#">Return & Refund</a></li>
-          <li><a href="#">Terms of Service</a></li>
-          <li><a href="#">Age Verification</a></li>
+          <li><a href="privacy.html">Privacy Policy</a></li>
+          <li><a href="shipping.html">Shipping Policy</a></li>
+          <li><a href="shipping.html">Return & Refund</a></li>
+          <li><a href="terms.html">Terms of Service</a></li>
+          <li><a href="privacy.html">Age Verification</a></li>
         </ul>
       </div>
       <div>
@@ -3011,7 +3011,7 @@
     </div>
     <div class="footer-bottom">
       <div class="footer-bottom-left">
-        © 2025 ADULTTOYSKE Kenya. All rights reserved. For adults 18+ only.
+        © 2020 - 2026 ADULTTOYSKE Kenya. All rights reserved. For adults 18+ only.
       </div>
       <div class="footer-bottom-right">
         <a href="admin.html" style="opacity:0.6;font-size:0.65rem">Staff Portal</a>
@@ -3839,11 +3839,13 @@
           to_email: "Adulytoyske@gmail.com"
         });
 
-        showToast('🎉 Subscribed! Check your inbox for 10% off.');
+        console.log('[NEWSLETTER] Client notified');
+        showToast('🎉 Subscribed! Welcome to the family.');
         inp.value = '';
       } catch (err) {
-        // If email fails, still show success to user (best for UX)
-        showToast('🎉 Subscribed! Welcome to the family.');
+        console.error(err);
+        // Still show success to user if logic worked up to here
+        showToast('🎉 Subscription confirmed!');
         inp.value = '';
       } finally {
         hideSpinner();
