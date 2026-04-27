@@ -65,7 +65,7 @@ CREATE POLICY "Admins full access" ON products TO authenticated USING (true) WIT
 
 -- Orders: Customers can submit and see their own history, Admins manage all.
 CREATE POLICY "Allow anon order placement" ON orders FOR INSERT WITH CHECK (true);
-CREATE POLICY "Users view own orders" ON orders FOR SELECT USING (ilike(customer_email, auth.jwt() ->> 'email'));
+CREATE POLICY "Users view own orders" ON orders FOR SELECT USING (customer_email ILIKE (auth.jwt() ->> 'email'));
 CREATE POLICY "Admins manage orders" ON orders TO authenticated USING (true) WITH CHECK (true);
 
 -- Customers: Setup for profile management
