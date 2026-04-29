@@ -3612,8 +3612,8 @@
       updateReviewVisibility();
     }
 
-    function updateReviewVisibility() {
-      const u = getCurrentUser();
+    async function updateReviewVisibility() {
+      const u = await getCurrentUser();
       if (u) {
         if (document.getElementById('pdReviewForm')) document.getElementById('pdReviewForm').style.display = 'block';
         if (document.getElementById('revLoginNotice')) document.getElementById('revLoginNotice').style.display = 'none';
@@ -3624,7 +3624,7 @@
     }
 
     async function submitReview() {
-      const u = getCurrentUser();
+      const u = await getCurrentUser();
       if (!u) { showToast('⚠️ Please sign in to leave a review.'); openAuth(); return; }
 
       const ratingEl = document.getElementById('revRating');
@@ -4319,7 +4319,7 @@
 
     // ── PHASE 4: ORDER HISTORY ────────────────────────────────────────
     async function viewOrderHistory() {
-      const user = getCurrentUser();
+      const user = await getCurrentUser();
       if (!user) { showToast('Please sign in to view orders.'); openAuth(); return; }
       showSpinner('Loading your orders...');
       try {
@@ -4427,9 +4427,9 @@
     });
 
     // ── PHASE 2C: QUICK CHECKOUT ──────────────────────────────────────
-    function quickCheckout() {
+    async function quickCheckout() {
       if (!cart.length) { showToast('Your cart is empty.'); return; }
-      const user = getCurrentUser();
+      const user = await getCurrentUser();
       if (!user) { openAuth(); return; }
       if (!user.email || !user.phone || !user.location) {
         showToast('⚠️ Please save your phone & delivery location first.');
