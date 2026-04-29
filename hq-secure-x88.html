@@ -1525,6 +1525,16 @@
                     errEl.style.display = 'block';
 
                 } else if (data.session) {
+                    // Check if this Supabase user is an authorized admin
+                    const { data: isAdmin } = await db.from('admins').select('email').ilike('email', data.user.email).maybeSingle();
+
+                    if (!isAdmin) {
+                        await db.auth.signOut();
+                        errEl.textContent = "❌ Access Denied: This account does not have administrator privileges.";
+                        errEl.style.display = 'block';
+                        return;
+                    }
+
                     // ✅ Supabase Auth success — clear counters
                     localStorage.removeItem('admin_login_attempts');
                     localStorage.removeItem('admin_lockout_until');
@@ -1560,9 +1570,18 @@
 
             const { data: { session } } = await db.auth.getSession();
             if (session) {
-                document.getElementById('adminLogin').classList.add('hidden');
-                document.getElementById('adminDisplayName').textContent = session.user?.email || 'Admin';
-                reloadAndRender();
+                // VERIFY: Ensure the session belongs to an actual admin
+                const { data: isAdmin } = await db.from('admins').select('email').ilike('email', session.user.email).maybeSingle();
+
+                if (isAdmin) {
+                    document.getElementById('adminLogin').classList.add('hidden');
+                    document.getElementById('adminDisplayName').textContent = session.user?.email || 'Admin';
+                    reloadAndRender();
+                } else {
+                    // Unauthorized session (likely a customer) - force logout from admin portal
+                    await db.auth.signOut();
+                    location.reload();
+                }
             }
         }
 
