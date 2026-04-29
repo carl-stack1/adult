@@ -3737,7 +3737,7 @@
       const meta = user.user_metadata || {};
 
       // We always return the latest from the database as the source of truth
-      const { data: custData } = await db.from('customers').select('*').eq('email', user.email).single();
+      const { data: custData } = await db.from('customers').select('*').ilike('email', user.email).maybeSingle();
 
       return {
         name: custData?.name || meta.full_name || user.email.split('@')[0],
@@ -4230,7 +4230,7 @@
           name: newU.name,
           phone: newU.phone,
           location: newU.location
-        }).eq('email', newU.email);
+        }).ilike('email', newU.email);
       }
 
       restoreAuthState();
@@ -4271,7 +4271,7 @@
 
         // Sync legacy table
         const u = await getCurrentUser();
-        if (u) await db.from('customers').update({ password: p1 }).eq('email', u.email);
+        if (u) await db.from('customers').update({ password: p1 }).ilike('email', u.email);
 
         showToast('✨ Password updated! You are now signed in.');
         closeAuth();
@@ -4324,7 +4324,7 @@
       showSpinner('Loading your orders...');
       try {
         const { data: orders, error } = await db.from('orders')
-          .select('*').eq('customer_email', user.email)
+          .select('*').ilike('customer_email', user.email)
           .order('created_at', { ascending: false });
         hideSpinner();
         if (error) { showToast('⚠️ Could not load orders. Please try again.'); return; }

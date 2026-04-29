@@ -355,7 +355,7 @@ window.doUpdatePassword = async function () {
         // Also update the legacy customers table for consistency
         const { data: { user } } = await db.auth.getUser();
         if (user) {
-            await db.from('customers').update({ password: p1 }).eq('email', user.email);
+            await db.from('customers').update({ password: p1 }).ilike('email', user.email);
         }
 
         showToast("✨ Password updated successfully!");
@@ -496,7 +496,7 @@ db.auth.onAuthStateChange(async (event, session) => {
     }
 
     if (session && session.user && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) {
-        let { data: customer } = await db.from('customers').select('*').eq('email', session.user.email).maybeSingle();
+        let { data: customer } = await db.from('customers').select('*').ilike('email', session.user.email).maybeSingle();
         if (!customer) {
             const newUser = { name: session.user.user_metadata.full_name || session.user.email.split('@')[0], email: session.user.email, password: 'oauth_' + Math.random().toString(36), phone: '', delivery_location: '' };
             const { data } = await db.from('customers').insert([newUser]).select().single();
