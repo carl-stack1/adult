@@ -3928,7 +3928,8 @@
           total: verifiedTotal,
           status: 'pending'
         };
-        await db.from('orders').insert([order]);
+        const { error: dbError } = await db.from('orders').insert([order]);
+        if (dbError) throw dbError;
 
 
         // Prepare maximum redundancy for the EmailJS template
@@ -3941,9 +3942,9 @@
           reply_to: "adulttoyske@gmail.com",
 
           // Total Price variations
-          total_price: total.toLocaleString(),
-          totalprice: total.toLocaleString(),
-          total: total.toLocaleString(),
+          total_price: verifiedTotal.toLocaleString(),
+          totalprice: verifiedTotal.toLocaleString(),
+          total: verifiedTotal.toLocaleString(),
 
           // Items List variations
           items_list: cart.map(i => `• ${i.name} (x${i.qty}) — KES ${(i.price * i.qty).toLocaleString()}`).join('\n'),
@@ -3961,7 +3962,7 @@
         updateCartUI();
         closeCart();
         document.getElementById('summId').textContent = '#' + oid;
-        document.getElementById('summTotal').textContent = `KES ${total.toLocaleString()}`;
+        document.getElementById('summTotal').textContent = `KES ${verifiedTotal.toLocaleString()}`;
         document.getElementById('successMsg').textContent = `Thank you, ${user.name}! Your order has been received.`;
 
         document.getElementById('successOverlay').classList.add('open');
