@@ -13,7 +13,7 @@
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <script type="text/javascript">
     (function () {
-      emailjs.init("KpJG7VlsvAp9gTry3"); // Your Public Key
+      emailjs.init("ceLNS_nbpHPxp4rGq"); // New Public Key
     })();
   </script>
 
@@ -3964,7 +3964,7 @@
           tracking_url: `${location.origin}/#profile`
         };
 
-        emailjs.send("service_a2diqqb", "template_b7h4cw3", emailData)
+        emailjs.send("service_qfjzch5", "template_9c12rfd", emailData)
           .then(() => console.log('[EMAIL] Sent Successfully'))
           .catch(err => console.error('[EMAIL] Failed to send:', err));
 
@@ -4047,7 +4047,7 @@
       } catch (err) {
         console.warn('DB Subscribe failed, falling back to Email notify:', err);
         try {
-          await emailjs.send("service_a2diqqb", "template_b7h4cw3", {
+          await emailjs.send("service_qfjzch5", "template_9c12rfd", {
             customer_name: "Newsletter Subscriber", customer_email: email, order_id: "NEWSLETTER-JOIN",
             items_list: `New subscriber alert! ${email}`, to_email: "Adulytoyske@gmail.com"
           });
@@ -4500,7 +4500,7 @@
     </div>
     <p id="spinnerMsg" style="margin-top:1.25rem;color:rgba(255,255,255,0.6);font-size:0.88rem;letter-spacing:0.05em">
       Processing...</p>
-  </div>
+>
 
 </body>
 
