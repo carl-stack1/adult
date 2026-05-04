@@ -2,8 +2,8 @@
    MASTER APPLICATION LOGIC - ADULTTOYSKE
    ========================================================================== */
 
-const SUPABASE_URL = 'https://ndwbepjjxjcrussmvnlm.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_Kb2j5iHBhdev3hZp1MX5lg_Rqi9Galn';
+const SUPABASE_URL = 'https://ozvdljbiltdkauaatzif.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_YW3uVTsSwD0dYUexp11_iQ_aEkG2TLH';
 const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let ALL_PRODUCTS_DB = [];
