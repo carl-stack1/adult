@@ -1729,6 +1729,12 @@
                 stock: parseInt(document.getElementById('pStock').value) || 0
             };
 
+            // CAPTURE IMAGE: If there's an image preview, save it
+            const imgEl = document.getElementById('imgPreview');
+            if (imgEl && imgEl.style.display !== 'none' && imgEl.src.startsWith('data:')) {
+                product.img = imgEl.src;
+            }
+
             const editIdx = document.getElementById('pName').dataset.editIndex;
             if (editIdx !== undefined && editIdx !== '') {
                 const oldP = getProducts()[parseInt(editIdx)];
