@@ -4096,9 +4096,12 @@
 
     // AUTH STATE RESTORE ON LOAD
     async function restoreAuthState() {
-      const { data: { session } } = await db.auth.getSession();
+      console.log('🔍 Checking session...');
+      const { data: { session }, error: sessionErr } = await db.auth.getSession();
+      if (sessionErr) console.error('❌ Session Error:', sessionErr);
+
       if (!session) {
-        // No active Supabase session - check legacy session (optional)
+        console.log('ℹ️ No active session found.');
         const li = document.getElementById('loginLink');
         const up = document.getElementById('userProfile');
         if (li) li.style.display = 'block';
@@ -4129,11 +4132,12 @@
 
       // Update UI
       if (document.getElementById('loginLink')) document.getElementById('loginLink').style.display = 'none';
+      console.log('Updating UI for:', u.name);
       if (document.getElementById('userProfile')) {
         document.getElementById('userProfile').style.display = 'flex';
         const nameEl = document.getElementById('userName');
         if (nameEl) {
-          nameEl.textContent = u.name.split(' ')[0];
+          nameEl.textContent = (u.name || 'Profile').split(' ')[0];
           nameEl.style.display = 'block';
         }
       }
