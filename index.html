@@ -26,6 +26,7 @@
   <meta http-equiv="X-Frame-Options" content="DENY">
   <meta http-equiv="Content-Security-Policy"
     content="default-src 'self' https: 'unsafe-inline' 'unsafe-eval'; img-src 'self' https: data:; font-src 'self' https: data:;">
+  <link rel="icon" type="image/png" href="img/logo.png">
 
   <style>
     :root {
@@ -4095,25 +4096,49 @@
 
     // AUTH STATE RESTORE ON LOAD
     async function restoreAuthState() {
-      const u = await getCurrentUser();
-
-      if (u) {
-        // Logged In State
-        if (document.getElementById('loginLink')) document.getElementById('loginLink').style.display = 'none';
-        if (document.getElementById('userProfile')) {
-          document.getElementById('userProfile').style.display = 'flex';
-          const nameEl = document.getElementById('userName');
-          if (nameEl) nameEl.textContent = u.name;
-        }
-        if (document.getElementById('dotProfileBtn')) document.getElementById('dotProfileBtn').style.display = 'block';
-        if (document.getElementById('dotLogoutBtn')) document.getElementById('dotLogoutBtn').style.display = 'block';
-      } else {
-        // Logged Out State
-        if (document.getElementById('loginLink')) document.getElementById('loginLink').style.display = 'block';
-        if (document.getElementById('userProfile')) document.getElementById('userProfile').style.display = 'none';
-        if (document.getElementById('dotProfileBtn')) document.getElementById('dotProfileBtn').style.display = 'none';
-        if (document.getElementById('dotLogoutBtn')) document.getElementById('dotLogoutBtn').style.display = 'none';
+      const { data: { session } } = await db.auth.getSession();
+      if (!session) {
+        // No active Supabase session - check legacy session (optional)
+        const li = document.getElementById('loginLink');
+        const up = document.getElementById('userProfile');
+        if (li) li.style.display = 'block';
+        if (up) up.style.display = 'none';
+        return;
       }
+
+      const user = session.user;
+      const meta = user.user_metadata || {};
+
+      // Sync with our custom 'customers' table
+      let { data: customer } = await db.from('customers').select('*').ilike('email', user.email).maybeSingle();
+
+      if (!customer) {
+        // First Google Login: Create customer entry so they can place orders
+        const newCustomer = {
+          name: meta.full_name || user.email.split('@')[0],
+          email: user.email,
+          phone: '',
+          location: '',
+          password: 'oauth_' + Math.random().toString(36).slice(-5)
+        };
+        const { data, error } = await db.from('customers').insert([newCustomer]).select().single();
+        if (!error) customer = data;
+      }
+
+      const u = customer || { name: meta.full_name || user.email.split('@')[0], email: user.email };
+
+      // Update UI
+      if (document.getElementById('loginLink')) document.getElementById('loginLink').style.display = 'none';
+      if (document.getElementById('userProfile')) {
+        document.getElementById('userProfile').style.display = 'flex';
+        const nameEl = document.getElementById('userName');
+        if (nameEl) {
+          nameEl.textContent = u.name.split(' ')[0];
+          nameEl.style.display = 'block';
+        }
+      }
+      if (document.getElementById('dotProfileBtn')) document.getElementById('dotProfileBtn').style.display = 'block';
+      if (document.getElementById('dotLogoutBtn')) document.getElementById('dotLogoutBtn').style.display = 'block';
     }
 
     function toggleProfileEdit(isEdit) {
