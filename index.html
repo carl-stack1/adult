@@ -4325,7 +4325,7 @@
 
     // Supabase Auth Listener (for Google Redirects)
     db.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' || event === 'USER_UPDATED') {
+      if (session && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'USER_UPDATED')) {
         restoreAuthState();
       }
       if (event === 'PASSWORD_RECOVERY') {
