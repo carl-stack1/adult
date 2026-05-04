@@ -2996,7 +2996,7 @@
           onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'"
           onerror="this.style.display='none'">
         <div class="pd-img-bg" id="pdImgBg"></div>
-        <div class="pd-img-emoji" id="pdEmoji">💜</div>
+        <div class="pd-img-emoji" id="pdEmoji"></div>
         <button class="pd-close" onclick="closePd()">×</button>
       </div>
       <div class="pd-info-panel">
@@ -3590,6 +3590,15 @@
         imgEl.style.display = 'none';
         bgEl.style.display = 'block';
         bgEl.className = 'pd-img-bg ' + (p.bgClass || 'p1');
+      }
+
+      if (emoEl) {
+        if (p.emoji && p.emoji.trim()) {
+          emoEl.textContent = p.emoji;
+          emoEl.style.display = 'flex';
+        } else {
+          emoEl.style.display = 'none';
+        }
       }
       const feats = (p.features || '').split('\n').filter(f => f.trim());
       document.getElementById('pdFeatures').innerHTML = feats.map(f => `<li>${f.trim()}</li>`).join('');
