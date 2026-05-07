@@ -42,6 +42,62 @@
       --border: rgba(255, 255, 255, 0.08)
     }
 
+    /* SKELETON ANIMATION */
+    @keyframes skeletonPulse {
+      0% {
+        background-color: rgba(255, 255, 255, 0.05);
+      }
+
+      50% {
+        background-color: rgba(255, 255, 255, 0.1);
+      }
+
+      100% {
+        background-color: rgba(255, 255, 255, 0.05);
+      }
+    }
+
+    .skeleton {
+      animation: skeletonPulse 1.5s infinite ease-in-out;
+      border-radius: 8px;
+    }
+
+    .skeleton-card {
+      width: 100%;
+      height: 380px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      border: 1px solid var(--border);
+    }
+
+    .skeleton-img {
+      height: 180px;
+      width: 100%;
+      border-radius: 12px;
+    }
+
+    .skeleton-line {
+      height: 12px;
+      border-radius: 4px;
+    }
+
+    .skeleton-title {
+      width: 70%;
+    }
+
+    .skeleton-price {
+      width: 40%;
+      height: 16px;
+    }
+
+    .skeleton-btn {
+      height: 35px;
+      width: 100%;
+      margin-top: auto;
+    }
+
     * {
       margin: 0;
       padding: 0;
@@ -3379,11 +3435,25 @@
       return ALL_PRODUCTS_DB;
     }
 
+    function renderSkeletons() {
+      const grid = document.getElementById('productGrid');
+      if (!grid) return;
+      grid.innerHTML = Array(8).fill(0).map(() => `
+        <div class="skeleton-card">
+          <div class="skeleton-img skeleton"></div>
+          <div class="skeleton-line skeleton-title skeleton"></div>
+          <div class="skeleton-line skeleton-price skeleton"></div>
+          <div class="skeleton-btn skeleton"></div>
+        </div>
+      `).join('');
+    }
+
     // URL param
     const urlCat = new URLSearchParams(location.search).get('cat') || 'All';
     let currentSort = 'all';
 
     async function fetchDbData() {
+      renderSkeletons(); // Show ghosts immediately
       try {
         const [pRes, cRes, bRes, rRes] = await Promise.all([
           db.from('products').select('*'),
