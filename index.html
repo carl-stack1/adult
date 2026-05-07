@@ -3408,6 +3408,7 @@
               desc: ap.full_desc || ap.short_desc || '',
               features: ap.features || '',
               img: ap.img,
+              gallery: ap.gallery || [],
               stock: ap.stock || 0,
               reviews: productReviews.map(r => ({
                 n: r.customer_name || 'Verified Customer',
@@ -3610,7 +3611,7 @@
       if (galEl) {
         const gal = p.gallery || [];
         const allImgs = [p.img, ...gal].filter(i => i && i.trim());
-        
+
         if (allImgs.length > 1) {
           galEl.innerHTML = allImgs.map(img => `
             <img src="${img}" 
