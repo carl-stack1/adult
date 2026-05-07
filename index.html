@@ -2999,7 +2999,7 @@
         <div class="pd-img-bg" id="pdImgBg"></div>
         <div class="pd-img-emoji" id="pdEmoji"></div>
         <div id="pdGallery"
-          style="display:flex;gap:8px;margin-top:15px;justify-content:center;overflow-x:auto;padding:5px;flex-wrap:wrap">
+          style="position:absolute;bottom:0;left:0;right:0;display:flex;gap:10px;justify-content:center;padding:15px;background:linear-gradient(to top, rgba(0,0,0,0.6), transparent);overflow-x:auto;z-index:5;">
         </div>
         <button class="pd-close" onclick="closePd()">×</button>
       </div>
@@ -3613,18 +3613,16 @@
         const allImgs = [p.img, ...gal].filter(i => i && i.trim());
 
         if (allImgs.length > 1) {
-          galEl.innerHTML = allImgs.map(img => `
+          galEl.style.display = 'flex';
+          galEl.innerHTML = allImgs.map((img, idx) => `
             <img src="${img}" 
-              onclick="document.getElementById('pdActualImg').src='${img}'; this.parentNode.querySelectorAll('img').forEach(i=>i.style.borderColor='transparent'); this.style.borderColor='var(--gold)';"
-              style="width:50px;height:50px;object-fit:cover;border-radius:4px;cursor:pointer;border:2px solid transparent;transition:all 0.2s"
-              onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'"
+              onclick="document.getElementById('pdActualImg').src='${img}'; this.parentNode.querySelectorAll('img').forEach(i=>i.style.boxShadow='none'); this.style.boxShadow='0 0 0 2px var(--gold)';"
+              style="width:48px;height:48px;object-fit:cover;border-radius:8px;cursor:pointer;border:1px solid rgba(255,255,255,0.3);box-shadow: ${idx === 0 ? '0 0 0 2px var(--gold)' : 'none'}; transition:all 0.3s"
+              onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='translateY(0)'"
             >
           `).join('');
-          // Style first one (main) as active
-          const first = galEl.querySelector('img');
-          if (first) first.style.borderColor = 'var(--gold)';
         } else {
-          galEl.innerHTML = '';
+          galEl.style.display = 'none';
         }
       }
       const feats = (p.features || '').split('\n').filter(f => f.trim());
