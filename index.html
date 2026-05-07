@@ -2993,11 +2993,14 @@
     <div class="pd-modal" id="pdModal">
       <div class="pd-img-panel">
         <img src="" id="pdActualImg"
-          style="width:100%;height:100%;object-fit:contain;display:none;transition:transform 0.5s ease-out;cursor:zoom-in"
+          style="width:100%;height:100%;max-height:400px;object-fit:contain;display:none;transition:transform 0.5s ease-out;cursor:zoom-in"
           onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'"
           onerror="this.style.display='none'">
         <div class="pd-img-bg" id="pdImgBg"></div>
         <div class="pd-img-emoji" id="pdEmoji"></div>
+        <div id="pdGallery"
+          style="display:flex;gap:8px;margin-top:15px;justify-content:center;overflow-x:auto;padding:5px;flex-wrap:wrap">
+        </div>
         <button class="pd-close" onclick="closePd()">×</button>
       </div>
       <div class="pd-info-panel">
@@ -3599,6 +3602,28 @@
           emoEl.style.display = 'flex';
         } else {
           emoEl.style.display = 'none';
+        }
+      }
+
+      // RENDER GALLERY
+      const galEl = document.getElementById('pdGallery');
+      if (galEl) {
+        const gal = p.gallery || [];
+        const allImgs = [p.img, ...gal].filter(i => i && i.trim());
+        
+        if (allImgs.length > 1) {
+          galEl.innerHTML = allImgs.map(img => `
+            <img src="${img}" 
+              onclick="document.getElementById('pdActualImg').src='${img}'; this.parentNode.querySelectorAll('img').forEach(i=>i.style.borderColor='transparent'); this.style.borderColor='var(--gold)';"
+              style="width:50px;height:50px;object-fit:cover;border-radius:4px;cursor:pointer;border:2px solid transparent;transition:all 0.2s"
+              onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'"
+            >
+          `).join('');
+          // Style first one (main) as active
+          const first = galEl.querySelector('img');
+          if (first) first.style.borderColor = 'var(--gold)';
+        } else {
+          galEl.innerHTML = '';
         }
       }
       const feats = (p.features || '').split('\n').filter(f => f.trim());
@@ -4500,7 +4525,7 @@
     </div>
     <p id="spinnerMsg" style="margin-top:1.25rem;color:rgba(255,255,255,0.6);font-size:0.88rem;letter-spacing:0.05em">
       Processing...</p>
->
+    >
 
 </body>
 
