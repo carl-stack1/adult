@@ -3477,6 +3477,7 @@
               model: ap.model || '—',
               desc: ap.full_desc || ap.short_desc || '',
               features: ap.features || '',
+              emoji: ap.emoji || '',
               img: ap.img,
               gallery: ap.gallery || [],
               stock: ap.stock || 0,
@@ -3803,10 +3804,14 @@
       if (p) document.getElementById('pdAddBtn').textContent = `Add ${pdQtyVal > 1 ? pdQtyVal + ' × ' : ''}to Cart  •  KES ${(p.price * pdQtyVal).toLocaleString()} `;
     }
     function addPdToCart() {
-      const p = getAllProducts().find(x => x.id === pdId);
+      const p = getAllProducts().find(x => x.id == pdId);
       if (!p) return;
-      for (let i = 0; i < pdQtyVal; i++) { const ex = cart.find(x => x.name === p.name); if (ex) ex.qty++; else cart.push({ name: p.name, price: p.price, qty: 1 }); }
-      updateCartUI(); showToast(`Added to cart ✨`); closePd(); openCart();
+      for (let i = 0; i < pdQtyVal; i++) {
+        const ex = cart.find(x => x.name === p.name);
+        if (ex) ex.qty++;
+        else cart.push({ name: p.name, price: p.price, emoji: p.emoji, qty: 1 });
+      }
+      updateCartUI(); showToast(`${p.emoji || '✨'} Added to cart`); closePd(); openCart();
     }
 
     // Cart
