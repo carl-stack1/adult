@@ -23,6 +23,62 @@
             --border: rgba(255, 255, 255, 0.08)
         }
 
+        /* SKELETON ANIMATION */
+        @keyframes skeletonPulse {
+            0% {
+                background-color: rgba(255, 255, 255, 0.05);
+            }
+
+            50% {
+                background-color: rgba(255, 255, 255, 0.1);
+            }
+
+            100% {
+                background-color: rgba(255, 255, 255, 0.05);
+            }
+        }
+
+        .skeleton {
+            animation: skeletonPulse 1.5s infinite ease-in-out;
+            border-radius: 8px;
+        }
+
+        .skeleton-card {
+            width: 100%;
+            height: 380px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+            border: 1px solid var(--border);
+        }
+
+        .skeleton-img {
+            height: 180px;
+            width: 100%;
+            border-radius: 12px;
+        }
+
+        .skeleton-line {
+            height: 12px;
+            border-radius: 4px;
+        }
+
+        .skeleton-title {
+            width: 70%;
+        }
+
+        .skeleton-price {
+            width: 40%;
+            height: 16px;
+        }
+
+        .skeleton-btn {
+            height: 35px;
+            width: 100%;
+            margin-top: auto;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -1431,7 +1487,12 @@
                 <img src="" id="pdActualImg" style="width:100%;height:100%;object-fit:cover;display:none"
                     onerror="this.style.display='none'">
                 <div class="pd-img-bg" id="pdImgBg"></div>
-                <div class="pd-img-emoji" id="pdEmoji">💜</div><button class="pd-close" onclick="closePd()">×</button>
+                <div class="pd-img-emoji" id="pdEmoji">💜</div>
+                <!-- Gallery Container -->
+                <div id="pdGallery"
+                    style="position:absolute;bottom:0;left:0;right:0;display:flex;gap:10px;justify-content:center;padding:15px;background:linear-gradient(to top, rgba(0,0,0,0.6), transparent);overflow-x:auto;z-index:5;">
+                </div>
+                <button class="pd-close" onclick="closePd()">×</button>
             </div>
             <div class="pd-info-panel">
                 <div class="pd-category" id="pdCategory"></div>
@@ -1550,8 +1611,8 @@
     </div>
 
     <script>
-        const SUPABASE_URL = 'https://ndwbepjjxjcrussmvnlm.supabase.co';
-        const SUPABASE_ANON_KEY = 'sb_publishable_Kb2j5iHBhdev3hZp1MX5lg_Rqi9Galn';
+        const SUPABASE_URL = 'https://ozvdljbiltdkauaatzif.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_YW3uVTsSwD0dYUexp11_iQ_aEkG2TLH';
         const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let ALL_PRODUCTS_DB = [];
@@ -1592,30 +1653,60 @@
         const urlCat = new URLSearchParams(location.search).get('cat') || 'All';
         let currentSort = 'all';
 
-        async function fetchDbData() {
-            const [pRes, cRes] = await Promise.all([
-                db.from('products').select('*'),
-                db.from('customers').select('*')
-            ]);
+        function renderSkeletons() {
+            const grid = document.getElementById('productsGrid');
+            if (!grid) return;
+            grid.innerHTML = Array(8).fill(0).map(() => `
+                <div class="skeleton-card">
+                  <div class="skeleton-img skeleton"></div>
+                  <div class="skeleton-line skeleton-title skeleton"></div>
+                  <div class="skeleton-line skeleton-price skeleton"></div>
+                  <div class="skeleton-btn skeleton"></div>
+                </div>
+            `).join('');
+        }
 
-            // Start with empty or only essential products
-            const base = [];
-            if (pRes.data) {
-                pRes.data.forEach(ap => {
-                    if (!base.find(p => p.id === ap.id)) {
-                        base.push({
-                            id: ap.id, name: ap.name, category: ap.category, emoji: ap.emoji,
-                            bgClass: 'p1', price: ap.price, oldPrice: ap.old_price,
-                            badge: ap.badge || '', rating: '★★★★★', count: 0,
-                            sizes: ap.sizes || 'One Size', model: ap.model || '—',
+        async function fetchDbData() {
+            renderSkeletons();
+            try {
+                const [pRes, cRes, rRes] = await Promise.all([
+                    db.from('products').select('*'),
+                    db.from('customers').select('*'),
+                    db.from('product_reviews').select('*').order('created_at', { ascending: false })
+                ]);
+
+                if (pRes.data) {
+                    ALL_PRODUCTS_DB = pRes.data.map(ap => {
+                        const productReviews = rRes.data ? rRes.data.filter(r => r.product_id === String(ap.id || ap.name)) : [];
+                        return {
+                            id: ap.id || ap.name,
+                            name: ap.name,
+                            category: ap.category,
+                            price: ap.price,
+                            oldPrice: ap.old_price,
+                            badge: ap.badge || '',
+                            rating: '★★★★★',
+                            count: productReviews.length,
+                            sizes: ap.sizes || 'One Size',
+                            model: ap.model || '—',
                             desc: ap.full_desc || ap.short_desc || '',
-                            features: ap.features || '', img: ap.img, reviews: [], stock: ap.stock || 0
-                        });
-                    }
-                });
+                            features: ap.features || '',
+                            img: ap.img,
+                            gallery: ap.gallery || [],
+                            stock: ap.stock || 0,
+                            reviews: productReviews.map(r => ({
+                                n: r.customer_name || 'Verified Customer',
+                                l: 'Verified Customer',
+                                s: '★'.repeat(r.rating || 5),
+                                t: r.review_text || ''
+                            }))
+                        };
+                    });
+                }
+                CUSTOMERS_DB = cRes.data || [];
+            } catch (err) {
+                console.error("Fetch error:", err);
             }
-            ALL_PRODUCTS_DB = base;
-            CUSTOMERS_DB = cRes.data || [];
         }
 
         async function init() {
@@ -1723,11 +1814,32 @@
                 emoEl.style.cssText = "";
             }
             emoEl.textContent = p.emoji;
+
+            // RENDER GALLERY (Enhanced Styling)
+            const galEl = document.getElementById('pdGallery');
+            if (galEl) {
+                const gal = p.gallery || [];
+                const allImgs = [p.img, ...gal].filter(i => i && i.trim());
+
+                if (allImgs.length > 1) {
+                    galEl.style.display = 'flex';
+                    galEl.innerHTML = allImgs.map((img, idx) => `
+                        <img src="${img}" 
+                            onclick="document.getElementById('pdActualImg').src='${img}'; this.parentNode.querySelectorAll('img').forEach(i=>i.style.boxShadow='none'); this.style.boxShadow='0 0 0 2px var(--gold)';"
+                            style="width:48px;height:48px;object-fit:cover;border-radius:8px;cursor:pointer;border:1px solid rgba(255,255,255,0.3);box-shadow: ${idx === 0 ? '0 0 0 2px var(--gold)' : 'none'}; transition:all 0.3s"
+                            onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='translateY(0)'"
+                        >
+                    `).join('');
+                } else {
+                    galEl.style.display = 'none';
+                }
+            }
+
             const feats = (p.features || '').split('\n').filter(f => f.trim());
-            document.getElementById('pdFeatures').innerHTML = feats.map(f => `< li > ${f.trim()}</li > `).join('');
-            document.getElementById('pdMeta').innerHTML = `< div ><div class="pd-meta-label">Size / Volume</div><div class="pd-meta-value">${p.sizes || '—'}</div></div > <div><div class="pd-meta-label">Material</div><div class="pd-meta-value">${p.model || '—'}</div></div>`;
+            document.getElementById('pdFeatures').innerHTML = feats.map(f => `<li>${f.trim()}</li>`).join('');
+            document.getElementById('pdMeta').innerHTML = `<div><div class="pd-meta-label">Size / Volume</div><div class="pd-meta-value">${p.sizes || '—'}</div></div> <div><div class="pd-meta-label">Material</div><div class="pd-meta-value">${p.model || '—'}</div></div>`;
             const revs = p.reviews || [];
-            document.getElementById('pdRevs').innerHTML = revs.length ? revs.map(r => `< div class="pd-review-item" ><div class="pd-review-header"><span class="pd-reviewer">${r.n} — ${r.l}</span><span class="stars" style="font-size:0.7rem">${r.s}</span></div><p class="pd-review-text">"${r.t}"</p></div > `).join('') : '<p style="font-size:0.78rem;color:var(--text-muted)">No reviews yet.</p>';
+            document.getElementById('pdRevs').innerHTML = revs.length ? revs.map(r => `<div class="pd-review-item"><div class="pd-review-header"><span class="pd-reviewer">${r.n} — ${r.l}</span><span class="stars" style="font-size:0.7rem">${r.s}</span></div><p class="pd-review-text">"${r.t}"</p></div>`).join('') : '<p style="font-size:0.78rem;color:var(--text-muted)">No reviews yet.</p>';
 
             const stockInfo = p.stock > 0 ? `<div style="color:#4caf7d; font-size:0.8rem; margin-bottom:0.5rem">✓ ${p.stock} units in stock</div>` : `<div style="color:var(--rose); font-size:0.8rem; margin-bottom:0.5rem">❌ Currently out of stock</div>`;
             document.getElementById('pdMeta').innerHTML += stockInfo;
