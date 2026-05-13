@@ -1083,7 +1083,6 @@
                                     <option>Couples</option>
                                     <option>Wellness</option>
                                     <option>Lubricants</option>
-                                    <option>Lingerie</option>
                                     <option>BDSM</option>
                                     <option>Accessories</option>
                                 </select>
@@ -1102,7 +1101,6 @@
                                     <option value="">None</option>
                                     <option value="New">New</option>
                                     <option value="Hot">Hot</option>
-                                    <option value="Sale">On Sale</option>
                                 </select>
                             </div>
                             <div class="form-group">
@@ -1375,6 +1373,15 @@
         const SUPABASE_URL = 'https://ozvdljbiltdkauaatzif.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_YW3uVTsSwD0dYUexp11_iQ_aEkG2TLH';
         const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // Files being held for upload
+        let productFiles = {
+            imgPreview: null,
+            imgP2: null,
+            imgP3: null,
+            imgP4: null,
+            imgP5: null
+        };
 
         function renderSubscribersTable() {
             const table = document.getElementById('subscribersTable');
@@ -1758,6 +1765,7 @@
             const category = document.getElementById('pCategory').value;
             const price = parseInt(document.getElementById('pPrice').value);
             if (!name || !category || !price) { alert('Please fill in Name, Category, and Price.'); return; }
+
             const product = {
                 name, category, price,
                 old_price: parseInt(document.getElementById('pOldPrice').value) || null,
@@ -1771,21 +1779,48 @@
                 stock: parseInt(document.getElementById('pStock').value) || 0
             };
 
-            // CAPTURE MAIN IMAGE
-            const imgEl = document.getElementById('imgPreview');
-            if (imgEl && imgEl.style.display !== 'none' && imgEl.src.startsWith('data:')) {
-                product.img = imgEl.src;
+            // HELPER: Upload to Supabase Storage
+            const uploadToStorage = async (file, path) => {
+                if (!file) return null;
+                const cleanName = (str) => str.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+                const fileName = `${cleanName(name)}_${path}_${Date.now()}.jpg`;
+
+                const { data, error } = await db.storage.from('product-images').upload(fileName, file, { upsert: true });
+                if (error) { console.error("Upload error:", error); return null; }
+
+                const { data: { publicUrl } } = db.storage.from('product-images').getPublicUrl(fileName);
+                return publicUrl;
+            };
+
+            // UPLOAD MAIN IMAGE
+            const mainImgFile = productFiles.imgPreview;
+            if (mainImgFile) {
+                const url = await uploadToStorage(mainImgFile, 'main');
+                if (url) product.img = url;
+            } else {
+                const existingImg = document.getElementById('imgPreview').src;
+                if (existingImg && !existingImg.startsWith('data:') && !existingImg.includes('localhost') && existingImg !== window.location.href) {
+                    product.img = existingImg;
+                }
             }
 
-            // CAPTURE GALLERY (4 extra)
-            const gallery = [];
-            ['imgP2', 'imgP3', 'imgP4', 'imgP5'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el && el.style.display !== 'none' && el.src.startsWith('data:')) {
-                    gallery.push(el.src);
+            // UPLOAD GALLERY
+            const galleryUrls = [];
+            const gallerySlots = ['imgP2', 'imgP3', 'imgP4', 'imgP5'];
+            for (let i = 0; i < gallerySlots.length; i++) {
+                const slotId = gallerySlots[i];
+                const file = productFiles[slotId];
+                if (file) {
+                    const url = await uploadToStorage(file, `gal_${i}`);
+                    if (url) galleryUrls.push(url);
+                } else {
+                    const existingImg = document.getElementById(slotId).src;
+                    if (existingImg && !existingImg.startsWith('data:') && existingImg !== "" && !existingImg.includes('localhost') && existingImg !== window.location.href) {
+                        galleryUrls.push(existingImg);
+                    }
                 }
-            });
-            product.gallery = gallery;
+            }
+            product.gallery = galleryUrls;
 
             const editIdx = document.getElementById('pName').dataset.editIndex;
             if (editIdx !== undefined && editIdx !== '') {
@@ -1812,6 +1847,9 @@
                 const el = document.getElementById(id);
                 if (el) { el.src = ''; el.style.display = 'none'; }
             });
+            // Clear pending files
+            productFiles = { imgPreview: null, imgP2: null, imgP3: null, imgP4: null, imgP5: null };
+
             delete document.getElementById('pName').dataset.editIndex;
             document.getElementById('addProductTitle').textContent = 'Add New Product';
             document.querySelector('.img-upload-icon').style.display = 'block';
@@ -1820,6 +1858,10 @@
         function previewImg(e, targetId) {
             const file = e.target.files[0];
             if (!file) return;
+
+            // Store the actual file for later upload
+            productFiles[targetId] = file;
+
             const reader = new FileReader();
             reader.onload = ev => {
                 const img = document.getElementById(targetId);

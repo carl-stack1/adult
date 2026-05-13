@@ -636,9 +636,9 @@
 
     .categories-grid {
       display: grid;
-      grid-template-columns: 1.4fr 1fr 1fr;
-      grid-template-rows: 340px 220px;
-      gap: 1rem;
+      grid-template-columns: 1.2fr 1fr;
+      grid-template-rows: 280px 280px;
+      gap: 1.5rem;
       margin-top: 3.5rem
     }
 
@@ -651,7 +651,7 @@
     }
 
     .cat-card:first-child {
-      grid-row: span 2
+      grid-row: span 1
     }
 
     .cat-bg {
@@ -2636,7 +2636,6 @@
       <a href="category.html?cat=Vibrators">Vibrators</a>
       <a href="category.html?cat=Couples">Couples</a>
       <a href="category.html?cat=Wellness">Wellness</a>
-      <a href="category.html?cat=Lingerie">Lingerie</a>
       <a href="#faq">FAQ</a>
     </div>
 
@@ -2794,15 +2793,6 @@
           <div class="cat-count">10 Premium Products</div>
         </div>
       </div>
-      <div class="cat-card" onclick="location.href='category.html?cat=Lingerie'" style="cursor:pointer">
-        <div class="cat-bg cat-bg-4"></div>
-        <div class="cat-pattern"></div>
-        <div class="cat-arrow">→</div>
-        <div class="cat-info">
-          <div class="cat-name">Lingerie & Apparel</div>
-          <div class="cat-count">5 Premium Products</div>
-        </div>
-      </div>
       <div class="cat-card" onclick="location.href='category.html?cat=BDSM'" style="cursor:pointer">
         <div class="cat-bg cat-bg-5"></div>
         <div class="cat-pattern"></div>
@@ -2828,9 +2818,7 @@
         <button class="filter-btn" onclick="setFilter(this)">Couples</button>
         <button class="filter-btn" onclick="setFilter(this)">Wellness</button>
         <button class="filter-btn" onclick="setFilter(this)">Lubricants</button>
-        <button class="filter-btn" onclick="setFilter(this)">Lingerie</button>
         <button class="filter-btn" onclick="setFilter(this)">BDSM</button>
-        <button class="filter-btn" onclick="setFilter(this)">On Sale</button>
       </div>
       <!-- PHASE 4: Price Range Filter -->
       <div style="display:flex;align-items:center;gap:1rem;margin-top:1rem;flex-wrap:wrap">
@@ -2998,7 +2986,6 @@
         <ul class="footer-links">
           <li><a href="#categories">Shop All</a></li>
           <li><a href="#featured">New Arrivals</a></li>
-          <li><a href="#promo">Sale & Offers</a></li>
           <li><a href="#reviews">Customer Reviews</a></li>
           <li><a href="#faq">FAQ</a></li>
         </ul>
@@ -3426,7 +3413,6 @@
       { name: 'Couples', icon: '💙', desc: 'Rings, remote kits & app-connected toys' },
       { name: 'Wellness', icon: '🍯', desc: 'Massage oils, serums & personal care' },
       { name: 'Lubricants', icon: '💚', desc: 'Water-based, aloe & warming lubricants' },
-      { name: 'Lingerie', icon: '⭐', desc: 'Bodysuits, lace sets & apparel' },
       { name: 'BDSM', icon: '🖤', desc: 'Restraints, blindfolds & roleplay accessories' },
     ];
 
@@ -3583,14 +3569,10 @@
       // 1. Category Filter
       if (activeFilter && activeFilter !== 'All') {
         const target = activeFilter.toLowerCase();
-        if (target === 'on sale') {
-          prods = prods.filter(p => p.oldPrice);
-        } else {
-          prods = prods.filter(p => {
-            const pc = (p.category || '').toLowerCase();
-            return pc === target || (target === 'wellness' && pc === 'lubricants') || (target === 'couples' && pc === 'couples play');
-          });
-        }
+        prods = prods.filter(p => {
+          const pc = (p.category || '').toLowerCase();
+          return pc === target || (target === 'wellness' && pc === 'lubricants') || (target === 'couples' && pc === 'couples play');
+        });
       }
 
       // 2. Price Filter

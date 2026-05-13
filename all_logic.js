@@ -153,7 +153,6 @@ function renderProductsGrid() {
 
     if (currentFilter === 'New In') prods = prods.filter(p => p.badge === 'New');
     else if (currentFilter === 'Bestsellers') prods = prods.filter(p => p.badge === 'Hot');
-    else if (currentFilter === 'On Sale') prods = prods.filter(p => p.oldPrice);
     else if (currentFilter !== 'All') {
         prods = prods.filter(p => p.category.toLowerCase() === currentFilter.toLowerCase());
     }
