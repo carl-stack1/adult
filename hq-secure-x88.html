@@ -1353,8 +1353,13 @@
                     <div class="panel">
                         <div class="panel-header">
                             <div class="panel-title">Client Communication Hub</div>
-                            <button class="btn-primary" id="btnSendEmail" onclick="sendCustomEmail()">🚀 Send Email
-                                Now</button>
+                            <div style="display:flex; gap:0.5rem">
+                                <button class="btn-primary" id="btnCopyOnly" onclick="copyEmailToClipboard(true)"
+                                    style="background:var(--off-black); border:1px solid var(--border)">📋 Copy
+                                    Only</button>
+                                <button class="btn-primary" id="btnSendEmail" onclick="openAndPasteInGmail()">📧 Open &
+                                    Paste in Gmail</button>
+                            </div>
                         </div>
                         <div class="panel-body">
                             <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
@@ -1397,6 +1402,11 @@
                                     <div id="emailPreview"
                                         style="flex:1; padding:2rem; overflow-y:auto; color:white; font-size:0.9rem">
                                         Select a template to generate preview...
+                                    </div>
+                                    <div
+                                        style="padding:1rem; border-top:1px solid var(--border); font-size:0.7rem; color:var(--gold); text-align:center; background:rgba(201,169,110,0.05)">
+                                        💡 <strong>Smart Workflow:</strong> The design is copied automatically. Just
+                                        <strong>Paste (Ctrl+V)</strong> when Gmail opens!
                                     </div>
                                 </div>
                             </div>
@@ -2321,35 +2331,40 @@
                 </div>`;
             }
 
-            async function sendCustomEmail() {
-                const btn = document.getElementById('btnSendEmail');
-                const email = document.getElementById('emailTo').value;
-                const subject = document.getElementById('emailSubject').value;
-                const bodyHTML = document.getElementById('emailPreview').innerHTML;
+            async function copyEmailToClipboard(showToastFlag) {
+                const preview = document.getElementById('emailPreview');
+                const html = preview.innerHTML;
+
+                // We create a Blob with the HTML content to keep styling
+                const blob = new Blob([html], { type: 'text/html' });
+                const data = [new ClipboardItem({ 'text/html': blob, 'text/plain': blob })];
+
+                try {
+                    await navigator.clipboard.write(data);
+                    if (showToastFlag) showAdminToast('📋 Template copied to clipboard!');
+                    return true;
+                } catch (err) {
+                    console.error('Clipboard Error:', err);
+                    alert('Failed to copy. Please try manually selecting and copying the preview.');
+                    return false;
+                }
+            }
+
+            async function openAndPasteInGmail() {
+                const email = document.getElementById('emailTo').value.trim();
+                const subject = document.getElementById('emailSubject').value.trim();
 
                 if (!email) { alert('Please enter a recipient email'); return; }
 
-                btn.textContent = '⌛ Sending...';
-                btn.disabled = true;
+                // Step 1: Copy the rich content
+                const ok = await copyEmailToClipboard(false);
+                if (!ok) return;
 
-                try {
-                    // IMPORTANT: You must ensure your EmailJS template (template_9c12rfd) 
-                    // has a variable (e.g., {{items_list}}) that accepts HTML.
-                    await emailjs.send('service_qfjzch5', 'template_9c12rfd', {
-                        to_email: email,
-                        customer_name: 'Our Valued Client',
-                        order_id: subject,
-                        total_price: 'N/A',
-                        items_list: bodyHTML
-                    });
-                    showAdminToast('🚀 Email sent successfully!');
-                } catch (e) {
-                    console.error(e);
-                    alert('Send failed: ' + e.message);
-                } finally {
-                    btn.textContent = '🚀 Send Email Now';
-                    btn.disabled = false;
-                }
+                // Step 2: Open Gmail Compose
+                const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(email)}&su=${encodeURIComponent(subject)}`;
+                window.open(gmailUrl, '_blank');
+
+                showAdminToast('📧 Gmail opened! Now just PASTE (Ctrl+V) into the message body.');
             }
 
             initAdminAuth();
