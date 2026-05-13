@@ -4230,7 +4230,6 @@
 
       // Update UI
       if (document.getElementById('loginLink')) document.getElementById('loginLink').style.display = 'none';
-      console.log('Updating UI for:', u.name);
       if (document.getElementById('userProfile')) {
         document.getElementById('userProfile').style.display = 'flex';
         const nameEl = document.getElementById('userName');
@@ -4241,6 +4240,14 @@
       }
       if (document.getElementById('dotProfileBtn')) document.getElementById('dotProfileBtn').style.display = 'block';
       if (document.getElementById('dotLogoutBtn')) document.getElementById('dotLogoutBtn').style.display = 'block';
+
+      // Auto-prompt to complete profile if fields are missing
+      if (!u.phone || !u.location) {
+        setTimeout(() => {
+          showToast('👋 Welcome! Please complete your delivery details below.');
+          openProfile();
+        }, 1500);
+      }
     }
 
     function toggleProfileEdit(isEdit) {
@@ -4567,11 +4574,19 @@
       if (!cart.length) { showToast('Your cart is empty.'); return; }
       const user = await getCurrentUser();
       if (!user) { openAuth(); return; }
-      if (!user.email || !user.phone || !user.location) {
-        showToast('⚠️ Please save your phone & delivery location first.');
+
+      // Strict validation for delivery details
+      if (!user.phone || user.phone.trim() === '') {
+        showToast('⚠️ Please enter your Phone Number in your profile.');
         openProfile();
         return;
       }
+      if (!user.location || user.location.trim() === '') {
+        showToast('⚠️ Please enter your Delivery Location in your profile.');
+        openProfile();
+        return;
+      }
+
       closeCart();
       placeOrder(user);
     }
