@@ -2421,6 +2421,17 @@
                 document.getElementById('emailTo').value = '';
                 document.getElementById('emailSubject').value = '';
 
+                // Show success + direct link to Gmail web Sent folder
+                document.getElementById('emailPreview').innerHTML = `
+                    <div style="text-align:center; padding:3rem; color:#333">
+                        <div style="font-size:3.5rem; margin-bottom:1rem">✅</div>
+                        <h3 style="color:#10b981; margin:0 0 0.5rem">Email Sent Successfully!</h3>
+                        <p style="color:#666; margin-bottom:2rem">Delivered to <strong>${to}</strong></p>
+                        <a href="https://mail.google.com/mail/u/0/#sent" target="_blank"
+                            style="display:inline-block; background:#c4587a; color:white; padding:0.9rem 2rem; border-radius:8px; text-decoration:none; font-weight:600; font-size:0.85rem; letter-spacing:0.05em">
+                            📬 View in Gmail (Web)
+                        </a>
+                    </div>`;
             } catch (e) {
                 console.error(e);
                 alert('Failed to send: ' + e.message + '\n\nNote: If token expired, click Connect Gmail again.');
