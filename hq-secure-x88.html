@@ -1350,119 +1350,123 @@
                         </div>
                     </div>
                 </div>
-                <div class="tab-content" id="page-email">
-                    <div class="panel">
-                        <div class="panel-header">
-                            <div class="panel-title">Client Communication Hub</div>
-                            <div style="display:flex; gap:0.5rem; align-items:center">
-                                <div id="gmailAuthStatus"
-                                    style="font-size:0.7rem; color:var(--text-muted); margin-right:0.5rem">● Not
-                                    connected to Gmail</div>
-                                <button class="btn-primary" id="btnGmailConnect" onclick="authorizeGmail()"
-                                    style="background:rgba(196,88,122,0.15); border:1px solid var(--rose)">🔑 Connect
-                                    Gmail</button>
-                                <button class="btn-primary" id="btnSendEmail" onclick="sendViaGmailAPI()"
-                                    style="display:none">📤 Send Email</button>
-                            </div>
-                        </div>
-                        <div class="panel-body">
-                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
-                                <div class="panel"
-                                    style="background:var(--off-black); padding:1.5rem; border:1px solid var(--border)">
-                                    <h3 style="color:var(--rose); margin-bottom:1.5rem">Email Details</h3>
-                                    <div class="form-group">
-                                        <label>Client Email</label>
-                                        <input type="email" id="emailTo" placeholder="customer@example.com">
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Template Type</label>
-                                        <select id="emailTemplate" onchange="updateEmailPreview()"
-                                            style="width:100%; background:var(--black); color:white; border:1px solid var(--border); padding:0.8rem; border-radius:8px">
-                                            <option value="invoice">📄 Professional Invoice</option>
-                                            <option value="payment">💰 Payment Details (M-Pesa)</option>
-                                            <option value="receipt">🧾 Official Receipt</option>
-                                            <option value="promo">📣 Marketing Promotion</option>
-                                        </select>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Subject Line</label>
-                                        <input type="text" id="emailSubject" placeholder="Invoice for Order #ATK-123">
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Linked Order (to pull products)</label>
-                                        <select id="emailOrderID" onchange="updateEmailPreview()"
-                                            style="width:100%; background:var(--black); color:white; border:1px solid var(--border); padding:0.8rem; border-radius:8px">
-                                            <option value="">Manual / None</option>
-                                        </select>
-                                    </div>
-                                </div>
+            </div>
+            <!-- /page-reviews -->
 
-                                <div class="panel"
-                                    style="background:var(--black); border:1px solid var(--border); min-height:500px; display:flex; flex-direction:column">
-                                    <div
-                                        style="padding:1rem; border-bottom:1px solid var(--border); font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.1em">
-                                        Live Template Preview
-                                    </div>
-                                    <div id="emailPreview"
-                                        style="flex:1; padding:2rem; overflow-y:auto; font-size:0.9rem; background:white; border-radius:8px; margin:1rem">
-                                        <p style="color:#999; text-align:center; margin-top:4rem">Select a template type
-                                            or click a 📧 button on any order to begin.</p>
-                                    </div>
-                                    <div
-                                        style="padding:1rem; border-top:1px solid var(--border); font-size:0.7rem; color:var(--gold); text-align:center; background:rgba(201,169,110,0.05)">
-                                        💡 <strong>Gmail API:</strong> Click <strong>Connect Gmail</strong> once, then
-                                        use <strong>Send Email</strong> to deliver directly from your inbox.
-                                    </div>
+            <!-- EMAIL CENTER PAGE -->
+            <div class="tab-content" id="page-email">
+                <div class="panel">
+                    <div class="panel-header">
+                        <div class="panel-title">Client Communication Hub</div>
+                        <div style="display:flex; gap:0.5rem; align-items:center">
+                            <div id="gmailAuthStatus"
+                                style="font-size:0.7rem; color:var(--text-muted); margin-right:0.5rem">● Not
+                                connected to Gmail</div>
+                            <button class="btn-primary" id="btnGmailConnect" onclick="authorizeGmail()"
+                                style="background:rgba(196,88,122,0.15); border:1px solid var(--rose)">🔑 Connect
+                                Gmail</button>
+                            <button class="btn-primary" id="btnSendEmail" onclick="sendViaGmailAPI()"
+                                style="display:none">📤 Send Email</button>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                            <div class="panel"
+                                style="background:var(--off-black); padding:1.5rem; border:1px solid var(--border)">
+                                <h3 style="color:var(--rose); margin-bottom:1.5rem">Email Details</h3>
+                                <div class="form-group">
+                                    <label>Client Email</label>
+                                    <input type="email" id="emailTo" placeholder="customer@example.com">
+                                </div>
+                                <div class="form-group">
+                                    <label>Template Type</label>
+                                    <select id="emailTemplate" onchange="updateEmailPreview()"
+                                        style="width:100%; background:var(--black); color:white; border:1px solid var(--border); padding:0.8rem; border-radius:8px">
+                                        <option value="invoice">📄 Professional Invoice</option>
+                                        <option value="payment">💰 Payment Details (M-Pesa)</option>
+                                        <option value="receipt">🧾 Official Receipt</option>
+                                        <option value="promo">📣 Marketing Promotion</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Subject Line</label>
+                                    <input type="text" id="emailSubject" placeholder="Invoice for Order #ATK-123">
+                                </div>
+                                <div class="form-group">
+                                    <label>Linked Order (to pull products)</label>
+                                    <select id="emailOrderID" onchange="updateEmailPreview()"
+                                        style="width:100%; background:var(--black); color:white; border:1px solid var(--border); padding:0.8rem; border-radius:8px">
+                                        <option value="">Manual / None</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="panel"
+                                style="background:var(--black); border:1px solid var(--border); min-height:500px; display:flex; flex-direction:column">
+                                <div
+                                    style="padding:1rem; border-bottom:1px solid var(--border); font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.1em">
+                                    Live Template Preview
+                                </div>
+                                <div id="emailPreview"
+                                    style="flex:1; padding:2rem; overflow-y:auto; font-size:0.9rem; background:white; border-radius:8px; margin:1rem">
+                                    <p style="color:#999; text-align:center; margin-top:4rem">Select a template type
+                                        or click a 📧 button on any order to begin.</p>
+                                </div>
+                                <div
+                                    style="padding:1rem; border-top:1px solid var(--border); font-size:0.7rem; color:var(--gold); text-align:center; background:rgba(201,169,110,0.05)">
+                                    💡 <strong>Gmail API:</strong> Click <strong>Connect Gmail</strong> once, then
+                                    use <strong>Send Email</strong> to deliver directly from your inbox.
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
+            </div><!-- /page-email -->
 
-            </div><!-- /content -->
-        </div><!-- /main -->
+        </div><!-- /content -->
+    </div><!-- /main -->
 
-        <!-- Order Detail Modal -->
-        <div class="modal-overlay" id="orderModal">
-            <div class="modal">
-                <div class="modal-header">
-                    <div class="modal-title">Order Details</div>
-                    <button class="modal-close" onclick="closeOrderModal()">×</button>
-                </div>
-                <div class="modal-body" id="orderModalBody"></div>
+    <!-- Order Detail Modal -->
+    <div class="modal-overlay" id="orderModal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">Order Details</div>
+                <button class="modal-close" onclick="closeOrderModal()">×</button>
             </div>
+            <div class="modal-body" id="orderModalBody"></div>
         </div>
+    </div>
 
-        <!-- Admin Toast -->
-        <div class="admin-toast" id="adminToast">
-            <div class="admin-toast-dot"></div>
-            <span id="adminToastMsg">Saved successfully</span>
-        </div>
+    <!-- Admin Toast -->
+    <div class="admin-toast" id="adminToast">
+        <div class="admin-toast-dot"></div>
+        <span id="adminToastMsg">Saved successfully</span>
+    </div>
 
 
-        <script src="https://accounts.google.com/gsi/client" async defer></script>
-        <script>
-            const SUPABASE_URL = 'https://ozvdljbiltdkauaatzif.supabase.co';
-            const SUPABASE_ANON_KEY = 'sb_publishable_YW3uVTsSwD0dYUexp11_iQ_aEkG2TLH';
-            const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script>
+        const SUPABASE_URL = 'https://ozvdljbiltdkauaatzif.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_YW3uVTsSwD0dYUexp11_iQ_aEkG2TLH';
+        const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-            // Files being held for upload
-            let productFiles = {
-                imgPreview: null,
-                imgP2: null,
-                imgP3: null,
-                imgP4: null,
-                imgP5: null
-            };
+        // Files being held for upload
+        let productFiles = {
+            imgPreview: null,
+            imgP2: null,
+            imgP3: null,
+            imgP4: null,
+            imgP5: null
+        };
 
-            function renderSubscribersTable() {
-                const table = document.getElementById('subscribersTable');
-                if (!table || !DB_SUBSCRIBERS) return;
-                if (DB_SUBSCRIBERS.length === 0) {
-                    table.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:2rem">No subscribers yet.</td></tr>';
-                    return;
-                }
-                table.innerHTML = DB_SUBSCRIBERS.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).map(s => `
+        function renderSubscribersTable() {
+            const table = document.getElementById('subscribersTable');
+            if (!table || !DB_SUBSCRIBERS) return;
+            if (DB_SUBSCRIBERS.length === 0) {
+                table.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:2rem">No subscribers yet.</td></tr>';
+                return;
+            }
+            table.innerHTML = DB_SUBSCRIBERS.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).map(s => `
                 <tr>
                     <td><div style="font-weight:600">${s.email}</div></td>
                     <td>${new Date(s.created_at).toLocaleDateString()}</td>
@@ -1471,62 +1475,62 @@
                     </td>
                 </tr>
             `).join('');
+        }
+
+        async function deleteSubscriber(id) {
+            if (!confirm('Are you sure you want to remove this subscriber?')) return;
+            const { error } = await db.from('newsletter_subscribers').delete().eq('id', id);
+            if (error) { alert('Error deleting subscriber'); }
+            else {
+                showAdminToast('🗑 Subscriber removed');
+                reloadAndRender();
             }
+        }
 
-            async function deleteSubscriber(id) {
-                if (!confirm('Are you sure you want to remove this subscriber?')) return;
-                const { error } = await db.from('newsletter_subscribers').delete().eq('id', id);
-                if (error) { alert('Error deleting subscriber'); }
-                else {
-                    showAdminToast('🗑 Subscriber removed');
-                    reloadAndRender();
-                }
+        // ── SECURITY UTILITIES ─────────────────────────────────────────
+        function sanitizeHTML(str) {
+            if (!str) return '';
+            const div = document.createElement('div');
+            div.textContent = String(str);
+            return div.innerHTML;
+        }
+
+        // ── INACTIVITY TIMER (30 MIN) ──────────────────────────────────
+        let inactivityTimer;
+        function resetInactivityTimer() {
+            clearTimeout(inactivityTimer);
+            inactivityTimer = setTimeout(() => adminLogout(), 30 * 60 * 1000);
+        }
+        ['click', 'keydown', 'mousemove', 'scroll'].forEach(e => document.addEventListener(e, resetInactivityTimer));
+
+        // ── BRUTE FORCE PROTECTION + SILENT SECURITY ALERTS ────────────
+        const MAX_LOGIN_ATTEMPTS = 5;
+        const LOCKOUT_TIME = 60 * 60 * 1000; // 1 hour lockout
+        const ALERT_THRESHOLD = 3;            // Send alert after 3 failed attempts
+        const OWNER_ALERT_EMAIL = 'wambuat197@gmail.com';
+
+        // Silently email the owner when brute force is detected
+        async function sendBruteForceAlert(attemptCount) {
+            try {
+                const timestamp = new Date().toLocaleString('en-KE', { timeZone: 'Africa/Nairobi' });
+                const browserInfo = navigator.userAgent;
+                await emailjs.send('service_qfjzch5', 'template_9c12rfd', {
+                    to_email: OWNER_ALERT_EMAIL,
+                    customer_name: '⚠️ SECURITY ALERT — AdultToysKe Admin Portal',
+                    order_id: `BRUTE-FORCE-DETECTED`,
+                    total_price: `${attemptCount} failed attempt(s)`,
+                    items_list: `Time: ${timestamp}\nBrowser: ${browserInfo}\nACTION: Admin login page is being targeted. If this was not you, the site has been locked for 1 hour.`,
+                });
+                console.warn('[SECURITY] Brute force alert sent to owner.');
+            } catch (e) {
+                // Silent — never reveal email failures to attacker
+                console.warn('[SECURITY] Alert email failed silently.');
             }
+        }
 
-            // ── SECURITY UTILITIES ─────────────────────────────────────────
-            function sanitizeHTML(str) {
-                if (!str) return '';
-                const div = document.createElement('div');
-                div.textContent = String(str);
-                return div.innerHTML;
-            }
-
-            // ── INACTIVITY TIMER (30 MIN) ──────────────────────────────────
-            let inactivityTimer;
-            function resetInactivityTimer() {
-                clearTimeout(inactivityTimer);
-                inactivityTimer = setTimeout(() => adminLogout(), 30 * 60 * 1000);
-            }
-            ['click', 'keydown', 'mousemove', 'scroll'].forEach(e => document.addEventListener(e, resetInactivityTimer));
-
-            // ── BRUTE FORCE PROTECTION + SILENT SECURITY ALERTS ────────────
-            const MAX_LOGIN_ATTEMPTS = 5;
-            const LOCKOUT_TIME = 60 * 60 * 1000; // 1 hour lockout
-            const ALERT_THRESHOLD = 3;            // Send alert after 3 failed attempts
-            const OWNER_ALERT_EMAIL = 'wambuat197@gmail.com';
-
-            // Silently email the owner when brute force is detected
-            async function sendBruteForceAlert(attemptCount) {
-                try {
-                    const timestamp = new Date().toLocaleString('en-KE', { timeZone: 'Africa/Nairobi' });
-                    const browserInfo = navigator.userAgent;
-                    await emailjs.send('service_qfjzch5', 'template_9c12rfd', {
-                        to_email: OWNER_ALERT_EMAIL,
-                        customer_name: '⚠️ SECURITY ALERT — AdultToysKe Admin Portal',
-                        order_id: `BRUTE-FORCE-DETECTED`,
-                        total_price: `${attemptCount} failed attempt(s)`,
-                        items_list: `Time: ${timestamp}\nBrowser: ${browserInfo}\nACTION: Admin login page is being targeted. If this was not you, the site has been locked for 1 hour.`,
-                    });
-                    console.warn('[SECURITY] Brute force alert sent to owner.');
-                } catch (e) {
-                    // Silent — never reveal email failures to attacker
-                    console.warn('[SECURITY] Alert email failed silently.');
-                }
-            }
-
-            // Put the site into maintenance mode (hides content, shows locked message)
-            function activateMaintenanceMode() {
-                document.body.innerHTML = `
+        // Put the site into maintenance mode (hides content, shows locked message)
+        function activateMaintenanceMode() {
+            document.body.innerHTML = `
                 <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;
                     min-height:100vh;background:#0a0a0a;color:#fdf8f5;font-family:'DM Sans',sans-serif;
                     text-align:center;padding:2rem;">
@@ -1543,222 +1547,222 @@
                         ADULTTOYSKE · SECURITY LOCKDOWN
                     </p>
                 </div>`;
+        }
+
+        async function doAdminLogin(evt) {
+            const btn = document.querySelector('.btn-login');
+            if (btn) btn.textContent = 'Authenticating...';
+
+            let loginAttempts = parseInt(localStorage.getItem('admin_login_attempts') || '0');
+            let lockoutUntil = parseInt(localStorage.getItem('admin_lockout_until') || '0');
+
+            // ── CHECK EXISTING LOCKOUT ──
+            if (lockoutUntil > Date.now()) {
+                const minsLeft = Math.ceil((lockoutUntil - Date.now()) / 60000);
+                showAdminToast(`🔒 Account locked. Try again in ${minsLeft} minute(s).`);
+                if (btn) btn.textContent = 'Sign In to Dashboard';
+                return;
             }
 
-            async function doAdminLogin(evt) {
-                const btn = document.querySelector('.btn-login');
-                if (btn) btn.textContent = 'Authenticating...';
+            // ── MAX ATTEMPTS REACHED → LOCKOUT + MAINTENANCE MODE ──
+            if (loginAttempts >= MAX_LOGIN_ATTEMPTS) {
+                localStorage.setItem('admin_lockout_until', (Date.now() + LOCKOUT_TIME).toString());
+                await sendBruteForceAlert(loginAttempts); // Silent alert
+                activateMaintenanceMode();                // Pull the site down
+                return;
+            }
 
-                let loginAttempts = parseInt(localStorage.getItem('admin_login_attempts') || '0');
-                let lockoutUntil = parseInt(localStorage.getItem('admin_lockout_until') || '0');
+            const e = document.getElementById('loginEmail').value.trim();
+            const p = document.getElementById('loginPass').value.trim();
+            const errEl = document.getElementById('loginErr');
 
-                // ── CHECK EXISTING LOCKOUT ──
-                if (lockoutUntil > Date.now()) {
-                    const minsLeft = Math.ceil((lockoutUntil - Date.now()) / 60000);
-                    showAdminToast(`🔒 Account locked. Try again in ${minsLeft} minute(s).`);
-                    if (btn) btn.textContent = 'Sign In to Dashboard';
-                    return;
-                }
+            try {
+                // ── STEP 1: Try Supabase Auth ──
+                const { data, error } = await db.auth.signInWithPassword({ email: e, password: p });
 
-                // ── MAX ATTEMPTS REACHED → LOCKOUT + MAINTENANCE MODE ──
-                if (loginAttempts >= MAX_LOGIN_ATTEMPTS) {
-                    localStorage.setItem('admin_lockout_until', (Date.now() + LOCKOUT_TIME).toString());
-                    await sendBruteForceAlert(loginAttempts); // Silent alert
-                    activateMaintenanceMode();                // Pull the site down
-                    return;
-                }
+                if (error) {
+                    // ── STEP 2: Legacy admins table fallback ──
+                    const cleanedEmail = e.toLowerCase();
+                    const { data: legacyAdmin } = await db
+                        .from('admins')
+                        .select('*')
+                        .ilike('email', cleanedEmail)
+                        .eq('password', p)
+                        .limit(1)
+                        .maybeSingle();
 
-                const e = document.getElementById('loginEmail').value.trim();
-                const p = document.getElementById('loginPass').value.trim();
-                const errEl = document.getElementById('loginErr');
-
-                try {
-                    // ── STEP 1: Try Supabase Auth ──
-                    const { data, error } = await db.auth.signInWithPassword({ email: e, password: p });
-
-                    if (error) {
-                        // ── STEP 2: Legacy admins table fallback ──
-                        const cleanedEmail = e.toLowerCase();
-                        const { data: legacyAdmin } = await db
-                            .from('admins')
-                            .select('*')
-                            .ilike('email', cleanedEmail)
-                            .eq('password', p)
-                            .limit(1)
-                            .maybeSingle();
-
-                        if (legacyAdmin) {
-                            // ✅ Legacy login success — clear counters
-                            localStorage.removeItem('admin_login_attempts');
-                            localStorage.removeItem('admin_lockout_until');
-                            document.getElementById('adminLogin').classList.add('hidden');
-                            document.getElementById('adminDisplayName').textContent = legacyAdmin.email;
-                            reloadAndRender();
-                            resetInactivityTimer();
-                            showAdminToast('✅ Welcome, ' + legacyAdmin.email);
-                            return;
-                        }
-
-                        // Check if this is a customer account
-                        const { data: isCustomer } = await db.from('customers').select('email').ilike('email', cleanedEmail).limit(1).maybeSingle();
-                        if (isCustomer) {
-                            errEl.textContent = "❌ This is a Customer account, not an Admin account.";
-                            errEl.style.display = 'block';
-                            if (btn) btn.textContent = 'Sign In to Dashboard';
-                            return;
-                        }
-
-                        // ── FAILED ATTEMPT — increment counter ──
-                        loginAttempts++;
-                        localStorage.setItem('admin_login_attempts', loginAttempts.toString());
-                        const attemptsLeft = MAX_LOGIN_ATTEMPTS - loginAttempts;
-
-                        // Send silent alert at threshold (3 attempts)
-                        if (loginAttempts === ALERT_THRESHOLD) {
-                            sendBruteForceAlert(loginAttempts); // fire and forget — don't await
-                        }
-
-                        // Pull site down and notify at max attempts
-                        if (loginAttempts >= MAX_LOGIN_ATTEMPTS) {
-                            localStorage.setItem('admin_lockout_until', (Date.now() + LOCKOUT_TIME).toString());
-                            await sendBruteForceAlert(loginAttempts);
-                            activateMaintenanceMode();
-                            return;
-                        }
-
-                        errEl.textContent = `❌ Incorrect credentials. ${attemptsLeft} attempt(s) left.`;
-                        errEl.style.display = 'block';
-
-                    } else if (data.session) {
-                        // Check if this Supabase user is an authorized admin
-                        const { data: isAdmin } = await db.from('admins').select('email').ilike('email', data.user.email).maybeSingle();
-
-                        if (!isAdmin) {
-                            await db.auth.signOut();
-                            errEl.textContent = "❌ Access Denied: This account does not have administrator privileges.";
-                            errEl.style.display = 'block';
-                            return;
-                        }
-
-                        // ✅ Supabase Auth success — clear counters
+                    if (legacyAdmin) {
+                        // ✅ Legacy login success — clear counters
                         localStorage.removeItem('admin_login_attempts');
                         localStorage.removeItem('admin_lockout_until');
                         document.getElementById('adminLogin').classList.add('hidden');
-                        document.getElementById('adminDisplayName').textContent = data.user?.email || 'Admin';
+                        document.getElementById('adminDisplayName').textContent = legacyAdmin.email;
                         reloadAndRender();
                         resetInactivityTimer();
+                        showAdminToast('✅ Welcome, ' + legacyAdmin.email);
+                        return;
                     }
-                } catch (err) {
-                    errEl.textContent = 'Unexpected error: ' + err.message;
+
+                    // Check if this is a customer account
+                    const { data: isCustomer } = await db.from('customers').select('email').ilike('email', cleanedEmail).limit(1).maybeSingle();
+                    if (isCustomer) {
+                        errEl.textContent = "❌ This is a Customer account, not an Admin account.";
+                        errEl.style.display = 'block';
+                        if (btn) btn.textContent = 'Sign In to Dashboard';
+                        return;
+                    }
+
+                    // ── FAILED ATTEMPT — increment counter ──
+                    loginAttempts++;
+                    localStorage.setItem('admin_login_attempts', loginAttempts.toString());
+                    const attemptsLeft = MAX_LOGIN_ATTEMPTS - loginAttempts;
+
+                    // Send silent alert at threshold (3 attempts)
+                    if (loginAttempts === ALERT_THRESHOLD) {
+                        sendBruteForceAlert(loginAttempts); // fire and forget — don't await
+                    }
+
+                    // Pull site down and notify at max attempts
+                    if (loginAttempts >= MAX_LOGIN_ATTEMPTS) {
+                        localStorage.setItem('admin_lockout_until', (Date.now() + LOCKOUT_TIME).toString());
+                        await sendBruteForceAlert(loginAttempts);
+                        activateMaintenanceMode();
+                        return;
+                    }
+
+                    errEl.textContent = `❌ Incorrect credentials. ${attemptsLeft} attempt(s) left.`;
                     errEl.style.display = 'block';
-                } finally {
-                    if (btn) btn.textContent = 'Sign In to Dashboard';
-                }
-            }
 
-            async function adminLogout() {
-                // Clear attempt counter on intentional logout — admin should always be able to log back in
-                localStorage.removeItem('admin_login_attempts');
-                localStorage.removeItem('admin_lockout_until');
-                await db.auth.signOut();
-                location.reload();
-            }
+                } else if (data.session) {
+                    // Check if this Supabase user is an authorized admin
+                    const { data: isAdmin } = await db.from('admins').select('email').ilike('email', data.user.email).maybeSingle();
 
-            async function initAdminAuth() {
-                // Hidden escape hatch: visit the page with ?resetlock=1 to clear a stale lockout
-                if (new URLSearchParams(window.location.search).get('resetlock') === '1') {
+                    if (!isAdmin) {
+                        await db.auth.signOut();
+                        errEl.textContent = "❌ Access Denied: This account does not have administrator privileges.";
+                        errEl.style.display = 'block';
+                        return;
+                    }
+
+                    // ✅ Supabase Auth success — clear counters
                     localStorage.removeItem('admin_login_attempts');
                     localStorage.removeItem('admin_lockout_until');
-                    // Clean URL
-                    history.replaceState({}, '', window.location.pathname);
+                    document.getElementById('adminLogin').classList.add('hidden');
+                    document.getElementById('adminDisplayName').textContent = data.user?.email || 'Admin';
+                    reloadAndRender();
+                    resetInactivityTimer();
                 }
+            } catch (err) {
+                errEl.textContent = 'Unexpected error: ' + err.message;
+                errEl.style.display = 'block';
+            } finally {
+                if (btn) btn.textContent = 'Sign In to Dashboard';
+            }
+        }
 
-                const { data: { session } } = await db.auth.getSession();
-                if (session) {
-                    // VERIFY: Ensure the session belongs to an actual admin
-                    const { data: isAdmin } = await db.from('admins').select('email').ilike('email', session.user.email).maybeSingle();
+        async function adminLogout() {
+            // Clear attempt counter on intentional logout — admin should always be able to log back in
+            localStorage.removeItem('admin_login_attempts');
+            localStorage.removeItem('admin_lockout_until');
+            await db.auth.signOut();
+            location.reload();
+        }
 
-                    if (isAdmin) {
-                        document.getElementById('adminLogin').classList.add('hidden');
-                        document.getElementById('adminDisplayName').textContent = session.user?.email || 'Admin';
-                        reloadAndRender();
-                    } else {
-                        // Unauthorized session (likely a customer) - force logout from admin portal
-                        await db.auth.signOut();
-                        location.reload();
-                    }
-                }
+        async function initAdminAuth() {
+            // Hidden escape hatch: visit the page with ?resetlock=1 to clear a stale lockout
+            if (new URLSearchParams(window.location.search).get('resetlock') === '1') {
+                localStorage.removeItem('admin_login_attempts');
+                localStorage.removeItem('admin_lockout_until');
+                // Clean URL
+                history.replaceState({}, '', window.location.pathname);
             }
 
+            const { data: { session } } = await db.auth.getSession();
+            if (session) {
+                // VERIFY: Ensure the session belongs to an actual admin
+                const { data: isAdmin } = await db.from('admins').select('email').ilike('email', session.user.email).maybeSingle();
 
-            document.getElementById('loginEmail').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('loginPass').focus(); });
-            document.getElementById('loginPass').addEventListener('keydown', e => { if (e.key === 'Enter') doAdminLogin(); });
-
-            // ===================== DATA =====================
-            let DB_PRODUCTS = [], DB_ORDERS = [], DB_CUSTOMERS = [], DB_PROMOS = [], DB_REVIEWS = [], DB_SUBSCRIBERS = [];
-
-            async function fetchAllData() {
-                try {
-                    const [pRes, oRes, cRes, bRes, rRes, sRes] = await Promise.all([
-                        db.from('products').select('*'),
-                        db.from('orders').select('*'),
-                        db.from('customers').select('*'),
-                        db.from('promo_banners').select('*'),
-                        db.from('product_reviews').select('*'),
-                        db.from('newsletter_subscribers').select('*')
-                    ]);
-                    DB_PRODUCTS = pRes.data || [];
-                    DB_ORDERS = oRes.data || [];
-                    DB_CUSTOMERS = cRes.data || [];
-                    DB_PROMOS = bRes.data || [];
-                    DB_REVIEWS = rRes.data || [];
-                    DB_SUBSCRIBERS = sRes ? (sRes.data || []) : [];
-                    // Data synced successfully
-                } catch (err) {
-                    console.error('Fetch Error:', err);
+                if (isAdmin) {
+                    document.getElementById('adminLogin').classList.add('hidden');
+                    document.getElementById('adminDisplayName').textContent = session.user?.email || 'Admin';
+                    reloadAndRender();
+                } else {
+                    // Unauthorized session (likely a customer) - force logout from admin portal
+                    await db.auth.signOut();
+                    location.reload();
                 }
             }
+        }
 
-            async function reloadAndRender() {
-                await fetchAllData();
-                loadData();
+
+        document.getElementById('loginEmail').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('loginPass').focus(); });
+        document.getElementById('loginPass').addEventListener('keydown', e => { if (e.key === 'Enter') doAdminLogin(); });
+
+        // ===================== DATA =====================
+        let DB_PRODUCTS = [], DB_ORDERS = [], DB_CUSTOMERS = [], DB_PROMOS = [], DB_REVIEWS = [], DB_SUBSCRIBERS = [];
+
+        async function fetchAllData() {
+            try {
+                const [pRes, oRes, cRes, bRes, rRes, sRes] = await Promise.all([
+                    db.from('products').select('*'),
+                    db.from('orders').select('*'),
+                    db.from('customers').select('*'),
+                    db.from('promo_banners').select('*'),
+                    db.from('product_reviews').select('*'),
+                    db.from('newsletter_subscribers').select('*')
+                ]);
+                DB_PRODUCTS = pRes.data || [];
+                DB_ORDERS = oRes.data || [];
+                DB_CUSTOMERS = cRes.data || [];
+                DB_PROMOS = bRes.data || [];
+                DB_REVIEWS = rRes.data || [];
+                DB_SUBSCRIBERS = sRes ? (sRes.data || []) : [];
+                // Data synced successfully
+            } catch (err) {
+                console.error('Fetch Error:', err);
             }
+        }
 
-            function getProducts() { return DB_PRODUCTS; }
-            function getOrders() { return DB_ORDERS; }
-            function getCustomers() { return DB_CUSTOMERS; }
+        async function reloadAndRender() {
+            await fetchAllData();
+            loadData();
+        }
 
-            function loadData() {
-                updateStats();
-                renderProductsTable();
-                renderOrdersTable();
-                renderCustomersTable();
-                renderCatalogue();
-                renderMarketingData();
-                renderReviewsTable();
-                checkNotifications();
-            }
+        function getProducts() { return DB_PRODUCTS; }
+        function getOrders() { return DB_ORDERS; }
+        function getCustomers() { return DB_CUSTOMERS; }
 
-            // ===================== STATS =====================
-            function updateStats() {
-                const orders = getOrders();
-                const pending = orders.filter(o => o.status === 'pending').length;
-                const confirmedCodes = ['confirmed', 'delivered', 'shipped'];
-                const revenue = orders.filter(o => confirmedCodes.includes(o.status))
-                    .reduce((s, o) => s + (o.total || 0), 0);
+        function loadData() {
+            updateStats();
+            renderProductsTable();
+            renderOrdersTable();
+            renderCustomersTable();
+            renderCatalogue();
+            renderMarketingData();
+            renderReviewsTable();
+            checkNotifications();
+        }
 
-                document.getElementById('statOrders').textContent = orders.length;
-                document.getElementById('statPending').textContent = pending;
-                document.getElementById('statRevenue').textContent = 'KES ' + revenue.toLocaleString();
-                document.getElementById('statProducts').textContent = getProducts().length;
-            }
+        // ===================== STATS =====================
+        function updateStats() {
+            const orders = getOrders();
+            const pending = orders.filter(o => o.status === 'pending').length;
+            const confirmedCodes = ['confirmed', 'delivered', 'shipped'];
+            const revenue = orders.filter(o => confirmedCodes.includes(o.status))
+                .reduce((s, o) => s + (o.total || 0), 0);
 
-            // ===================== PRODUCTS TABLE =====================
-            function renderProductsTable() {
-                const products = getProducts();
-                const tbody = document.getElementById('productsTable');
-                if (!products.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:2rem">No products. Add your first product.</td></tr>'; return; }
-                tbody.innerHTML = products.map((p, i) => `
+            document.getElementById('statOrders').textContent = orders.length;
+            document.getElementById('statPending').textContent = pending;
+            document.getElementById('statRevenue').textContent = 'KES ' + revenue.toLocaleString();
+            document.getElementById('statProducts').textContent = getProducts().length;
+        }
+
+        // ===================== PRODUCTS TABLE =====================
+        function renderProductsTable() {
+            const products = getProducts();
+            const tbody = document.getElementById('productsTable');
+            if (!products.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:2rem">No products. Add your first product.</td></tr>'; return; }
+            tbody.innerHTML = products.map((p, i) => `
     <tr>
       <td><span class="table-emoji">${p.emoji}</span> <strong>${p.name}</strong></td>
       <td>${p.img ? `<img src="${p.img}" style="width:40px;height:40px;object-fit:cover;border-radius:4px">` : '<div style="width:40px;height:40px;background:var(--off-black);display:flex;align-items:center;justify-content:center;border-radius:4px">🖼️</div>'}</td>
@@ -1773,211 +1777,211 @@
       </td>
     </tr>
   `).join('');
-            }
+        }
 
-            function editProduct(i) {
-                const products = getProducts();
-                const p = products[i];
-                document.getElementById('pName').value = p.name;
-                document.getElementById('pCategory').value = p.category;
-                document.getElementById('pPrice').value = p.price;
-                document.getElementById('pOldPrice').value = p.old_price || '';
-                document.getElementById('pBadge').value = p.badge || '';
-                document.getElementById('pEmoji').value = p.emoji;
-                document.getElementById('pSizes').value = p.sizes || '';
-                document.getElementById('pModel').value = p.model || '';
-                document.getElementById('pShortDesc').value = p.short_desc || '';
-                document.getElementById('pFullDesc').value = p.full_desc || '';
-                document.getElementById('pFeatures').value = p.features || '';
-                document.getElementById('pStock').value = p.stock || 0;
+        function editProduct(i) {
+            const products = getProducts();
+            const p = products[i];
+            document.getElementById('pName').value = p.name;
+            document.getElementById('pCategory').value = p.category;
+            document.getElementById('pPrice').value = p.price;
+            document.getElementById('pOldPrice').value = p.old_price || '';
+            document.getElementById('pBadge').value = p.badge || '';
+            document.getElementById('pEmoji').value = p.emoji;
+            document.getElementById('pSizes').value = p.sizes || '';
+            document.getElementById('pModel').value = p.model || '';
+            document.getElementById('pShortDesc').value = p.short_desc || '';
+            document.getElementById('pFullDesc').value = p.full_desc || '';
+            document.getElementById('pFeatures').value = p.features || '';
+            document.getElementById('pStock').value = p.stock || 0;
 
-                const imgPrev = document.getElementById('imgPreview');
-                if (p.img) {
-                    imgPrev.src = p.img;
-                    imgPrev.style.display = 'block';
-                    document.querySelector('.img-upload-icon').style.display = 'none';
-                } else {
-                    imgPrev.style.display = 'none';
-                    document.querySelector('.img-upload-icon').style.display = 'block';
-                }
-
-                // Load Gallery
-                const gal = p.gallery || [];
-                ['imgP2', 'imgP3', 'imgP4', 'imgP5'].forEach((id, idx) => {
-                    const el = document.getElementById(id);
-                    if (gal[idx]) {
-                        el.src = gal[idx];
-                        el.style.display = 'block';
-                    } else {
-                        el.src = '';
-                        el.style.display = 'none';
-                    }
-                });
-
-                document.getElementById('addProductTitle').textContent = 'Edit Product — ' + p.name;
-                document.getElementById('pName').dataset.editIndex = i;
-
-                showPage('addProduct', document.querySelector('[onclick*="addProduct"]'));
-                window.scrollTo(0, 0);
-            }
-
-            async function deleteProduct(i) {
-                if (!confirm('Delete this product from the catalogue?')) return;
-                const p = getProducts()[i];
-                const { error } = await db.from('products').delete().eq('id', p.id);
-                if (!error) {
-                    showAdminToast('Product deleted');
-                    reloadAndRender();
-                }
-            }
-
-            // ===================== SAVE PRODUCT =====================
-            async function saveProduct() {
-                const name = document.getElementById('pName').value.trim();
-                const category = document.getElementById('pCategory').value;
-                const price = parseInt(document.getElementById('pPrice').value);
-                if (!name || !category || !price) { alert('Please fill in Name, Category, and Price.'); return; }
-
-                const product = {
-                    name, category, price,
-                    old_price: parseInt(document.getElementById('pOldPrice').value) || null,
-                    badge: document.getElementById('pBadge').value,
-                    emoji: document.getElementById('pEmoji').value || '',
-                    sizes: document.getElementById('pSizes').value,
-                    model: document.getElementById('pModel').value,
-                    short_desc: document.getElementById('pShortDesc').value,
-                    full_desc: document.getElementById('pFullDesc').value,
-                    features: document.getElementById('pFeatures').value,
-                    stock: parseInt(document.getElementById('pStock').value) || 0
-                };
-
-                // HELPER: Upload to Supabase Storage
-                const uploadToStorage = async (file, path) => {
-                    if (!file) return null;
-                    const cleanName = (str) => str.replace(/[^a-z0-9]/gi, '_').toLowerCase();
-                    const fileName = `${cleanName(name)}_${path}_${Date.now()}.jpg`;
-
-                    const { data, error } = await db.storage.from('product-images').upload(fileName, file, { upsert: true });
-                    if (error) { console.error("Upload error:", error); return null; }
-
-                    const { data: { publicUrl } } = db.storage.from('product-images').getPublicUrl(fileName);
-                    return publicUrl;
-                };
-
-                // UPLOAD MAIN IMAGE
-                const mainImgFile = productFiles.imgPreview;
-                if (mainImgFile) {
-                    const url = await uploadToStorage(mainImgFile, 'main');
-                    if (url) product.img = url;
-                } else {
-                    const existingImg = document.getElementById('imgPreview').src;
-                    if (existingImg && !existingImg.startsWith('data:') && !existingImg.includes('localhost') && existingImg !== window.location.href) {
-                        product.img = existingImg;
-                    }
-                }
-
-                // UPLOAD GALLERY
-                const galleryUrls = [];
-                const gallerySlots = ['imgP2', 'imgP3', 'imgP4', 'imgP5'];
-                for (let i = 0; i < gallerySlots.length; i++) {
-                    const slotId = gallerySlots[i];
-                    const file = productFiles[slotId];
-                    if (file) {
-                        const url = await uploadToStorage(file, `gal_${i}`);
-                        if (url) galleryUrls.push(url);
-                    } else {
-                        const existingImg = document.getElementById(slotId).src;
-                        if (existingImg && !existingImg.startsWith('data:') && existingImg !== "" && !existingImg.includes('localhost') && existingImg !== window.location.href) {
-                            galleryUrls.push(existingImg);
-                        }
-                    }
-                }
-                product.gallery = galleryUrls;
-
-                const editIdx = document.getElementById('pName').dataset.editIndex;
-                if (editIdx !== undefined && editIdx !== '') {
-                    const oldP = getProducts()[parseInt(editIdx)];
-                    await db.from('products').update(product).eq('id', oldP.id);
-                    delete document.getElementById('pName').dataset.editIndex;
-                    document.getElementById('addProductTitle').textContent = 'Add New Product';
-                } else {
-                    await db.from('products').insert([product]);
-                }
-
-                clearProductForm();
-                showAdminToast('✅ Product saved to catalogue!');
-                await reloadAndRender();
-                showPage('products', document.querySelector('[onclick*="products"]'));
-            }
-
-            function clearProductForm() {
-                ['pName', 'pCategory', 'pPrice', 'pOldPrice', 'pBadge', 'pEmoji', 'pSizes', 'pModel', 'pShortDesc', 'pFullDesc', 'pFeatures'].forEach(id => {
-                    const el = document.getElementById(id);
-                    if (el) el.value = '';
-                });
-                ['imgPreview', 'imgP2', 'imgP3', 'imgP4', 'imgP5'].forEach(id => {
-                    const el = document.getElementById(id);
-                    if (el) { el.src = ''; el.style.display = 'none'; }
-                });
-                // Clear pending files
-                productFiles = { imgPreview: null, imgP2: null, imgP3: null, imgP4: null, imgP5: null };
-
-                delete document.getElementById('pName').dataset.editIndex;
-                document.getElementById('addProductTitle').textContent = 'Add New Product';
+            const imgPrev = document.getElementById('imgPreview');
+            if (p.img) {
+                imgPrev.src = p.img;
+                imgPrev.style.display = 'block';
+                document.querySelector('.img-upload-icon').style.display = 'none';
+            } else {
+                imgPrev.style.display = 'none';
                 document.querySelector('.img-upload-icon').style.display = 'block';
             }
 
-            function previewImg(e, targetId) {
-                const file = e.target.files[0];
-                if (!file) return;
+            // Load Gallery
+            const gal = p.gallery || [];
+            ['imgP2', 'imgP3', 'imgP4', 'imgP5'].forEach((id, idx) => {
+                const el = document.getElementById(id);
+                if (gal[idx]) {
+                    el.src = gal[idx];
+                    el.style.display = 'block';
+                } else {
+                    el.src = '';
+                    el.style.display = 'none';
+                }
+            });
 
-                // Store the actual file for later upload
-                productFiles[targetId] = file;
+            document.getElementById('addProductTitle').textContent = 'Edit Product — ' + p.name;
+            document.getElementById('pName').dataset.editIndex = i;
 
-                const reader = new FileReader();
-                reader.onload = ev => {
-                    const img = document.getElementById(targetId);
-                    img.src = ev.target.result;
-                    img.style.display = 'block';
-                    if (targetId === 'imgPreview') {
-                        document.querySelector('.img-upload-icon').style.display = 'none';
-                    }
-                };
-                reader.readAsDataURL(file);
+            showPage('addProduct', document.querySelector('[onclick*="addProduct"]'));
+            window.scrollTo(0, 0);
+        }
+
+        async function deleteProduct(i) {
+            if (!confirm('Delete this product from the catalogue?')) return;
+            const p = getProducts()[i];
+            const { error } = await db.from('products').delete().eq('id', p.id);
+            if (!error) {
+                showAdminToast('Product deleted');
+                reloadAndRender();
             }
+        }
 
-            // ===================== ORDERS TABLE =====================
-            function renderOrdersTable() {
-                const orders = getOrders();
-                const filter = document.getElementById('orderFilter')?.value || 'all';
-                const filtered = filter === 'all' ? orders : orders.filter(o => o.status === filter);
+        // ===================== SAVE PRODUCT =====================
+        async function saveProduct() {
+            const name = document.getElementById('pName').value.trim();
+            const category = document.getElementById('pCategory').value;
+            const price = parseInt(document.getElementById('pPrice').value);
+            if (!name || !category || !price) { alert('Please fill in Name, Category, and Price.'); return; }
 
-                const dashTbody = document.getElementById('dashboardOrdersTable');
-                const allTbody = document.getElementById('allOrdersTable');
+            const product = {
+                name, category, price,
+                old_price: parseInt(document.getElementById('pOldPrice').value) || null,
+                badge: document.getElementById('pBadge').value,
+                emoji: document.getElementById('pEmoji').value || '',
+                sizes: document.getElementById('pSizes').value,
+                model: document.getElementById('pModel').value,
+                short_desc: document.getElementById('pShortDesc').value,
+                full_desc: document.getElementById('pFullDesc').value,
+                features: document.getElementById('pFeatures').value,
+                stock: parseInt(document.getElementById('pStock').value) || 0
+            };
 
-                const recentOrders = [...orders].reverse().slice(0, 5);
+            // HELPER: Upload to Supabase Storage
+            const uploadToStorage = async (file, path) => {
+                if (!file) return null;
+                const cleanName = (str) => str.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+                const fileName = `${cleanName(name)}_${path}_${Date.now()}.jpg`;
 
-                dashTbody.innerHTML = recentOrders.length ? recentOrders.map(o => orderRow(o, false)).join('')
-                    : '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:2rem">No orders yet.</td></tr>';
+                const { data, error } = await db.storage.from('product-images').upload(fileName, file, { upsert: true });
+                if (error) { console.error("Upload error:", error); return null; }
 
-                allTbody.innerHTML = filtered.length ? [...filtered].reverse().map(o => orderRow(o, true)).join('')
-                    : '<tr><td colspan="8" style="text-align:center;color:var(--text-muted);padding:2rem">No orders found.</td></tr>';
+                const { data: { publicUrl } } = db.storage.from('product-images').getPublicUrl(fileName);
+                return publicUrl;
+            };
 
-                // Also update Email Center Dropdown
-                const emailSelect = document.getElementById('emailOrderID');
-                if (emailSelect) {
-                    const currentVal = emailSelect.value;
-                    emailSelect.innerHTML = '<option value="">Manual / None</option>' +
-                        orders.map(o => `<option value="${o.id}">Order #${o.id.slice(0, 8)} - ${o.customer_name}</option>`).join('');
-                    emailSelect.value = currentVal;
+            // UPLOAD MAIN IMAGE
+            const mainImgFile = productFiles.imgPreview;
+            if (mainImgFile) {
+                const url = await uploadToStorage(mainImgFile, 'main');
+                if (url) product.img = url;
+            } else {
+                const existingImg = document.getElementById('imgPreview').src;
+                if (existingImg && !existingImg.startsWith('data:') && !existingImg.includes('localhost') && existingImg !== window.location.href) {
+                    product.img = existingImg;
                 }
             }
 
-            function orderRow(o, showEmail) {
-                const statusClass = { pending: 'status-pending', confirmed: 'status-confirmed', shipped: 'status-confirmed', delivered: 'status-delivered', cancelled: 'status-cancelled' }[o.status] || 'status-pending';
-                const itemsSummary = (o.items || []).slice(0, 2).map(i => i.name).join(', ') + (o.items && o.items.length > 2 ? ` +${o.items.length - 2} more` : '');
-                const emailCol = showEmail ? `<td>${o.customer_email || '—'}</td>` : '';
-                return `
+            // UPLOAD GALLERY
+            const galleryUrls = [];
+            const gallerySlots = ['imgP2', 'imgP3', 'imgP4', 'imgP5'];
+            for (let i = 0; i < gallerySlots.length; i++) {
+                const slotId = gallerySlots[i];
+                const file = productFiles[slotId];
+                if (file) {
+                    const url = await uploadToStorage(file, `gal_${i}`);
+                    if (url) galleryUrls.push(url);
+                } else {
+                    const existingImg = document.getElementById(slotId).src;
+                    if (existingImg && !existingImg.startsWith('data:') && existingImg !== "" && !existingImg.includes('localhost') && existingImg !== window.location.href) {
+                        galleryUrls.push(existingImg);
+                    }
+                }
+            }
+            product.gallery = galleryUrls;
+
+            const editIdx = document.getElementById('pName').dataset.editIndex;
+            if (editIdx !== undefined && editIdx !== '') {
+                const oldP = getProducts()[parseInt(editIdx)];
+                await db.from('products').update(product).eq('id', oldP.id);
+                delete document.getElementById('pName').dataset.editIndex;
+                document.getElementById('addProductTitle').textContent = 'Add New Product';
+            } else {
+                await db.from('products').insert([product]);
+            }
+
+            clearProductForm();
+            showAdminToast('✅ Product saved to catalogue!');
+            await reloadAndRender();
+            showPage('products', document.querySelector('[onclick*="products"]'));
+        }
+
+        function clearProductForm() {
+            ['pName', 'pCategory', 'pPrice', 'pOldPrice', 'pBadge', 'pEmoji', 'pSizes', 'pModel', 'pShortDesc', 'pFullDesc', 'pFeatures'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = '';
+            });
+            ['imgPreview', 'imgP2', 'imgP3', 'imgP4', 'imgP5'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) { el.src = ''; el.style.display = 'none'; }
+            });
+            // Clear pending files
+            productFiles = { imgPreview: null, imgP2: null, imgP3: null, imgP4: null, imgP5: null };
+
+            delete document.getElementById('pName').dataset.editIndex;
+            document.getElementById('addProductTitle').textContent = 'Add New Product';
+            document.querySelector('.img-upload-icon').style.display = 'block';
+        }
+
+        function previewImg(e, targetId) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            // Store the actual file for later upload
+            productFiles[targetId] = file;
+
+            const reader = new FileReader();
+            reader.onload = ev => {
+                const img = document.getElementById(targetId);
+                img.src = ev.target.result;
+                img.style.display = 'block';
+                if (targetId === 'imgPreview') {
+                    document.querySelector('.img-upload-icon').style.display = 'none';
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // ===================== ORDERS TABLE =====================
+        function renderOrdersTable() {
+            const orders = getOrders();
+            const filter = document.getElementById('orderFilter')?.value || 'all';
+            const filtered = filter === 'all' ? orders : orders.filter(o => o.status === filter);
+
+            const dashTbody = document.getElementById('dashboardOrdersTable');
+            const allTbody = document.getElementById('allOrdersTable');
+
+            const recentOrders = [...orders].reverse().slice(0, 5);
+
+            dashTbody.innerHTML = recentOrders.length ? recentOrders.map(o => orderRow(o, false)).join('')
+                : '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:2rem">No orders yet.</td></tr>';
+
+            allTbody.innerHTML = filtered.length ? [...filtered].reverse().map(o => orderRow(o, true)).join('')
+                : '<tr><td colspan="8" style="text-align:center;color:var(--text-muted);padding:2rem">No orders found.</td></tr>';
+
+            // Also update Email Center Dropdown
+            const emailSelect = document.getElementById('emailOrderID');
+            if (emailSelect) {
+                const currentVal = emailSelect.value;
+                emailSelect.innerHTML = '<option value="">Manual / None</option>' +
+                    orders.map(o => `<option value="${o.id}">Order #${o.id.slice(0, 8)} - ${o.customer_name}</option>`).join('');
+                emailSelect.value = currentVal;
+            }
+        }
+
+        function orderRow(o, showEmail) {
+            const statusClass = { pending: 'status-pending', confirmed: 'status-confirmed', shipped: 'status-confirmed', delivered: 'status-delivered', cancelled: 'status-cancelled' }[o.status] || 'status-pending';
+            const itemsSummary = (o.items || []).slice(0, 2).map(i => i.name).join(', ') + (o.items && o.items.length > 2 ? ` +${o.items.length - 2} more` : '');
+            const emailCol = showEmail ? `<td>${o.customer_email || '—'}</td>` : '';
+            return `
     <tr>
       <td style="font-family:monospace;font-size:0.75rem">${o.id}</td>
       <td>${o.customer_name || '—'}</td>
@@ -1994,43 +1998,43 @@
       </td>
     </tr>
   `;
-            }
+        }
 
-            async function updateStatus(orderId, newStatus) {
-                // Deduct stock if marked as delivered
-                if (newStatus === 'delivered') {
-                    const order = getOrders().find(o => o.id === orderId);
-                    if (order && order.items && order.status !== 'delivered') {
-                        for (const item of order.items) {
-                            // Find product by name or id (assuming item has name and we match it in DB_PRODUCTS)
-                            const prod = DB_PRODUCTS.find(p => p.name === item.name);
-                            if (prod) {
-                                const newStock = Math.max(0, (prod.stock || 0) - (item.qty || 1));
-                                await db.from('products').update({ stock: newStock }).eq('id', prod.id);
-                            }
+        async function updateStatus(orderId, newStatus) {
+            // Deduct stock if marked as delivered
+            if (newStatus === 'delivered') {
+                const order = getOrders().find(o => o.id === orderId);
+                if (order && order.items && order.status !== 'delivered') {
+                    for (const item of order.items) {
+                        // Find product by name or id (assuming item has name and we match it in DB_PRODUCTS)
+                        const prod = DB_PRODUCTS.find(p => p.name === item.name);
+                        if (prod) {
+                            const newStock = Math.max(0, (prod.stock || 0) - (item.qty || 1));
+                            await db.from('products').update({ stock: newStock }).eq('id', prod.id);
                         }
                     }
                 }
-
-                const { error } = await db.from('orders').update({ status: newStatus }).eq('id', orderId);
-                if (!error) {
-                    showAdminToast(`Order ${orderId} marked as ${newStatus}`);
-                    reloadAndRender();
-                }
             }
 
-            function viewOrder(orderId) {
-                const orders = getOrders();
-                const customers = getCustomers();
-                const o = orders.find(o => o.id === orderId);
-                if (!o) return;
-                const statusClass = { pending: 'status-pending', confirmed: 'status-confirmed', shipped: 'status-confirmed', delivered: 'status-delivered', cancelled: 'status-cancelled' }[o.status];
+            const { error } = await db.from('orders').update({ status: newStatus }).eq('id', orderId);
+            if (!error) {
+                showAdminToast(`Order ${orderId} marked as ${newStatus}`);
+                reloadAndRender();
+            }
+        }
 
-                // Cross-reference customer database to fetch delivery location
-                const matchedCustomer = customers.find(c => c.email === o.customer_email);
-                const deliveryLocation = matchedCustomer && matchedCustomer.location ? matchedCustomer.location : 'Not provided yet';
+        function viewOrder(orderId) {
+            const orders = getOrders();
+            const customers = getCustomers();
+            const o = orders.find(o => o.id === orderId);
+            if (!o) return;
+            const statusClass = { pending: 'status-pending', confirmed: 'status-confirmed', shipped: 'status-confirmed', delivered: 'status-delivered', cancelled: 'status-cancelled' }[o.status];
 
-                document.getElementById('orderModalBody').innerHTML = `
+            // Cross-reference customer database to fetch delivery location
+            const matchedCustomer = customers.find(c => c.email === o.customer_email);
+            const deliveryLocation = matchedCustomer && matchedCustomer.location ? matchedCustomer.location : 'Not provided yet';
+
+            document.getElementById('orderModalBody').innerHTML = `
     <div class="order-detail-row"><span class="order-detail-label">Order ID</span><span style="font-family:monospace">${sanitizeHTML(o.id)}</span></div>
     <div class="order-detail-row"><span class="order-detail-label">Customer</span><span>${sanitizeHTML(o.customer_name)}</span></div>
     <div class="order-detail-row"><span class="order-detail-label">Email</span><span>${sanitizeHTML(o.customer_email)}</span></div>
@@ -2048,28 +2052,28 @@
       <button class="btn-ghost" onclick="updateStatus('${o.id}','cancelled');closeOrderModal()" style="border-color:var(--danger);color:var(--danger)">❌ Cancel</button>
     </div>
   `;
-                document.getElementById('orderModal').classList.add('open');
-            }
+            document.getElementById('orderModal').classList.add('open');
+        }
 
-            function closeOrderModal() { document.getElementById('orderModal').classList.remove('open'); }
-            document.getElementById('orderModal').addEventListener('click', e => { if (e.target.id === 'orderModal') closeOrderModal(); });
+        function closeOrderModal() { document.getElementById('orderModal').classList.remove('open'); }
+        document.getElementById('orderModal').addEventListener('click', e => { if (e.target.id === 'orderModal') closeOrderModal(); });
 
-            // ===================== CUSTOMERS =====================
-            function renderCustomersTable() {
-                const customers = getCustomers();
-                const orders = getOrders();
-                const tbody = document.getElementById('customersTable');
-                if (!customers.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:2rem">No registered customers yet.</td></tr>'; return; }
-                tbody.innerHTML = customers.map(c => {
-                    const orderCount = orders.filter(o => o.customer_email === c.email).length;
-                    return `<tr><td>${c.name}</td><td>${c.email}</td><td>${c.phone || '—'}</td><td>${c.location || '—'}</td><td>${orderCount}</td><td style="font-size:0.72rem;color:var(--text-muted)">${c.created_at ? new Date(c.created_at).toLocaleDateString() : '—'}</td></tr>`;
-                }).join('');
-            }
+        // ===================== CUSTOMERS =====================
+        function renderCustomersTable() {
+            const customers = getCustomers();
+            const orders = getOrders();
+            const tbody = document.getElementById('customersTable');
+            if (!customers.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:2rem">No registered customers yet.</td></tr>'; return; }
+            tbody.innerHTML = customers.map(c => {
+                const orderCount = orders.filter(o => o.customer_email === c.email).length;
+                return `<tr><td>${c.name}</td><td>${c.email}</td><td>${c.phone || '—'}</td><td>${c.location || '—'}</td><td>${orderCount}</td><td style="font-size:0.72rem;color:var(--text-muted)">${c.created_at ? new Date(c.created_at).toLocaleDateString() : '—'}</td></tr>`;
+            }).join('');
+        }
 
-            // ===================== CATALOGUE PREVIEW =====================
-            function renderCatalogue() {
-                const products = getProducts();
-                document.getElementById('catalogueGrid').innerHTML = products.map(p => `
+        // ===================== CATALOGUE PREVIEW =====================
+        function renderCatalogue() {
+            const products = getProducts();
+            document.getElementById('catalogueGrid').innerHTML = products.map(p => `
     <div style="background:var(--off-black);border:1px solid var(--border);padding:1.25rem;text-align:center">
       <div style="height:120px;display:flex;align-items:center;justify-content:center;margin-bottom:1rem;overflow:hidden;border-radius:4px">
         ${p.img ? `<img src="${p.img}" style="width:100%;height:100%;object-fit:cover">` : `<div style="font-size:3rem">${p.emoji}</div>`}
@@ -2080,138 +2084,138 @@
       ${p.old_price ? `<div style="font-size:0.8rem;color:var(--text-muted);text-decoration:line-through">KES ${p.old_price.toLocaleString()}</div>` : ''}
     </div>
   `).join('');
+        }
+
+        // ===================== NOTIFICATIONS =====================
+        function checkNotifications() {
+            const orders = getOrders();
+            const newOrders = orders.filter(o => o.status === 'pending').length;
+            const dot = document.getElementById('orderNotifDot');
+            dot.style.display = newOrders > 0 ? 'inline-block' : 'none';
+        }
+
+        // Poll for new orders
+        setInterval(async () => {
+            const { data: { session } } = await db.auth.getSession();
+            if (session) {
+                fetchAllData().then(() => {
+                    renderOrdersTable();
+                    renderCustomersTable();
+                    updateStats();
+                    checkNotifications();
+                });
             }
+        }, 5000);
 
-            // ===================== NOTIFICATIONS =====================
-            function checkNotifications() {
-                const orders = getOrders();
-                const newOrders = orders.filter(o => o.status === 'pending').length;
-                const dot = document.getElementById('orderNotifDot');
-                dot.style.display = newOrders > 0 ? 'inline-block' : 'none';
+        // ===================== NAVIGATION =====================
+        function showPage(id, btn) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.getElementById('page-' + id).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+            const titles = { dashboard: 'Dashboard', orders: 'Orders', products: 'Products', addProduct: 'Add Product', customers: 'Customers', catalogue: 'Catalogue', marketing: 'Marketing', reviews: 'Reviews', subscribers: 'Subscribers' };
+            document.getElementById('pageTitle').textContent = titles[id] || id;
+            if (id === 'products') renderProductsTable();
+            if (id === 'orders') renderOrdersTable();
+            if (id === 'customers') renderCustomersTable();
+            if (id === 'subscribers') renderSubscribersTable();
+            if (id === 'catalogue') renderCatalogue();
+            if (id === 'email') updateEmailPreview();
+            if (window.innerWidth <= 1024) toggleSidebar(false);
+        }
+
+        function toggleSidebar(force) {
+            const side = document.querySelector('.sidebar');
+            if (force === false) side.classList.remove('open');
+            else if (force === true) side.classList.add('open');
+            else side.classList.toggle('open');
+        }
+
+        // ===================== TOAST =====================
+        function showAdminToast(msg) {
+            const t = document.getElementById('adminToast');
+            document.getElementById('adminToastMsg').textContent = msg;
+            t.classList.add('show');
+            clearTimeout(t._t);
+            t._t = setTimeout(() => t.classList.remove('show'), 3000);
+        }
+        // ===================== MARKETING =====================
+        function renderMarketingData() {
+            if (!DB_PROMOS) return;
+            const p1 = DB_PROMOS.find(p => p.type === 'promo1');
+            const p2 = DB_PROMOS.find(p => p.type === 'promo2');
+
+            if (p1) {
+                document.getElementById('m1_eyebrow').value = p1.eyebrow || '';
+                document.getElementById('m1_title').value = p1.title || '';
+                document.getElementById('m1_desc').value = p1.description || '';
+                document.getElementById('m1_btn').value = p1.button_text || '';
             }
-
-            // Poll for new orders
-            setInterval(async () => {
-                const { data: { session } } = await db.auth.getSession();
-                if (session) {
-                    fetchAllData().then(() => {
-                        renderOrdersTable();
-                        renderCustomersTable();
-                        updateStats();
-                        checkNotifications();
-                    });
-                }
-            }, 5000);
-
-            // ===================== NAVIGATION =====================
-            function showPage(id, btn) {
-                document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-                document.getElementById('page-' + id).classList.add('active');
-                document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-                if (btn) btn.classList.add('active');
-                const titles = { dashboard: 'Dashboard', orders: 'Orders', products: 'Products', addProduct: 'Add Product', customers: 'Customers', catalogue: 'Catalogue', marketing: 'Marketing', reviews: 'Reviews', subscribers: 'Subscribers' };
-                document.getElementById('pageTitle').textContent = titles[id] || id;
-                if (id === 'products') renderProductsTable();
-                if (id === 'orders') renderOrdersTable();
-                if (id === 'customers') renderCustomersTable();
-                if (id === 'subscribers') renderSubscribersTable();
-                if (id === 'catalogue') renderCatalogue();
-                if (id === 'email') updateEmailPreview();
-                if (window.innerWidth <= 1024) toggleSidebar(false);
+            if (p2) {
+                document.getElementById('m2_eyebrow').value = p2.eyebrow || '';
+                document.getElementById('m2_title').value = p2.title || '';
+                document.getElementById('m2_desc').value = p2.description || '';
+                document.getElementById('m2_btn').value = p2.button_text || '';
             }
+            const marq = DB_PROMOS.find(p => p.type === 'marquee');
+            if (marq) document.getElementById('m_marquee').value = marq.title || '';
+        }
 
-            function toggleSidebar(force) {
-                const side = document.querySelector('.sidebar');
-                if (force === false) side.classList.remove('open');
-                else if (force === true) side.classList.add('open');
-                else side.classList.toggle('open');
-            }
+        async function savePromos() {
+            const p1 = {
+                type: 'promo1',
+                eyebrow: document.getElementById('m1_eyebrow').value,
+                title: document.getElementById('m1_title').value,
+                description: document.getElementById('m1_desc').value,
+                button_text: document.getElementById('m1_btn').value
+            };
+            const p2 = {
+                type: 'promo2',
+                eyebrow: document.getElementById('m2_eyebrow').value,
+                title: document.getElementById('m2_title').value,
+                description: document.getElementById('m2_desc').value,
+                button_text: document.getElementById('m2_btn').value
+            };
+            const pMarq = {
+                type: 'marquee',
+                title: document.getElementById('m_marquee').value,
+                description: document.getElementById('m_marquee').value // Mirror to desc for safety
+            };
 
-            // ===================== TOAST =====================
-            function showAdminToast(msg) {
-                const t = document.getElementById('adminToast');
-                document.getElementById('adminToastMsg').textContent = msg;
-                t.classList.add('show');
-                clearTimeout(t._t);
-                t._t = setTimeout(() => t.classList.remove('show'), 3000);
-            }
-            // ===================== MARKETING =====================
-            function renderMarketingData() {
-                if (!DB_PROMOS) return;
-                const p1 = DB_PROMOS.find(p => p.type === 'promo1');
-                const p2 = DB_PROMOS.find(p => p.type === 'promo2');
+            try {
+                // Use upsert to handle missing rows
+                const { error: e1 } = await db.from('promo_banners').upsert(p1, { onConflict: 'type' });
+                const { error: e2 } = await db.from('promo_banners').upsert(p2, { onConflict: 'type' });
+                const { error: e3 } = await db.from('promo_banners').upsert(pMarq, { onConflict: 'type' });
 
-                if (p1) {
-                    document.getElementById('m1_eyebrow').value = p1.eyebrow || '';
-                    document.getElementById('m1_title').value = p1.title || '';
-                    document.getElementById('m1_desc').value = p1.description || '';
-                    document.getElementById('m1_btn').value = p1.button_text || '';
-                }
-                if (p2) {
-                    document.getElementById('m2_eyebrow').value = p2.eyebrow || '';
-                    document.getElementById('m2_title').value = p2.title || '';
-                    document.getElementById('m2_desc').value = p2.description || '';
-                    document.getElementById('m2_btn').value = p2.button_text || '';
-                }
-                const marq = DB_PROMOS.find(p => p.type === 'marquee');
-                if (marq) document.getElementById('m_marquee').value = marq.title || '';
-            }
-
-            async function savePromos() {
-                const p1 = {
-                    type: 'promo1',
-                    eyebrow: document.getElementById('m1_eyebrow').value,
-                    title: document.getElementById('m1_title').value,
-                    description: document.getElementById('m1_desc').value,
-                    button_text: document.getElementById('m1_btn').value
-                };
-                const p2 = {
-                    type: 'promo2',
-                    eyebrow: document.getElementById('m2_eyebrow').value,
-                    title: document.getElementById('m2_title').value,
-                    description: document.getElementById('m2_desc').value,
-                    button_text: document.getElementById('m2_btn').value
-                };
-                const pMarq = {
-                    type: 'marquee',
-                    title: document.getElementById('m_marquee').value,
-                    description: document.getElementById('m_marquee').value // Mirror to desc for safety
-                };
-
-                try {
-                    // Use upsert to handle missing rows
-                    const { error: e1 } = await db.from('promo_banners').upsert(p1, { onConflict: 'type' });
-                    const { error: e2 } = await db.from('promo_banners').upsert(p2, { onConflict: 'type' });
-                    const { error: e3 } = await db.from('promo_banners').upsert(pMarq, { onConflict: 'type' });
-
-                    if (e1 || e2 || e3) {
-                        throw new Error(e1?.message || e2?.message || e3?.message);
-                    }
-
-                    showAdminToast('📣 Marketing banners updated successfully!');
-                    await fetchAllData();
-                } catch (err) {
-                    console.error(err);
-                    showAdminToast('❌ Database Error: ' + err.message);
-                }
-            }
-
-            // ===================== REVIEWS =====================
-            function renderReviewsTable() {
-                const table = document.getElementById('allReviewsTable');
-                if (!table || !DB_REVIEWS) return;
-
-                if (DB_REVIEWS.length === 0) {
-                    table.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:2rem">No reviews yet.</td></tr>';
-                    return;
+                if (e1 || e2 || e3) {
+                    throw new Error(e1?.message || e2?.message || e3?.message);
                 }
 
-                table.innerHTML = DB_REVIEWS.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).map(r => {
-                    // Check if they have a confirmed order
-                    const hasOrder = DB_ORDERS.some(o => o.customer_email === r.customer_email && o.status === 'confirmed');
-                    const badge = hasOrder ? '<span style="color:#10b981;font-size:0.7rem;font-weight:600">✓ Verified Buyer</span>' : '<span style="color:#ef4444;font-size:0.7rem;font-weight:600">⚠ Unverified</span>';
+                showAdminToast('📣 Marketing banners updated successfully!');
+                await fetchAllData();
+            } catch (err) {
+                console.error(err);
+                showAdminToast('❌ Database Error: ' + err.message);
+            }
+        }
 
-                    return `
+        // ===================== REVIEWS =====================
+        function renderReviewsTable() {
+            const table = document.getElementById('allReviewsTable');
+            if (!table || !DB_REVIEWS) return;
+
+            if (DB_REVIEWS.length === 0) {
+                table.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:2rem">No reviews yet.</td></tr>';
+                return;
+            }
+
+            table.innerHTML = DB_REVIEWS.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).map(r => {
+                // Check if they have a confirmed order
+                const hasOrder = DB_ORDERS.some(o => o.customer_email === r.customer_email && o.status === 'confirmed');
+                const badge = hasOrder ? '<span style="color:#10b981;font-size:0.7rem;font-weight:600">✓ Verified Buyer</span>' : '<span style="color:#ef4444;font-size:0.7rem;font-weight:600">⚠ Unverified</span>';
+
+                return `
                     <tr>
                         <td>
                             <div style="font-weight:600">${sanitizeHTML(r.customer_name)}</div>
@@ -2228,56 +2232,56 @@
                         </td>
                     </tr>
                 `;
-                }).join('');
+            }).join('');
+        }
+
+        async function deleteReview(id) {
+            if (!confirm('Are you sure you want to delete this review?')) return;
+            const { error } = await db.from('product_reviews').delete().eq('id', id);
+            if (error) {
+                alert('Error deleting review');
+            } else {
+                showAdminToast('🗑 Review deleted');
+                reloadAndRender();
             }
+        }
 
-            async function deleteReview(id) {
-                if (!confirm('Are you sure you want to delete this review?')) return;
-                const { error } = await db.from('product_reviews').delete().eq('id', id);
-                if (error) {
-                    alert('Error deleting review');
-                } else {
-                    showAdminToast('🗑 Review deleted');
-                    reloadAndRender();
-                }
+        // ===================== EMAIL CENTER LOGIC =====================
+        function openEmailCenter(orderId) {
+            const order = DB_ORDERS.find(o => o.id === orderId);
+            if (order) {
+                document.getElementById('emailTo').value = order.customer_email || '';
+                document.getElementById('emailOrderID').value = order.id;
+                document.getElementById('emailSubject').value = `Invoice for Order #${order.id.slice(0, 8)}`;
             }
+            // Navigate to the email page
+            const emailNavBtn = document.querySelector('.nav-item[onclick*="\'email\'"]');
+            showPage('email', emailNavBtn);
+        }
 
-            // ===================== EMAIL CENTER LOGIC =====================
-            function openEmailCenter(orderId) {
-                const order = DB_ORDERS.find(o => o.id === orderId);
-                if (order) {
-                    document.getElementById('emailTo').value = order.customer_email || '';
-                    document.getElementById('emailOrderID').value = order.id;
-                    document.getElementById('emailSubject').value = `Invoice for Order #${order.id.slice(0, 8)}`;
-                }
-                // Navigate to the email page
-                const emailNavBtn = document.querySelector('.nav-item[onclick*="\'email\'"]');
-                showPage('email', emailNavBtn);
-            }
+        function updateEmailPreview() {
+            const type = document.getElementById('emailTemplate').value;
+            const OID = document.getElementById('emailOrderID').value;
+            const order = DB_ORDERS.find(o => o.id === OID);
+            const preview = document.getElementById('emailPreview');
 
-            function updateEmailPreview() {
-                const type = document.getElementById('emailTemplate').value;
-                const OID = document.getElementById('emailOrderID').value;
-                const order = DB_ORDERS.find(o => o.id === OID);
-                const preview = document.getElementById('emailPreview');
+            let html = "";
+            const currentYear = new Date().getFullYear();
 
-                let html = "";
-                const currentYear = new Date().getFullYear();
+            if (type === 'invoice') html = generateInvoiceHTML(order, currentYear);
+            else if (type === 'payment') html = generatePaymentHTML(order);
+            else if (type === 'receipt') html = generateReceiptHTML(order, currentYear);
+            else if (type === 'promo') html = generatePromoHTML();
 
-                if (type === 'invoice') html = generateInvoiceHTML(order, currentYear);
-                else if (type === 'payment') html = generatePaymentHTML(order);
-                else if (type === 'receipt') html = generateReceiptHTML(order, currentYear);
-                else if (type === 'promo') html = generatePromoHTML();
+            preview.innerHTML = html;
+        }
 
-                preview.innerHTML = html;
-            }
+        function generateInvoiceHTML(o, year) {
+            const items = o && o.items ? o.items.map(i => `<tr><td style="padding:8px;border-bottom:1px solid #eee">${i.name}</td><td style="padding:8px;border-bottom:1px solid #eee">x${i.qty}</td><td style="padding:8px;border-bottom:1px solid #eee">KES ${(i.price * i.qty).toLocaleString()}</td></tr>`).join('') : '<tr><td colspan="3">No items found</td></tr>';
+            const total = o ? o.total.toLocaleString() : '0';
+            const oid = o ? o.id.slice(0, 8) : 'Manual';
 
-            function generateInvoiceHTML(o, year) {
-                const items = o && o.items ? o.items.map(i => `<tr><td style="padding:8px;border-bottom:1px solid #eee">${i.name}</td><td style="padding:8px;border-bottom:1px solid #eee">x${i.qty}</td><td style="padding:8px;border-bottom:1px solid #eee">KES ${(i.price * i.qty).toLocaleString()}</td></tr>`).join('') : '<tr><td colspan="3">No items found</td></tr>';
-                const total = o ? o.total.toLocaleString() : '0';
-                const oid = o ? o.id.slice(0, 8) : 'Manual';
-
-                return `
+            return `
                 <div style="background:white; color:#333; padding:2rem; font-family:sans-serif; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.1)">
                     <div style="display:flex; justify-content:space-between; border-bottom:2px solid #c4587a; padding-bottom:1rem; align-items:center">
                         <h2 style="color:#c4587a; margin:0">ADULTTOYSKE</h2>
@@ -2291,10 +2295,10 @@
                     <div style="text-align:right; font-size:1.2rem; border-top:2px solid #333; padding-top:1rem"><strong>Total: KES ${total}</strong></div>
                     <div style="margin-top:2rem; font-size:0.75rem; color:#777; border-top:1px solid #ddd; padding-top:1rem; text-align:center">© ${year} AdultToysKe (Kenya). Standard terms apply. Discretion Guaranteed.</div>
                 </div>`;
-            }
+        }
 
-            function generatePaymentHTML(o) {
-                return `
+        function generatePaymentHTML(o) {
+            return `
                 <div style="background:#1a1016; color:white; padding:2rem; font-family:sans-serif; border-radius:8px; border:1px solid #c4587a; box-shadow:0 4px 12px rgba(0,0,0,0.3)">
                     <h2 style="color:#c4587a; text-align:center; font-family:'Cormorant Garamond', serif">Payment Instructions</h2>
                     <p style="text-align:center; opacity:0.8">Hi ${o ? o.customer_name.split(' ')[0] : 'there'}, please use the details below to complete your order payment.</p>
@@ -2306,10 +2310,10 @@
                     <div style="text-align:center; font-size:1.3rem">Payable: <strong style="color:#c4587a">KES ${o ? o.total.toLocaleString() : '—'}</strong></div>
                     <p style="font-size:0.8rem; color:#888; text-align:center; margin-top:1.5rem">Once payment is done, simply reply to this email with your M-Pesa code or WhatsApp it to us.</p>
                 </div>`;
-            }
+        }
 
-            function generateReceiptHTML(o, year) {
-                return `
+        function generateReceiptHTML(o, year) {
+            return `
                 <div style="background:white; color:#333; padding:2rem; font-family:sans-serif; border-radius:8px; text-align:center">
                     <div style="border-bottom:1px dashed #ddd; padding-bottom:1rem">
                         <h2 style="margin:0; color:#c4587a">ADULTTOYSKE</h2>
@@ -2326,10 +2330,10 @@
                     </div>
                     <p style="font-size:0.8rem; color:#777; margin-top:2rem">Thank you for your trust. Your package will be delivered discreetly.</p>
                 </div>`;
-            }
+        }
 
-            function generatePromoHTML() {
-                return `
+        function generatePromoHTML() {
+            return `
                 <div style="background:linear-gradient(135deg, #1a1016, #0a0a0a); color:white; padding:3rem; font-family:sans-serif; border-radius:12px; text-align:center; border:1px solid #c4587a; position:relative; overflow:hidden">
                     <div style="position:absolute; top:-20px; right:-20px; width:100px; height:100px; background:#c4587a; filter:blur(50px); opacity:0.3"></div>
                     <div style="color:#c4587a; font-size:0.7rem; font-weight:900; letter-spacing:4px; margin-bottom:1.5rem">SPECIAL PRIVILEGE</div>
@@ -2337,103 +2341,103 @@
                     <p style="color:#aaa; max-width:400px; margin:0 auto; line-height:1.6">We've added new premium collections to the store. As a preferred member, enjoy exclusive early access and a secret discount.</p>
                     <a href="https://adult-xi-cyan.vercel.app" style="display:inline-block; margin-top:2.5rem; background:#c4587a; color:white; padding:1.2rem 2.5rem; border-radius:4px; text-decoration:none; font-weight:700; text-transform:uppercase; letter-spacing:2px; font-size:0.8rem">Explore Boutique</a>
                 </div>`;
+        }
+
+        // ===================== GMAIL API INTEGRATION =====================
+        const GMAIL_CLIENT_ID = '833274271998-rbbjng74719r2t8sod20o1bicldagr2v.apps.googleusercontent.com';
+        const GMAIL_SCOPE = 'https://www.googleapis.com/auth/gmail.send';
+        let gmailAccessToken = null;
+        let tokenClient = null;
+
+        function authorizeGmail() {
+            if (!window.google) {
+                alert('Google Identity Services not loaded yet. Please wait a moment and try again.');
+                return;
             }
-
-            // ===================== GMAIL API INTEGRATION =====================
-            const GMAIL_CLIENT_ID = '833274271998-rbbjng74719r2t8sod20o1bicldagr2v.apps.googleusercontent.com';
-            const GMAIL_SCOPE = 'https://www.googleapis.com/auth/gmail.send';
-            let gmailAccessToken = null;
-            let tokenClient = null;
-
-            function authorizeGmail() {
-                if (!window.google) {
-                    alert('Google Identity Services not loaded yet. Please wait a moment and try again.');
-                    return;
-                }
-                if (!tokenClient) {
-                    tokenClient = google.accounts.oauth2.initTokenClient({
-                        client_id: GMAIL_CLIENT_ID,
-                        scope: GMAIL_SCOPE,
-                        callback: (resp) => {
-                            if (resp.error) {
-                                alert('Google Auth failed: ' + resp.error);
-                                return;
-                            }
-                            gmailAccessToken = resp.access_token;
-                            document.getElementById('gmailAuthStatus').textContent = '🟢 Gmail Connected';
-                            document.getElementById('gmailAuthStatus').style.color = '#10b981';
-                            document.getElementById('btnGmailConnect').style.display = 'none';
-                            document.getElementById('btnSendEmail').style.display = 'inline-block';
-                            showAdminToast('✅ Gmail connected! Ready to send.');
+            if (!tokenClient) {
+                tokenClient = google.accounts.oauth2.initTokenClient({
+                    client_id: GMAIL_CLIENT_ID,
+                    scope: GMAIL_SCOPE,
+                    callback: (resp) => {
+                        if (resp.error) {
+                            alert('Google Auth failed: ' + resp.error);
+                            return;
                         }
-                    });
-                }
-                tokenClient.requestAccessToken();
-            }
-
-            async function sendViaGmailAPI() {
-                const to = document.getElementById('emailTo').value.trim();
-                const subject = document.getElementById('emailSubject').value.trim();
-                const bodyEl = document.getElementById('emailPreview');
-                const bodyHTML = bodyEl.innerHTML;
-
-                if (!to) { alert('Please enter a recipient email.'); return; }
-                if (!gmailAccessToken) { alert('Please connect Gmail first.'); return; }
-
-                const btn = document.getElementById('btnSendEmail');
-                btn.textContent = '⌛ Sending...';
-                btn.disabled = true;
-
-                // Build RFC 2822 MIME email
-                const email = [
-                    `To: ${to}`,
-                    `Subject: ${subject}`,
-                    'MIME-Version: 1.0',
-                    'Content-Type: text/html; charset=UTF-8',
-                    '',
-                    bodyHTML
-                ].join('\r\n');
-
-                // Base64url encode (Gmail API requirement)
-                const encoded = btoa(unescape(encodeURIComponent(email)))
-                    .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-
-                try {
-                    const res = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', {
-                        method: 'POST',
-                        headers: {
-                            'Authorization': `Bearer ${gmailAccessToken}`,
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ raw: encoded })
-                    });
-
-                    if (!res.ok) {
-                        const err = await res.json();
-                        throw new Error(err.error?.message || 'Send failed');
+                        gmailAccessToken = resp.access_token;
+                        document.getElementById('gmailAuthStatus').textContent = '🟢 Gmail Connected';
+                        document.getElementById('gmailAuthStatus').style.color = '#10b981';
+                        document.getElementById('btnGmailConnect').style.display = 'none';
+                        document.getElementById('btnSendEmail').style.display = 'inline-block';
+                        showAdminToast('✅ Gmail connected! Ready to send.');
                     }
-
-                    showAdminToast(`📧 Email sent to ${to} successfully!`);
-                    document.getElementById('emailTo').value = '';
-                    document.getElementById('emailSubject').value = '';
-
-                } catch (e) {
-                    console.error(e);
-                    alert('Failed to send: ' + e.message + '\n\nNote: If token expired, click Connect Gmail again.');
-                    // Reset token so admin can re-auth
-                    gmailAccessToken = null;
-                    document.getElementById('btnGmailConnect').style.display = 'inline-block';
-                    document.getElementById('btnSendEmail').style.display = 'none';
-                    document.getElementById('gmailAuthStatus').textContent = '● Not connected to Gmail';
-                    document.getElementById('gmailAuthStatus').style.color = '';
-                } finally {
-                    btn.textContent = '📤 Send Email';
-                    btn.disabled = false;
-                }
+                });
             }
+            tokenClient.requestAccessToken();
+        }
 
-            initAdminAuth();
-        </script>
+        async function sendViaGmailAPI() {
+            const to = document.getElementById('emailTo').value.trim();
+            const subject = document.getElementById('emailSubject').value.trim();
+            const bodyEl = document.getElementById('emailPreview');
+            const bodyHTML = bodyEl.innerHTML;
+
+            if (!to) { alert('Please enter a recipient email.'); return; }
+            if (!gmailAccessToken) { alert('Please connect Gmail first.'); return; }
+
+            const btn = document.getElementById('btnSendEmail');
+            btn.textContent = '⌛ Sending...';
+            btn.disabled = true;
+
+            // Build RFC 2822 MIME email
+            const email = [
+                `To: ${to}`,
+                `Subject: ${subject}`,
+                'MIME-Version: 1.0',
+                'Content-Type: text/html; charset=UTF-8',
+                '',
+                bodyHTML
+            ].join('\r\n');
+
+            // Base64url encode (Gmail API requirement)
+            const encoded = btoa(unescape(encodeURIComponent(email)))
+                .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+
+            try {
+                const res = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${gmailAccessToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ raw: encoded })
+                });
+
+                if (!res.ok) {
+                    const err = await res.json();
+                    throw new Error(err.error?.message || 'Send failed');
+                }
+
+                showAdminToast(`📧 Email sent to ${to} successfully!`);
+                document.getElementById('emailTo').value = '';
+                document.getElementById('emailSubject').value = '';
+
+            } catch (e) {
+                console.error(e);
+                alert('Failed to send: ' + e.message + '\n\nNote: If token expired, click Connect Gmail again.');
+                // Reset token so admin can re-auth
+                gmailAccessToken = null;
+                document.getElementById('btnGmailConnect').style.display = 'inline-block';
+                document.getElementById('btnSendEmail').style.display = 'none';
+                document.getElementById('gmailAuthStatus').textContent = '● Not connected to Gmail';
+                document.getElementById('gmailAuthStatus').style.color = '';
+            } finally {
+                btn.textContent = '📤 Send Email';
+                btn.disabled = false;
+            }
+        }
+
+        initAdminAuth();
+    </script>
 </body>
 
 </html>
