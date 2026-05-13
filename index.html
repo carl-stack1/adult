@@ -4194,19 +4194,36 @@
       const meta = user.user_metadata || {};
 
       // Sync with our custom 'customers' table
-      let { data: customer } = await db.from('customers').select('*').ilike('email', user.email).maybeSingle();
+      let { data: customer, error: fetchErr } = await db.from('customers')
+        .select('*')
+        .ilike('email', user.email)
+        .maybeSingle();
 
       if (!customer) {
-        // First Google Login: Create customer entry so they can place orders
+        console.log('✨ Creating new customer record for Google user...');
         const newCustomer = {
           name: meta.full_name || user.email.split('@')[0],
-          email: user.email,
-          phone: '',
+          email: user.email.toLowerCase(),
+          phone: user.phone || '',
           location: '',
+          delivery_location: '', // Adding both for schema compatibility
           password: 'oauth_' + Math.random().toString(36).slice(-5)
         };
-        const { data, error } = await db.from('customers').insert([newCustomer]).select().single();
-        if (!error) customer = data;
+
+        const { data: inserted, error: insErr } = await db.from('customers')
+          .insert([newCustomer])
+          .select()
+          .single();
+
+        if (insErr) {
+          console.error('❌ Failed to create customer record:', insErr);
+          // Retry with absolute minimum fields if the full insert failed
+          const fallbackCustomer = { name: newCustomer.name, email: newCustomer.email, password: newCustomer.password };
+          const { data: retryData } = await db.from('customers').insert([fallbackCustomer]).select().single();
+          customer = retryData || { ...newCustomer, id: user.id };
+        } else {
+          customer = inserted;
+        }
       }
 
       const u = customer || { name: meta.full_name || user.email.split('@')[0], email: user.email };
