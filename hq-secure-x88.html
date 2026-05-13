@@ -2268,10 +2268,19 @@
             let html = "";
             const currentYear = new Date().getFullYear();
 
+            // Enable editing for promo and payment templates
+            const isEditable = (type === 'promo' || type === 'payment');
+            preview.contentEditable = isEditable;
+            preview.style.border = isEditable ? '2px solid var(--gold)' : 'none';
+
             if (type === 'invoice') html = generateInvoiceHTML(order, currentYear);
             else if (type === 'payment') html = generatePaymentHTML(order);
             else if (type === 'receipt') html = generateReceiptHTML(order, currentYear);
             else if (type === 'promo') html = generatePromoHTML();
+
+            if (isEditable) {
+                html = `<div style="background:var(--gold); color:black; font-size:0.6rem; padding:2px 8px; font-weight:800; display:inline-block; border-radius:4px; margin-bottom:1rem; text-transform:uppercase; pointer-events:none">✏️ Click anywhere below to edit text</div>` + html;
+            }
 
             preview.innerHTML = html;
         }
